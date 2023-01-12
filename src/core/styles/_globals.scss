@@ -1,0 +1,49 @@
+@use '../../shared/styles/constants';
+
+* {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: constants.$fsz-text;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  &,
+  &:active,
+  &:visited {
+    text-decoration: none;
+    color: unset;
+  }
+}
+
+button {
+  border: none;
+}
+
+ol,
+ul {
+  margin: 0;
+  padding-left: unset;
+
+  li {
+    list-style: none;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+}

@@ -1,0 +1,183 @@
+@use 'constants';
+
+@mixin fade(
+  $transition: constants.$trn-slow-out,
+  $name: v,
+  $this: true,
+  $enter: true,
+  $leave: true
+) {
+  #{if($this, '&', '& > *')}.#{$name} {
+    @if ($enter) {
+      &-enter-from {
+        opacity: 0;
+      }
+
+      &-enter-active {
+        transition: $transition;
+      }
+    }
+
+    @if ($leave) {
+      &-leave-to {
+        opacity: 0;
+      }
+
+      &-leave-active {
+        transition: $transition;
+      }
+    }
+  }
+}
+
+@mixin move(
+  $x: 0,
+  $y: 0,
+  $transition: constants.$trn-slow-out,
+  $name: v,
+  $this: true,
+  $enter: true,
+  $leave: true
+) {
+  @include fade(
+    $transition: $transition,
+    $name: $name,
+    $this: $this,
+    $enter: $enter,
+    $leave: $leave
+  );
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    @if ($enter) {
+      &-enter-from {
+        transform: translate($x, $y);
+      }
+    }
+
+    @if ($leave) {
+      &-leave-to {
+        transform: translate($x, $y);
+      }
+    }
+  }
+}
+
+@mixin scale(
+  $ratio: 1,
+  $x: 1,
+  $y: 1,
+  $origin: center,
+  $transition: constants.$trn-slow-out,
+  $name: v,
+  $this: true,
+  $enter: true,
+  $leave: true
+) {
+  @include fade(
+    $transition: $transition,
+    $name: $name,
+    $this: $this,
+    $enter: $enter,
+    $leave: $leave
+  );
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    @if ($enter) {
+      &-enter-from {
+        transform-origin: $origin;
+        transform: scale($x * $ratio, $y * $ratio);
+      }
+    }
+
+    @if ($leave) {
+      &-leave-to {
+        transform-origin: $origin;
+        transform: scale($x * $ratio, $y * $ratio);
+      }
+    }
+  }
+}
+
+@mixin size(
+  $ratio: 1,
+  $width: 1,
+  $height: 1,
+  $transition: constants.$trn-slow-out,
+  $name: v,
+  $this: true,
+  $enter: true,
+  $leave: true
+) {
+  @include fade(
+    $transition: $transition,
+    $name: $name,
+    $this: $this,
+    $enter: $enter,
+    $leave: $leave
+  );
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    @if ($enter) {
+      &-enter-from {
+        width: $width * $ratio;
+        height: $height * $ratio;
+      }
+    }
+
+    @if ($leave) {
+      &-leave-to {
+        width: $width * $ratio;
+        height: $height * $ratio;
+      }
+    }
+  }
+}
+
+@mixin group-fade(
+  $transition: constants.$trn-very-slow-out,
+  $name: v,
+  $this: true
+) {
+  @include fade($transition: $transition, $name: $name);
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    &-move {
+      transition: $transition;
+    }
+  }
+}
+
+@mixin group-move(
+  $x: 0,
+  $y: 0,
+  $transition: constants.$trn-very-slow-out,
+  $name: v,
+  $this: true
+) {
+  @include group-fade($transition: $transition, $name: $name);
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    &-enter-from,
+    &-leave-to {
+      transform: translate($x, $y);
+    }
+  }
+}
+
+@mixin group-scale(
+  $ratio: 1,
+  $x: 1,
+  $y: 1,
+  $transition: constants.$trn-very-slow-out,
+  $name: v,
+  $this: true
+) {
+  @include group-fade($transition: $transition, $name: $name);
+
+  #{if($this, '&', '& > *')}.#{$name} {
+    &-enter-from,
+    &-leave-to {
+      transform: scale($x * $ratio, $y * $ratio);
+    }
+  }
+}

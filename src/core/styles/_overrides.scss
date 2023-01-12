@@ -1,0 +1,163 @@
+@use '../../shared/styles/constants';
+
+.p-confirm-popup {
+  &::before {
+    margin-left: -8px;
+  }
+
+  .p-confirm-popup-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.p-panelmenu {
+  .p-panelmenu-header {
+    .p-panelmenu-header-link {
+      transition: constants.$trn-slow-out;
+
+      .p-menuitem-text,
+      .p-menuitem-icon {
+        transition: constants.$trn-slow-out;
+      }
+    }
+  }
+}
+
+.p-tabmenu {
+  .p-tabmenu-nav {
+    .p-tabmenuitem {
+      .p-menuitem-link {
+        transition: constants.$trn-slow-out;
+      }
+    }
+  }
+}
+
+.p-component-overlay {
+  background: none;
+  backdrop-filter: blur(3px);
+  transition: constants.$trn-slow-out;
+}
+
+.p-image {
+  img {
+    display: block;
+    width: 100%;
+  }
+}
+
+.p-listbox {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-fieldset {
+  .p-toggleable-content {
+    flex: auto;
+  }
+}
+
+.p-float-label .p-placeholder,
+.p-float-label input::placeholder,
+.p-float-label .p-inputtext::placeholder {
+  opacity: unset;
+}
+
+.p-dropdown {
+  display: flex;
+  transition: constants.$trn-fast-out;
+  transition-property: border-color;
+
+  &.p-input-icon-left {
+    .p-dropdown-label {
+      margin-left: 32px;
+    }
+  }
+
+  .p-dropdown-clear-icon {
+    margin: auto 0;
+    position: static;
+  }
+
+  .p-dropdown-trigger {
+    position: relative;
+  }
+}
+
+.p-inputtextarea {
+  min-width: 100px;
+}
+
+.p-inputnumber {
+  .p-inputnumber-button-group {
+    .p-inputnumber-button {
+      position: relative;
+      width: 40px;
+      display: flex;
+      justify-content: center;
+
+      .p-button-icon {
+        margin: auto;
+        left: 0;
+      }
+    }
+  }
+}
+
+.p-inputtext {
+  transition: constants.$trn-fast-out;
+  transition-property: box-shadow, border-color;
+  font-size: 16px;
+}
+
+.p-input-icon-left,
+.p-input-icon-right,
+.p-float-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .p-inputtext {
+    width: 100%;
+  }
+
+  i {
+    top: unset;
+    margin-top: unset;
+    position: absolute;
+  }
+
+  label {
+    margin: unset;
+    line-height: unset;
+  }
+}
+
+.p-input-icon-left {
+  .p-inputtext {
+    padding-left: 32px;
+  }
+
+  .pi:first-child {
+    left: 12px;
+  }
+}
+
+.p-input-icon-right {
+  .p-inputtext {
+    padding-right: 32px;
+  }
+
+  .pi:last-child {
+    right: 12px;
+  }
+}
+
+.p-inputgroup {
+  display: flex;
+
+  .p-inputgroup-addon {
+    min-width: unset;
+  }
+}

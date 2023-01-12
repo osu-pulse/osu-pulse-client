@@ -1,0 +1,35 @@
+# Compiled output
+/node_modules
+/dist
+/coverage
+/src/auto-imports.d.ts
+/src/components.d.ts
+
+# Common
+README.md
+CHANGELOG.md
+docker-compose.yml
+Dockerfile
+
+# Git
+.git
+.github
+.gitattributes
+.gitignore
+
+# JetBrains
+.idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Configs
+.prettierrc
+.editorconfig
+
