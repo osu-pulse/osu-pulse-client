@@ -1,0 +1,30 @@
+// Common
+$cmn-border-radius: var(--border-radius);
+
+// Transitions
+$trn-very-slow-out: 0.4s ease-out;
+$trn-very-slow-in: 0.4s ease-in;
+$trn-slow-out: 0.2s ease-out;
+$trn-slow-in: 0.2s ease-in;
+$trn-fast-out: 0.1s ease-out;
+$trn-fast-in: 0.1s ease-in;
+
+// Font-sizes
+$fsz-h1: 26px;
+$fsz-h2: 22px;
+$fsz-h3: 18px;
+$fsz-text: 14px;
+
+// Fonts
+$fnt-primary: 'Exo 2', sans-serif;
+
+// Colors
+$clr-primary: var(--primary-color);
+$clr-text: var(--text-color);
+
+// Breakpoints
+$bpt-sm: 640px;
+$bpt-md: 768px;
+$bpt-lg: 1024px;
+$bpt-xl: 1280px;
+$bpt-xxl: 1536px;

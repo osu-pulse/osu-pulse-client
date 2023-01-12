@@ -1,0 +1,15 @@
+{
+  "name": "Default",
+  "schemaPath": "schema.gql",
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "http://127.0.0.1:5000/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": true
+      }
+    }
+  }
+}

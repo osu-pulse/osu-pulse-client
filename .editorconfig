@@ -1,0 +1,26 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 80
+tab_width = 4
+trim_trailing_whitespace = true
+
+[*.scss]
+indent_size = 2
+
+[*.vue]
+indent_size = 2
+tab_width = 2
+
+[{*.ats,*.cts,*.mts,*.ts}]
+indent_size = 2
+tab_width = 2
+ij_typescript_use_double_quotes = false
+
+[{*.yml,*.yaml}]
+indent_size = 2

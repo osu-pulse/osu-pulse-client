@@ -1,0 +1,17 @@
+@mixin size($size) {
+  @if ($size == fit) {
+    @include size(max-content);
+  } @else if ($size == fill) {
+    @include size(100%);
+  } @else {
+    width: $size;
+    height: $size;
+  }
+}
+
+@mixin pseudo() {
+  @include size(fill);
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
