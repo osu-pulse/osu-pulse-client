@@ -1,0 +1,74 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+type Device {
+    deviceId: ID!
+    info: DeviceInfo!
+    status: DeviceStatus!
+    userId: String!
+}
+
+type DeviceInfo {
+    client: String!
+    device: String!
+    type: DeviceType!
+}
+
+type DeviceStatus {
+    playing: Boolean
+    progress: Float
+    trackId: String
+    volume: Float
+}
+
+type Mutation {
+    cacheTrack(trackId: String!): ID!
+}
+
+type Query {
+    devices: [Device!]!
+    health: Boolean!
+    track(trackId: String!): Track!
+    tracks(cursor: String, search: String): TracksWithCursor!
+}
+
+type Subscription {
+    deviceStatusUpdated: Device!
+    trackCached: Track!
+}
+
+type Track {
+    artist: String!
+    cached: Boolean!
+    cover: TrackCover!
+    id: String!
+    title: String!
+    url: TrackUrl!
+}
+
+type TrackCover {
+    normal: String!
+    small: String!
+}
+
+type TrackUrl {
+    audio: String!
+    file: String!
+    page: String!
+}
+
+type TracksWithCursor {
+    cursor: String!
+    tracks: [Track!]!
+}
+
+enum DeviceType {
+    DESKTOP
+    MOBILE
+    OTHER
+}

@@ -3,6 +3,7 @@
 
 <template>
   <div class="app-component">
+    <input v-model="target" @change="emit">
   </div>
 </template>
 
