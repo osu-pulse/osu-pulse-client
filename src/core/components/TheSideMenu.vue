@@ -150,6 +150,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
   display: flex;
   flex-direction: column;
   background-color: constants.$clr-background;
+  box-shadow: constants.$cmn-shadow-block;
 
   .logo {
     margin: 0 auto 30px;
@@ -263,7 +264,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       .section-inner {
         margin: 0 20px;
         flex: auto;
-        padding: 22px;
+        padding: 20px;
         display: flex;
         align-items: center;
         gap: 22px;
@@ -295,7 +296,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         border-bottom-left-radius: constants.$cmn-border-radius;
         background-color: constants.$clr-primary;
         transform: translateX(constants.$cmn-border-radius);
-        transition: constants.$trn-normal-in;
+        transition: constants.$trn-fast-out;
       }
 
       &:hover {
