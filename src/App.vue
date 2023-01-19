@@ -4,17 +4,18 @@ import TheQueue from '~/core/components/TheQueue.vue';
 </script>
 
 <template>
-  <div class="app-component">
+  <div class="app">
     <TheSideMenu class="side-menu" />
 
     <div class="main-section">
-      <div class="page-outer">
-        <router-view v-slot="{ Component }">
+      <div class="page-container">
+        <RouterView v-slot="{ Component }">
           <Transition mode="out-in">
             <Component :is="Component" />
           </Transition>
-        </router-view>
+        </RouterView>
       </div>
+
       <ThePlayer class="player"></ThePlayer>
     </div>
 
@@ -27,12 +28,12 @@ import TheQueue from '~/core/components/TheQueue.vue';
 @use 'shared/styles/constants';
 @use 'shared/styles/mixins';
 
-.app-component {
+.app {
   flex: auto;
   display: flex;
   gap: 10px;
   overflow: auto;
-  background-color: constants.$clr-main-section;
+  background-color: constants.$clr-secondary;
 
   .side-menu {
   }
@@ -42,9 +43,9 @@ import TheQueue from '~/core/components/TheQueue.vue';
     flex: auto;
     flex-direction: column;
 
-    .page-outer {
+    .page-container {
+      overflow: auto;
       flex: auto;
-      background-color: constants.$clr-main-section;
     }
 
     .player {
@@ -61,7 +62,13 @@ import TheQueue from '~/core/components/TheQueue.vue';
 
 @import 'core/styles/globals';
 @import 'core/styles/fonts';
-@import 'core/styles/overrides';
+
+:root {
+  --color-primary: #000000;
+  --color-secondary: #f4f5fe;
+  --color-background: #ffffff;
+  --color-text-inactive: #8f91a5;
+}
 
 #app {
   @include mixins.size(fill);
