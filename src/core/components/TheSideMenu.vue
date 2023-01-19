@@ -1,63 +1,57 @@
 <script lang="ts" setup>
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
-  faBookOpen,
-  faCircle,
-  faGear,
-  faHouse,
-  faListUl,
-  faPaintRoller,
-  faShareNodes,
-  faUserGroup,
-} from '@fortawesome/free-solid-svg-icons';
+  BIconBook,
+  BIconCast,
+  BIconCircleFill,
+  BIconGear,
+  BIconHouse,
+  BIconMusicNoteList,
+  BIconPalette,
+  BIconPeople,
+} from 'bootstrap-icons-vue';
+import type { SideMenuItem } from '~/core/types/SideMenuItem';
 
-library.add(
-  faHouse,
-  faListUl,
-  faBookOpen,
-  faUserGroup,
-  faShareNodes,
-  faGear,
-  faPaintRoller,
-  faCircle,
-);
-
-const menuMusicItems = [
+const menuMusicItems: SideMenuItem[] = [
   {
     label: 'Home',
-    icon: 'fa-solid fa-house',
+    icon: BIconHouse,
+    to: RouteName.HOME,
   },
   {
     label: 'Library',
-    icon: 'fa-solid fa-book-open',
+    icon: BIconBook,
+    to: RouteName.LIBRARY,
   },
   {
     label: 'Playlists',
-    icon: 'fa-solid fa-list-ul',
+    icon: BIconMusicNoteList,
+    to: RouteName.PLAYLISTS,
   },
   {
     label: 'Friends',
-    icon: 'fa-solid fa-user-group',
+    icon: BIconPeople,
+    to: RouteName.FRIENDS,
   },
 ];
 
-const menuControlItems = [
+const menuControlItems: SideMenuItem[] = [
   {
     label: 'Devices',
-    icon: 'fa-solid fa-share-nodes',
+    icon: BIconCast,
+    to: RouteName.DEVICES,
   },
   {
     label: 'Themes',
-    icon: 'fa-solid fa-paint-roller',
+    icon: BIconPalette,
+    to: RouteName.THEMES,
   },
   {
     label: 'Settings',
-    icon: 'fa-solid fa-gear',
+    icon: BIconGear,
+    to: RouteName.SETTINGS,
   },
 ];
 
-const isSelected = ref<boolean>(false);
 const userAvatar = ref<boolean>(false);
 const isUserOnline = ref<boolean>(true);
 const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
@@ -66,19 +60,24 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
 <template>
   <div class="side-menu-component">
     <div class="logo">
-      <img alt="logo" src="../assets/logo/osulogo.png" />
+      <img class="logo-img" alt="logo" src="../assets/osulogo.png" />
       <p>Pulse</p>
     </div>
 
     <div class="user">
       <div class="user-img-container">
-        <img v-if="!userAvatar" alt="avatar" src="../assets/empty-avatar.jpg" />
-        <img v-else alt="avatar" src="" />
+        <img
+          v-if="!userAvatar"
+          class="user-avatar"
+          alt="avatar"
+          src="../../shared/assets/empty-avatar.jpg"
+        />
+        <img v-else class="user-avatar" alt="avatar" src="" />
       </div>
       <div class="user-info">
         <div class="user-name">Unknown</div>
         <div class="user-status" :class="{ _online: isUserOnline }">
-          <FontAwesomeIcon class="status-icon" icon="fa solid fa-circle" />
+          <BIconCircleFill class="status-icon" />
           <div>{{ userStatus }}</div>
         </div>
       </div>
@@ -86,56 +85,46 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
 
     <div class="menu-sections">
       <div class="section-label">Music</div>
-      <div
+      <router-link
         v-for="item in menuMusicItems"
         :key="item"
+        :to="item.to"
         class="side-menu-item"
-        :class="{ _selected: isSelected }"
       >
         <div class="icon-container">
-          <FontAwesomeIcon
-            :icon="item.icon"
-            class="item-icon"
-          ></FontAwesomeIcon>
+          <Component :is="item.icon" class="item-icon" />
         </div>
         <div class="item-label">{{ item.label }}</div>
-      </div>
+      </router-link>
 
       <div class="section-label">Control</div>
-      <div
+      <router-link
         v-for="item in menuControlItems"
         :key="item"
+        :to="item.to"
         class="side-menu-item"
-        :class="{ _selected: isSelected }"
       >
         <div class="icon-container">
-          <FontAwesomeIcon
-            :icon="item.icon"
-            class="item-icon"
-          ></FontAwesomeIcon>
+          <Component :is="item.icon" class="item-icon" />
         </div>
         <div class="item-label">{{ item.label }}</div>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-* {
-  font-size: 10px;
-  margin: 0;
-  padding: 0;
-}
+@use '../src/shared/styles/constants';
 
 .side-menu-component {
   padding: 20px;
   width: 22%;
-  min-width: 150px;
-  max-width: 250px;
+  min-width: 200px;
+  max-width: 300px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: constants.$clr-side-menu;
 
   .logo {
     margin-bottom: 30px;
@@ -144,13 +133,13 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
     justify-content: center;
     align-items: center;
 
-    img {
+    .logo-img {
       width: 50px;
       height: 50px;
     }
 
     p {
-      font-size: 2.5em;
+      font-size: 25px;
       font-weight: 500;
     }
   }
@@ -158,12 +147,12 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
   .user {
     margin-bottom: 20px;
     display: flex;
-    gap: 1.5em;
+    gap: 15px;
 
     .user-img-container {
-      width: 50px;
+      width: 73px;
 
-      img {
+      .user-avatar {
         width: 100%;
         border-radius: 10px;
       }
@@ -174,14 +163,14 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
       align-self: center;
 
       .user-name {
-        font-size: 1.5em;
+        font-size: 15px;
         font-weight: bold;
       }
 
       .user-status {
-        margin-top: 0.2em;
+        margin-top: 8px;
         display: flex;
-        gap: 0.5em;
+        gap: 5px;
         color: #f56767;
 
         .status-icon {
@@ -202,10 +191,10 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
     gap: 5px;
 
     .section-label {
-      margin-top: 1em;
+      margin-top: 10px;
       padding-left: 10px;
+      font-size: 12px;
       color: #c4c3c3;
-      font-size: 1.2em;
     }
 
     .side-menu-item {
@@ -214,27 +203,27 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
       border-radius: 10px;
 
       .icon-container {
-        width: 20%;
+        padding: 10px;
         display: flex;
         justify-content: center;
-        padding: 10px;
+        width: 20%;
 
         .item-icon {
+          width: 24px;
+          height: 24px;
           color: #767676;
-          width: 1.6em;
-          height: 1.6em;
         }
       }
 
       .item-label {
-        flex: auto;
         padding: 10px;
+        flex: auto;
+        font-size: 18px;
         color: #606060;
-        font-size: 1.3em;
       }
 
       &:hover {
-        background-color: #f4f5fe;
+        background-color: constants.$clr-main-section;
         cursor: pointer;
 
         .item-icon,
@@ -243,7 +232,7 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
         }
       }
 
-      &._selected {
+      &.router-link-active {
         background-color: #2f2f2f;
 
         .item-icon,

@@ -1,12 +1,9 @@
 export enum RouteName {
-  SCHOOLS = 'schools',
-  RECORDS = 'records',
-  DRIVERS = 'drivers',
-  CAMERAS = 'cameras',
-  CARS = 'cars',
-  RIDES = 'rides',
+  DEVICES = 'devices',
+  FRIENDS = 'friends',
+  HOME = 'home',
+  LIBRARY = 'library',
+  PLAYLISTS = 'playlists',
   SETTINGS = 'settings',
-  MAIN = 'main',
-  STUDENTS = 'students',
-  INSTRUCTORS = 'instructors',
+  THEMES = 'themes',
 }

@@ -7,18 +7,20 @@
 </template>
 
 <style lang="scss" scoped>
+@use '../src/shared/styles/constants';
+
 .player-component {
-  height: 120px;
-  background-color: #f4f5fe;
-  border: 1px solid #9099e5;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 120px;
+  background-color: constants.$clr-main-section;
+  border: 1px solid #9099e5;
 
   .player-container {
-    background-color: white;
     width: 85%;
     height: 80%;
+    background-color: white;
     border-radius: 10px;
   }
 }

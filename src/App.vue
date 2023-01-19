@@ -7,13 +7,13 @@ import TheQueue from '~/core/components/TheQueue.vue';
   <div class="app-component">
     <TheSideMenu class="side-menu" />
 
-    <div class="body">
+    <div class="main-section">
       <div class="page-outer">
-        <RouterView v-slot="{ Component }">
+        <router-view v-slot="{ Component }">
           <Transition mode="out-in">
             <Component :is="Component" />
           </Transition>
-        </RouterView>
+        </router-view>
       </div>
       <ThePlayer class="player"></ThePlayer>
     </div>
@@ -30,21 +30,21 @@ import TheQueue from '~/core/components/TheQueue.vue';
 .app-component {
   flex: auto;
   display: flex;
+  gap: 10px;
   overflow: auto;
-  background-color: #f4f5fe;
+  background-color: constants.$clr-main-section;
 
   .side-menu {
   }
 
-  .body {
+  .main-section {
     display: flex;
     flex: auto;
     flex-direction: column;
-    border-radius: 20px;
 
     .page-outer {
       flex: auto;
-      background-color: #f4f5fe;
+      background-color: constants.$clr-main-section;
     }
 
     .player {
