@@ -60,7 +60,7 @@ const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
 <template>
   <div class="side-menu-component">
     <div class="logo">
-      <img class="logo-img" alt="logo" src="../assets/osulogo.png" />
+      <img class="logo-img" alt="logo" src="../assets/osu-logo.png" />
       <p>Pulse</p>
     </div>
 
