@@ -68,7 +68,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
             :class="isOnline ? '_online' : '_offline'"
           />
 
-          <div class="name">T1MON</div>
+          <div class="name">Eleanor</div>
         </div>
 
         <div v-show="listening" class="listening">
