@@ -1,6 +1,8 @@
 @use '../../shared/styles/constants';
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
@@ -8,6 +10,7 @@
 
 html {
   font-size: constants.$fsz-text;
+  color: constants.$clr-inactive;
 }
 
 body {

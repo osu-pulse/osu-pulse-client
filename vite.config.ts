@@ -4,6 +4,7 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vitest/config';
 import { PrimeVueResolver } from 'unplugin-vue-components/resolvers';
+import { iconNames } from 'bootstrap-icons-vue';
 
 export default defineConfig({
   server: {
@@ -33,36 +34,22 @@ export default defineConfig({
   },
 
   plugins: [
-    Vue({
-      reactivityTransform: true,
-    }),
+    Vue(),
 
     AutoImport({
       imports: [
         'vue',
         'vue-router',
-        'vue/macros',
         '@vueuse/core',
         'vitest',
         {
-          // PrimeVue
-          'primevue/config': [['default', 'PrimeVue']],
-          'primevue/toastservice': [['default', 'ToastService']],
-          'primevue/confirmationservice': [['default', 'ConfirmationService']],
-          'primevue/tooltip': [['default', 'Tooltip']],
-          'primevue/api': ['PrimeIcons', 'ToastSeverity'],
-          'primevue/useconfirm': ['useConfirm'],
-          'primevue/usedialog': ['useDialog'],
-          'primevue/usetoast': ['useToast'],
-          // GraphQL
           '@vue/apollo-composable': [
             'useQuery',
             'useMutation',
             'useSubscription',
           ],
           'graphql-tag': [['default', 'gql']],
-          // Moment
-          moment: [['default', 'moment']],
+          'bootstrap-icons-vue': iconNames,
         },
       ],
       dirs: [
@@ -83,7 +70,14 @@ export default defineConfig({
 
     Components({
       dirs: ['./src/**/views', './src/**/components'],
-      resolvers: [PrimeVueResolver()],
+      resolvers: [
+        PrimeVueResolver(),
+        (componentName) => {
+          if (componentName.startsWith('BI')) {
+            return { name: componentName, from: 'bootstrap-icons-vue' };
+          }
+        },
+      ],
       dts: './src/components.d.ts',
     }),
   ],

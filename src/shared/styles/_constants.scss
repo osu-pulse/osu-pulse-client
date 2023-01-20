@@ -1,13 +1,14 @@
 // Common
-$cmn-border-radius: var(--border-radius);
+$cmn-border-radius: 10px;
+$cmn-shadow-block: 0 0 10px rgba(black, 0.05);
 
 // Transitions
-$trn-very-slow-out: 0.4s ease-out;
-$trn-very-slow-in: 0.4s ease-in;
-$trn-slow-out: 0.2s ease-out;
-$trn-slow-in: 0.2s ease-in;
-$trn-fast-out: 0.1s ease-out;
-$trn-fast-in: 0.1s ease-in;
+$trn-slow-out: 0.4s ease-out;
+$trn-slow-in: 0.4s ease-in;
+$trn-normal-out: 0.25s ease-out;
+$trn-normal-in: 0.25s ease-in;
+$trn-fast-out: 0.15s ease-out;
+$trn-fast-in: 0.15s ease-in;
 
 // Font-sizes
 $fsz-h1: 26px;
@@ -15,14 +16,12 @@ $fsz-h2: 22px;
 $fsz-h3: 18px;
 $fsz-text: 14px;
 
-// Fonts
-$fnt-primary: 'Exo 2', sans-serif;
-
 // Colors
-$clr-primary: var(--primary-color);
-$clr-text: var(--text-color);
-$clr-side-menu: #fff;
-$clr-main-section: #f4f5fe;
+$clr-primary: var(--color-primary);
+$clr-secondary: var(--color-secondary);
+$clr-background: var(--color-background);
+$clr-inactive: var(--color-text-inactive);
+$clr-text: #000000;
 
 // Breakpoints
 $bpt-sm: 640px;

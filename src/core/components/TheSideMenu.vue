@@ -1,243 +1,339 @@
 <script lang="ts" setup>
-import {
-  BIconBook,
-  BIconCast,
-  BIconCircleFill,
-  BIconGear,
-  BIconHouse,
-  BIconMusicNoteList,
-  BIconPalette,
-  BIconPeople,
-} from 'bootstrap-icons-vue';
 import type { SideMenuItem } from '~/core/types/SideMenuItem';
 
-const menuMusicItems: SideMenuItem[] = [
+const itemsMusic: SideMenuItem[] = [
   {
     label: 'Home',
     icon: BIconHouse,
-    to: RouteName.HOME,
+    to: { name: RouteName.HOME },
   },
   {
     label: 'Library',
     icon: BIconBook,
-    to: RouteName.LIBRARY,
+    to: { name: RouteName.LIBRARY },
   },
   {
     label: 'Playlists',
     icon: BIconMusicNoteList,
-    to: RouteName.PLAYLISTS,
+    to: { name: RouteName.PLAYLISTS },
   },
   {
     label: 'Friends',
     icon: BIconPeople,
-    to: RouteName.FRIENDS,
+    to: { name: RouteName.FRIENDS },
   },
 ];
 
-const menuControlItems: SideMenuItem[] = [
+const itemsControl: SideMenuItem[] = [
   {
     label: 'Devices',
     icon: BIconCast,
-    to: RouteName.DEVICES,
+    to: { name: RouteName.DEVICES },
   },
   {
     label: 'Themes',
     icon: BIconPalette,
-    to: RouteName.THEMES,
+    to: { name: RouteName.THEMES },
   },
   {
     label: 'Settings',
     icon: BIconGear,
-    to: RouteName.SETTINGS,
+    to: { name: RouteName.SETTINGS },
   },
 ];
 
-const userAvatar = ref<boolean>(false);
-const isUserOnline = ref<boolean>(true);
-const userStatus = computed(() => (isUserOnline.value ? 'online' : 'offline'));
+const isOnline = ref(true);
+const avatar = ref<string>('https://a.ppy.sh/22339657?1671484060.jpeg');
+const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 </script>
 
 <template>
-  <div class="side-menu-component">
-    <div class="logo">
-      <img class="logo-img" alt="logo" src="../assets/osulogo.png" />
-      <p>Pulse</p>
-    </div>
+  <div class="side-component">
+    <RouterLink :to="{ name: RouteName.HOME }" class="logo">
+      <img class="icon" alt="logo" src="../assets/osu-logo.webp" />
+      <span class="label">Pulse</span>
+    </RouterLink>
 
     <div class="user">
-      <div class="user-img-container">
-        <img
-          v-if="!userAvatar"
-          class="user-avatar"
-          alt="avatar"
-          src="../../shared/assets/empty-avatar.jpg"
-        />
-        <img v-else class="user-avatar" alt="avatar" src="" />
-      </div>
-      <div class="user-info">
-        <div class="user-name">Unknown</div>
-        <div class="user-status" :class="{ _online: isUserOnline }">
-          <BIconCircleFill class="status-icon" />
-          <div>{{ userStatus }}</div>
+      <img
+        class="avatar"
+        alt="avatar"
+        :src="avatar ?? require('../../shared/assets/empty-avatar.webp')"
+      />
+
+      <div class="info">
+        <div class="title">
+          <BIconCircleFill
+            class="status"
+            :class="isOnline ? '_online' : '_offline'"
+          />
+
+          <div class="name">T1MON</div>
+        </div>
+
+        <div v-show="listening" class="listening">
+          <BIconMusicNote class="icon" />
+          <span class="text">Time Is Ticking Out - TheCranberries</span>
         </div>
       </div>
     </div>
 
-    <div class="menu-sections">
-      <div class="section-label">Music</div>
-      <router-link
-        v-for="item in menuMusicItems"
-        :key="item"
-        :to="item.to"
-        class="side-menu-item"
-      >
-        <div class="icon-container">
-          <Component :is="item.icon" class="item-icon" />
-        </div>
-        <div class="item-label">{{ item.label }}</div>
-      </router-link>
+    <div class="divider" />
 
-      <div class="section-label">Control</div>
-      <router-link
-        v-for="item in menuControlItems"
-        :key="item"
+    <div class="sections-list">
+      <RouterLink
+        v-for="item in itemsMusic"
+        :key="item.label"
         :to="item.to"
-        class="side-menu-item"
+        class="section"
       >
-        <div class="icon-container">
-          <Component :is="item.icon" class="item-icon" />
+        <div class="section-inner">
+          <Component :is="item.icon" class="icon" />
+          <div class="label">{{ item.label }}</div>
         </div>
-        <div class="item-label">{{ item.label }}</div>
-      </router-link>
+      </RouterLink>
+    </div>
+
+    <div class="divider" />
+
+    <div class="sections-list">
+      <RouterLink
+        v-for="item in itemsControl"
+        :key="item.label"
+        :to="item.to"
+        class="section"
+      >
+        <div class="section-inner">
+          <Component :is="item.icon" class="icon" />
+          <div class="label">{{ item.label }}</div>
+        </div>
+      </RouterLink>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+@use '../src/shared/styles/mixins';
 @use '../src/shared/styles/constants';
 
-.side-menu-component {
-  padding: 20px;
-  width: 22%;
-  min-width: 200px;
-  max-width: 300px;
-  height: 100%;
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.97);
+  }
+  35% {
+    transform: scale(0.9);
+  }
+  45% {
+    transform: scale(1.1);
+  }
+  55% {
+    transform: scale(0.9);
+  }
+  65% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.side-menu {
+  width: 300px;
+  overflow: auto;
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
-  background-color: constants.$clr-side-menu;
+  background-color: constants.$clr-background;
+  box-shadow: constants.$cmn-shadow-block;
 
   .logo {
-    margin-bottom: 30px;
+    margin: 0 auto 30px;
     display: flex;
-    gap: 10px;
     justify-content: center;
     align-items: center;
+    gap: 10px;
 
-    .logo-img {
+    .icon {
       width: 50px;
-      height: 50px;
     }
 
-    p {
-      font-size: 25px;
-      font-weight: 500;
+    .label {
+      color: constants.$clr-text;
+      font-family: 'Michroma', sans-serif;
+      font-size: 26px;
+    }
+
+    &:hover {
+      .icon {
+        animation: heartbeat 1.5s infinite;
+      }
     }
   }
 
   .user {
-    margin-bottom: 20px;
+    margin: 0 20px 20px;
     display: flex;
     gap: 15px;
 
-    .user-img-container {
-      width: 73px;
-
-      .user-avatar {
-        width: 100%;
-        border-radius: 10px;
-      }
+    .avatar {
+      @include mixins.size(73px);
+      object-fit: cover;
+      object-position: center;
+      border-radius: constants.$cmn-border-radius;
     }
 
-    .user-info {
+    .info {
+      padding-top: 5px;
       flex: auto;
-      align-self: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
 
-      .user-name {
-        font-size: 15px;
-        font-weight: bold;
-      }
-
-      .user-status {
-        margin-top: 8px;
+      .title {
         display: flex;
-        gap: 5px;
-        color: #f56767;
+        align-items: center;
+        gap: 10px;
 
-        .status-icon {
-          width: 7px;
-          height: auto;
+        .status {
+          font-size: 10px;
+
+          &._online {
+            color: #78d17c;
+          }
+
+          &._offline {
+            color: #f56767;
+          }
         }
 
-        &._online {
-          color: #78d17c;
+        .name {
+          color: constants.$clr-text;
+          font-size: 20px;
+          font-weight: bold;
+          letter-spacing: 1px;
+        }
+      }
+
+      .listening {
+        gap: 2px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        color: constants.$clr-inactive;
+
+        .text {
+          flex: auto;
+          width: 110px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
     }
   }
 
-  .menu-sections {
+  .divider {
+    margin: 20px 70px;
+    flex: none;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      constants.$clr-inactive 40%,
+      constants.$clr-inactive 60%,
+      transparent 100%
+    );
+  }
+
+  .sections-list {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 5px;
 
-    .section-label {
-      margin-top: 10px;
-      padding-left: 10px;
-      font-size: 12px;
-      color: #c4c3c3;
-    }
-
-    .side-menu-item {
+    .section {
       display: flex;
-      align-items: center;
-      border-radius: 10px;
+      overflow: hidden;
 
-      .icon-container {
-        padding: 10px;
+      .section-inner {
+        margin: 0 20px;
+        flex: auto;
+        padding: 20px;
         display: flex;
-        justify-content: center;
-        width: 20%;
+        align-items: center;
+        gap: 22px;
+        border-radius: constants.$cmn-border-radius;
+        transition: constants.$trn-normal-out;
 
-        .item-icon {
-          width: 24px;
-          height: 24px;
-          color: #767676;
+        .icon,
+        .label {
+          transition: constants.$trn-normal-out;
+        }
+
+        .icon {
+          font-size: 22px;
+          transition: constants.$trn-normal-out;
+        }
+
+        .label {
+          font-size: 18px;
+          font-weight: bold;
+          transition: constants.$trn-normal-out;
         }
       }
 
-      .item-label {
-        padding: 10px;
-        flex: auto;
-        font-size: 18px;
-        color: #606060;
+      &::after {
+        @include mixins.pseudo();
+        position: static;
+        width: constants.$cmn-border-radius;
+        border-top-left-radius: constants.$cmn-border-radius;
+        border-bottom-left-radius: constants.$cmn-border-radius;
+        background-color: constants.$clr-primary;
+        transform: translateX(constants.$cmn-border-radius);
+        transition: constants.$trn-fast-out;
       }
 
       &:hover {
-        background-color: constants.$clr-main-section;
-        cursor: pointer;
+        .section-inner {
+          background-color: constants.$clr-secondary;
+          cursor: pointer;
+          transition: constants.$trn-fast-in;
 
-        .item-icon,
-        .item-label {
-          color: #000000;
+          .icon {
+            transform: scale(1.1);
+          }
+
+          .icon,
+          .label {
+            color: constants.$clr-text;
+            transition: constants.$trn-fast-in;
+          }
         }
       }
 
       &.router-link-active {
-        background-color: #2f2f2f;
+        .section-inner {
+          background-color: constants.$clr-primary;
 
-        .item-icon,
-        .item-label {
-          color: #fff;
+          .icon {
+            transform: scale(1.1);
+          }
+
+          .icon,
+          .label {
+            color: constants.$clr-background;
+          }
+        }
+
+        &::after {
+          transform: none;
+          transition: constants.$trn-normal-out;
         }
       }
     }
