@@ -161,6 +161,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 
     .icon {
       width: 50px;
+      animation: heartbeat 1.5s;
     }
 
     .label {
