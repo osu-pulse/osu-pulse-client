@@ -72,7 +72,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         </div>
 
         <div v-show="listening" class="listening">
-          <BIconMusicNote class="icon" />
+          <BIconMusicNoteBeamed class="icon" />
           <span class="text">Time Is Ticking Out - TheCranberries</span>
         </div>
       </div>
@@ -144,7 +144,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 }
 
 .side-menu {
-  width: 300px;
+  width: 330px;
   overflow: auto;
   padding-top: 20px;
   display: flex;
@@ -178,7 +178,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
   }
 
   .user {
-    margin: 0 20px 20px;
+    margin: 0 30px 20px;
     display: flex;
     gap: 15px;
 
@@ -222,11 +222,12 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       }
 
       .listening {
-        gap: 2px;
+        gap: 5px;
         overflow: hidden;
         display: flex;
         align-items: center;
         color: constants.$clr-inactive;
+        font-size: 14px;
 
         .text {
           flex: auto;
@@ -263,7 +264,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       overflow: hidden;
 
       .section-inner {
-        margin: 0 20px;
+        margin: 0 30px;
         flex: auto;
         padding: 20px;
         display: flex;
