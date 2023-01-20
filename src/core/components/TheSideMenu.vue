@@ -268,7 +268,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         padding: 20px;
         display: flex;
         align-items: center;
-        gap: 22px;
+        gap: 20px;
         border-radius: constants.$cmn-border-radius;
         transition: constants.$trn-normal-out;
 
