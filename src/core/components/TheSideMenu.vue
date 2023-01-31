@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SideMenuItem } from '~/core/types/SideMenuItem';
+import type { SideMenuItem } from '~/core/types/side-menu-item';
 
 const itemsMusic: SideMenuItem[] = [
   {
