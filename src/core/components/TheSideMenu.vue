@@ -1,5 +1,7 @@
 <script lang="ts" setup>
+import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url';
 import type { SideMenuItem } from '~/core/types/side-menu-item';
+import { useUser } from '~/core/stores/user';
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -42,8 +44,10 @@ const itemsControl: SideMenuItem[] = [
   },
 ];
 
-const isOnline = ref(true);
-const avatar = ref<string>('https://a.ppy.sh/22339657?1671484060.jpeg');
+const { user } = useUser();
+const isOnline = useOnline();
+const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
+const username = computed(() => user.value?.username ?? 'UNKNOWN');
 const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 </script>
 
@@ -55,11 +59,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
     </RouterLink>
 
     <div class="user">
-      <img
-        class="avatar"
-        alt="avatar"
-        :src="avatar ?? require('../../shared/assets/empty-avatar.webp')"
-      />
+      <img class="avatar" alt="avatar" :src="avatar" />
 
       <div class="info">
         <div class="title">
@@ -68,7 +68,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
             :class="isOnline ? '_online' : '_offline'"
           />
 
-          <div class="name">Eleanor</div>
+          <div class="name">{{ username }}</div>
         </div>
 
         <div v-show="listening" class="listening">

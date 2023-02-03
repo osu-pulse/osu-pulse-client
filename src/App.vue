@@ -2,8 +2,10 @@
 import TheSideMenu from '~/core/components/TheSideMenu.vue';
 import TheQueue from '~/core/components/TheQueue.vue';
 import { useAuthentication } from '~/auth/stores/authentication';
+import { useUser } from '~/core/stores/user';
 
 const { isAuthenticated, auth } = useAuthentication();
+
 tryOnMounted(auth);
 </script>
 

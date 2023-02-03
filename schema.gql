@@ -6,20 +6,20 @@ schema {
     subscription: Subscription
 }
 
-type Device {
-    deviceId: ID!
-    info: DeviceInfo!
-    status: DeviceStatus!
-    userId: String!
-}
-
-type DeviceInfo {
+type DeviceInfoObject {
     client: String!
     device: String!
     type: DeviceType!
 }
 
-type DeviceStatus {
+type DeviceObject {
+    id: ID!
+    info: DeviceInfoObject!
+    status: DeviceStatusObject!
+    userId: String!
+}
+
+type DeviceStatusObject {
     playing: Boolean
     progress: Float
     trackId: String
@@ -27,48 +27,97 @@ type DeviceStatus {
 }
 
 type Mutation {
-    cacheTrack(trackId: String!): ID!
+    addMyTrack(trackId: String!): TrackObject!
+    addPlaylistTrack(playlistId: String!, trackId: String!): TrackObject!
+    cacheTrack(trackId: String!): TrackObject!
+    copyPlaylist(playlistId: String!): PlaylistObject!
+    createMyPlaylist(payload: CreatePlaylistInput!): PlaylistObject!
+    deleteMyPlaylist(playlistId: String!): PlaylistObject!
+    moveMyTrack(position: Float!, trackId: String!): TrackObject!
+    movePlaylistTrack(playlistId: String!, position: Float!, trackId: String!): TrackObject!
+    removeMyTrack(trackId: String!): TrackObject!
+    removePlaylistTrack(playlistId: String!, trackId: String!): TrackObject!
+    updateMyPlaylist(payload: UpdatePlaylistInput!, playlistId: String!): PlaylistObject!
+}
+
+type PlaylistObject {
+    cover: String
+    id: ID!
+    public: String!
+    title: String!
+    trackIds: [String!]!
+    tracks(cursor: String, limit: Float = 50.0): TracksWithCursorObject!
+    userId: String!
 }
 
 type Query {
-    devices: [Device!]!
+    devices: [DeviceObject!]!
     health: Boolean!
-    track(trackId: String!): Track!
-    tracks(cursor: String, search: String): TracksWithCursor!
+    me: UserObject!
+    myPlaylist(playlistId: String!): PlaylistObject!
+    myPlaylists(search: String): [PlaylistObject!]!
+    myTracks(cursor: String, limit: Float = 50.0): TracksWithCursorObject!
+    playlistTracks(cursor: String, limit: Float = 50.0, playlistId: String!): TracksWithCursorObject!
+    publicPlaylist(playlistId: String!): PlaylistObject!
+    publicPlaylists(search: String): [PlaylistObject!]!
+    track(trackId: String!): TrackObject!
+    tracks(cursor: String, search: String): TracksWithCursorObject!
 }
 
 type Subscription {
-    deviceStatusUpdated: Device!
-    trackCached: Track!
+    deviceStatusUpdated: DeviceObject!
 }
 
-type Track {
-    artist: String!
-    cached: Boolean!
-    cover: TrackCover!
-    id: String!
-    title: String!
-    url: TrackUrl!
-}
-
-type TrackCover {
+type TrackCoverObject {
     normal: String!
     small: String!
 }
 
-type TrackUrl {
-    audio: String!
+type TrackObject {
+    artist: String!
+    cover: TrackCoverObject!
+    id: ID!
+    liked: Float!
+    played: Float!
+    title: String!
+    url: TrackUrlObject!
+}
+
+type TrackUrlObject {
+    audio: String
     file: String!
     page: String!
 }
 
-type TracksWithCursor {
-    cursor: String!
-    tracks: [Track!]!
+type TracksWithCursorObject {
+    cursor: String
+    data: [TrackObject!]!
+}
+
+type UserObject {
+    id: ID!
+    url: UserUrlObject!
+    username: String!
+}
+
+type UserUrlObject {
+    avatar: String!
+    cover: String!
+    profile: String!
 }
 
 enum DeviceType {
     DESKTOP
     MOBILE
     OTHER
+}
+
+input CreatePlaylistInput {
+    public: String!
+    title: String!
+}
+
+input UpdatePlaylistInput {
+    public: String
+    title: String
 }
