@@ -9,6 +9,7 @@ const app = createApp(App);
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/', redirect: { name: RouteName.HOME } },
     devicesRoute,
     friendsRoute,
     homeRoute,

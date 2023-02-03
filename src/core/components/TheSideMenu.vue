@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SideMenuItem } from '~/core/types/SideMenuItem';
+import type { SideMenuItem } from '~/core/types/side-menu-item';
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -50,7 +50,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 <template>
   <div class="side-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
-      <img class="icon" alt="logo" src="../assets/osu-logo.webp" />
+      <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
       <span class="label">Pulse</span>
     </RouterLink>
 
