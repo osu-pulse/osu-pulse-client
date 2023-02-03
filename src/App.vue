@@ -1,32 +1,49 @@
 <script lang="ts" setup>
 import TheSideMenu from '~/core/components/TheSideMenu.vue';
 import TheQueue from '~/core/components/TheQueue.vue';
+import { useAuthentication } from '~/auth/stores/authentication';
+
+const { isAuthenticated, auth } = useAuthentication();
+tryOnMounted(auth);
 </script>
 
 <template>
-  <div class="app">
-    <TheSideMenu class="side-menu" />
+  <Transition mode="out-in">
+    <div v-if="isAuthenticated" class="app">
+      <TheSideMenu class="side-menu" />
 
-    <div class="main-section">
-      <div class="page-container">
-        <RouterView v-slot="{ Component }">
-          <Transition mode="out-in">
-            <Component :is="Component" />
-          </Transition>
-        </RouterView>
+      <div class="main-section">
+        <div class="page-container">
+          <RouterView v-slot="{ Component }">
+            <Transition mode="out-in">
+              <Component :is="Component" />
+            </Transition>
+          </RouterView>
+        </div>
+
+        <ThePlayer class="player"></ThePlayer>
       </div>
 
-      <ThePlayer class="player"></ThePlayer>
+      <TheQueue class="queue"></TheQueue>
     </div>
 
-    <TheQueue class="queue"></TheQueue>
-  </div>
+    <PageLoader v-else class="loader" />
+  </Transition>
 </template>
 
 <style lang="scss" scoped>
 @use 'shared/styles/transitions';
 @use 'shared/styles/constants';
 @use 'shared/styles/mixins';
+
+.app,
+.loader {
+  @include transitions.fade();
+}
+
+.loader {
+  margin: auto;
+}
 
 .app {
   flex: auto;

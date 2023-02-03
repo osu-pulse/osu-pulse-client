@@ -12,15 +12,17 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { useAuthentication } from '~/auth/stores/authentication';
 
-const { accessToken } = useAuthentication();
-
 const httpLink = new HttpLink({
   uri: GQL_URL,
   fetch: async (uri, options) => {
-    const token = accessToken.value;
+    const { accessToken } = useAuthentication();
+
     options = {
       ...options,
-      headers: { ...options?.headers, Authorization: `Bearer ${token}` },
+      headers: {
+        ...options?.headers,
+        Authorization: `Bearer ${accessToken.value}`,
+      },
     };
     return fetch(uri, options);
   },
@@ -30,9 +32,10 @@ const wsLink = new GraphQLWsLink(
   createClient({
     url: GQL_WS_URL,
     connectionParams: async () => {
-      const token = accessToken.value;
+      const { accessToken } = useAuthentication();
+
       return {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken.value}`,
       };
     },
   }),

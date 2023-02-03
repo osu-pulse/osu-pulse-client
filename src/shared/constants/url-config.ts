@@ -15,3 +15,7 @@ export const API_WS_URL = import.meta.env.PROD
 export const GQL_WS_URL = import.meta.env.PROD
   ? `wss://${window.location.host}/graphql`
   : import.meta.env.VITE_GQL_URL.replace(/^http/, 'ws');
+
+export const AUTH_URL = import.meta.env.PROD
+  ? `https://${window.location.host}/auth`
+  : import.meta.env.VITE_AUTH_URL;

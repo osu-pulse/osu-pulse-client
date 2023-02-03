@@ -1,13 +1,16 @@
 import Axios from 'axios';
-import { useAuthentication } from '~/auth/stores/authentication';
 
-export const axios = Axios.create({
+export const axiosAuth = Axios.create({
+  baseURL: AUTH_URL,
+});
+
+export const axiosApi = Axios.create({
   baseURL: API_URL,
 });
 
-const { accessToken } = useAuthentication();
+axiosApi.interceptors.request.use(async (request) => {
+  const { accessToken } = useAuthentication();
 
-axios.interceptors.request.use(async (request) => {
   const token = accessToken.value;
   request.headers = {
     ...request.headers,

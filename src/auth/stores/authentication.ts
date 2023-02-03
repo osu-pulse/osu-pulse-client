@@ -1,49 +1,81 @@
+import jwtDecode from 'jwt-decode';
 import { useAuthenticationService } from '~/auth/services/authentication';
-import type { TokenSetDto } from '~/auth/dto/token-set-dto';
+import type { JwtPayload } from '~/auth/types/jwt-payload';
 
 const useAuthenticationState = createGlobalState(() => ({
   accessToken: ref<string>(),
-  refreshToken: useLocalStorage<string>('refresh-token', null, { serializer }),
+  refreshToken: useLocalStorage<string | undefined>(
+    'refresh-token',
+    undefined,
+    { serializer },
+  ),
 }));
 
 export const useAuthentication = createSharedComposable(() => {
   const { accessToken, refreshToken } = useAuthenticationState();
 
+  const isAuthenticated = computed(() => Boolean(accessToken.value));
+
   function redirect() {
-    // TODO: Перенаправить
+    window.location.href = `${AUTH_URL}/authorize`;
   }
 
   function schedule() {
-    const timeout = 123; // TODO: Вставлять время из access token
-    setTimeout(rotate, timeout);
+    if (accessToken.value) {
+      const { exp } = jwtDecode<JwtPayload>(accessToken.value);
+      const time = (exp - new Date().getTime() / 1000 - 10) * 1000;
+
+      setTimeout(rotate, time);
+    }
   }
 
   const authenticationService = useAuthenticationService();
   async function rotate() {
-    const { access_token, refresh_token } = await authenticationService.rotate(
-      'sioeffshef',
-    );
-    // TODO: Что-то с ними сделать
+    if (refreshToken.value) {
+      const { access_token, refresh_token } =
+        await authenticationService.rotate(refreshToken.value);
+
+      accessToken.value = access_token;
+      refreshToken.value = refresh_token;
+
+      schedule();
+    }
   }
 
   const route = useRoute();
   const router = useRouter();
+
+  async function isUrlClaimable() {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('access_token') && params.has('refresh_token');
+  }
   async function claimUrl() {
-    const { access_token, refresh_token } = route.query;
-    // TODO: Что-то с ними сделать
+    const params = new URLSearchParams(window.location.search);
+
+    accessToken.value = params.get('access_token') as string;
+    refreshToken.value = params.get('refresh_token') as string;
 
     await router.replace({
       query: omit(route.query, ['access_token', 'refresh_token']),
     });
+
+    schedule();
   }
 
   async function auth(): Promise<void> {
-    // TODO: Алгоритм
+    if (await isUrlClaimable()) {
+      await claimUrl();
+    } else if (refreshToken.value) {
+      await rotate();
+    } else {
+      redirect();
+    }
   }
 
   return {
     accessToken: readonly(accessToken),
     refreshToken: readonly(refreshToken),
+    isAuthenticated,
 
     auth,
   };
