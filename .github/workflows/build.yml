@@ -51,7 +51,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@master
         with:
-          node-version: 16.x
+          node-version: 16
+          cache: 'npm'
 
       - name: Build
         run: |
@@ -61,7 +62,7 @@ jobs:
       - name: Upload to release
         uses: xresloader/upload-to-github-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: "dist/electron/*.exe"
           release_id: github.event.release.id
