@@ -62,7 +62,7 @@ jobs:
       - name: Upload to release
         uses: xresloader/upload-to-github-release@v1
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: "dist/electron/*.exe"
           release_id: github.event.release.id
