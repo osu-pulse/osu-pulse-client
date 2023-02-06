@@ -5,7 +5,7 @@ WORKDIR /osu-pulse-client
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY ./ .
-RUN yarn run build
+RUN yarn web:build
 
 
 FROM caddy:alpine as serve-stage

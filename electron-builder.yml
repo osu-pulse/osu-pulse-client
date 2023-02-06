@@ -1,6 +1,6 @@
 appId: com.osu-pulse.app
 productName: OsuPulse
-publish: never
+publish: false
 nsis:
   oneClick: false
 win:
