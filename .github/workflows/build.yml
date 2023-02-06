@@ -62,6 +62,4 @@ jobs:
       - name: Upload to release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            dist/electron/OsuPulse Setup *.exe
-            dist/electron/OsuPulse *.exe
+          files: dist/electron/*.exe

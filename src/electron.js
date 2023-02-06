@@ -36,7 +36,6 @@ function createWindow() {
   window = new BrowserWindow({
     width: 1000,
     height: 800,
-    title: 'fef',
     icon: electronIcon,
     autoHideMenuBar: true,
   });
