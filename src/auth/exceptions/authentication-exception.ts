@@ -1,1 +1,3 @@
-export class AuthenticationError extends Error {}
+export class AuthenticationError extends Error {
+  name = AuthenticationError.name;
+}

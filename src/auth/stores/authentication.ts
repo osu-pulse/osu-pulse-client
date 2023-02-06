@@ -62,7 +62,7 @@ export const useAuthentication = createSharedComposable(() => {
     schedule();
   }
 
-  async function auth(): Promise<void> {
+  async function login(): Promise<void> {
     if (await isUrlClaimable()) {
       await claimUrl();
     } else if (refreshToken.value) {
@@ -72,11 +72,22 @@ export const useAuthentication = createSharedComposable(() => {
     }
   }
 
+  const onLogout = ref<void>();
+  function logout(): void {
+    refreshToken.value = undefined;
+    accessToken.value = undefined;
+    onLogout.value = undefined;
+    redirect();
+  }
+
   return {
     accessToken: readonly(accessToken),
     refreshToken: readonly(refreshToken),
     isAuthenticated,
 
-    auth,
+    onLogout: readonly(onLogout),
+
+    login,
+    logout,
   };
 });

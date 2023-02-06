@@ -1,17 +1,13 @@
 <script lang="ts" setup>
-import TheSideMenu from '~/core/components/TheSideMenu.vue';
-import TheQueue from '~/core/components/TheQueue.vue';
-import { useAuthentication } from '~/auth/stores/authentication';
-import { useUser } from '~/core/stores/user';
+const { isAuthenticated, login } = useAuthentication();
+const { isOffline } = useOffline();
 
-const { isAuthenticated, auth } = useAuthentication();
-
-tryOnMounted(auth);
+tryOnMounted(login);
 </script>
 
 <template>
   <Transition mode="out-in">
-    <div v-if="isAuthenticated" class="app">
+    <div v-if="isAuthenticated || isOffline" class="app">
       <TheSideMenu class="side-menu" />
 
       <div class="main-section">

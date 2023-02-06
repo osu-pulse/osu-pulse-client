@@ -1,11 +1,17 @@
 {
-    "name": "dtts-client",
-    "private": true,
+    "name": "osu-pulse-client",
+    "author": {
+        "name": "T1MON"
+    },
+    "description": "OSU Music player",
+    "license": "AGPL-3.0",
     "packageManager": "yarn@1.22.0",
+    "version": "0.9.0",
     "scripts": {
-        "dev": "vite --open --host",
-        "build": "vite build",
-        "preview": "vite preview --host",
+        "web:dev": "vite --open --host",
+        "web:build": "vite build",
+        "electron:dev": "vite build && electron src/electron.js",
+        "electron:build": "vite build && electron-builder --config --win",
         "lint": "eslint . --fix",
         "format": "prettier . --write",
         "test": "vitest run --coverage"
@@ -35,6 +41,9 @@
         "@vue/eslint-config-prettier": "^7.0.0",
         "@vue/eslint-config-typescript": "^11.0.0",
         "@vue/test-utils": "^2.0.0-rc.21",
+        "electron": "^22.2.0",
+        "electron-builder": "^23.6.0",
+        "electron-packager": "^17.1.1",
         "eslint": "^8.18.0",
         "eslint-plugin-vue": "^9.1.1",
         "prettier": "^2.7.1",
