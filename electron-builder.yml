@@ -1,0 +1,15 @@
+appId: com.osu-pulse.app
+productName: OsuPulse
+nsis:
+  oneClick: false
+win:
+  icon: src/core/assets/electron.ico
+  target:
+    - nsis
+extraMetadata:
+  main: src/electron.js
+extraResources:
+  - dist/web
+directories:
+  output: dist/electron
+

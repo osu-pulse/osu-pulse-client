@@ -1,5 +1,5 @@
 :8080 {
-	root * /dtts-client
+	root * /osu-pulse-client
 	try_files {path} /index.html
 	file_server
 }

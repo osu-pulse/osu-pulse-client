@@ -1,6 +1,6 @@
 FROM node:alpine as build-stage
 
-WORKDIR /dtts-client
+WORKDIR /osu-pulse-client
 
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
@@ -11,5 +11,5 @@ RUN yarn run build
 FROM caddy:alpine as serve-stage
 
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY --from=build-stage /dtts-client/dist /dtts-client
+COPY --from=build-stage /osu-pulse-client/dist /osu-pulse-client
 
