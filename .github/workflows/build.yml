@@ -64,5 +64,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "dist/electron/*.exe"
-          release_id: github.event.release.id
+          file: dist/electron/*.exe
+          release_id: github.event.release.database_id
