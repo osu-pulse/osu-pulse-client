@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url';
 import type { SideMenuItem } from '~/core/types/side-menu-item';
-import { useUser } from '~/core/stores/user';
+import { useUser } from '~/shared/stores/user';
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -45,7 +45,7 @@ const itemsControl: SideMenuItem[] = [
 ];
 
 const { user } = useUser();
-const isOnline = useOnline();
+const { isOffline } = useOffline();
 const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
 const username = computed(() => user.value?.username ?? 'UNKNOWN');
 const listening = ref<string>('Time Is Ticking Out - TheCranberries');
@@ -65,7 +65,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         <div class="title">
           <BIconCircleFill
             class="status"
-            :class="isOnline ? '_online' : '_offline'"
+            :class="isOffline ? '_offline' : '_online'"
           />
 
           <div class="name">{{ username }}</div>
@@ -209,7 +209,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
           }
 
           &._offline {
-            color: #f56767;
+            color: #b7b7b7;
           }
         }
 
