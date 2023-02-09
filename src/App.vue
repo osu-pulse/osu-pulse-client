@@ -1,17 +1,13 @@
 <script lang="ts" setup>
 const { isAuthenticated, login } = useAuthentication();
-const { isPending, isOffline, check } = useOffline();
-tryOnMounted(async () => {
-  await check();
-  if (!isOffline.value) {
-    await login();
-  }
-});
+
+const { isLoading, isOffline } = useOffline();
+whenever(() => !isOffline.value, login, { immediate: true });
 </script>
 
 <template>
   <Transition mode="out-in">
-    <div v-if="!isPending && (isAuthenticated || isOffline)" class="app">
+    <div v-if="!isLoading && (isAuthenticated || isOffline)" class="app">
       <TheSideMenu class="side-menu" />
 
       <div class="main-section">
