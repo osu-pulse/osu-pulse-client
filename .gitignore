@@ -1,6 +1,7 @@
 # Compiled output
 /dist*
 /node_modules
+/electron/main.js
 /s3
 /src/auto-imports.d.ts
 /src/components.d.ts
