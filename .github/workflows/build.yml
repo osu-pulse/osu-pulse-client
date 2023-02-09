@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  docker:
+  docker-web:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +41,7 @@ jobs:
             ghcr.io/${{ github.event.repository.owner.login }}/${{ github.event.repository.name }}:${{ env.VERSION }}
             ghcr.io/${{ github.event.repository.owner.login }}/${{ github.event.repository.name }}:latest
 
-  windows:
+  electron-windows:
     runs-on: windows-latest
 
     steps:
@@ -62,4 +62,4 @@ jobs:
       - name: Upload to release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/electron/*.exe
+          files: dist-electron/*.exe

@@ -6,15 +6,22 @@ nsis:
   oneClick: false
 
 win:
-  icon: src/core/assets/electron.ico
+  icon: electron/assets/app.ico
   target:
     - nsis
     - portable
 
 extraMetadata:
-  main: src/electron.js
+  main: electron/main.js
+
+files:
+  - package.json
+  - electron/main.js
+
 extraResources:
-  - dist/web
+  - dist
+  - electron/assets
+
 directories:
-  output: dist/electron
+  output: dist-electron
 
