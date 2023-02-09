@@ -11,5 +11,5 @@ RUN yarn web:build
 FROM caddy:alpine as serve-stage
 
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY --from=build-stage /osu-pulse-client/dist/web /osu-pulse-client
+COPY --from=build-stage /osu-pulse-client/dist /osu-pulse-client
 

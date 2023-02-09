@@ -1,5 +1,9 @@
 import Axios from 'axios';
 
+export const axiosBase = Axios.create({
+  baseURL: API_URL,
+});
+
 export const axiosAuth = Axios.create({
   baseURL: AUTH_URL,
 });
