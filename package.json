@@ -1,11 +1,17 @@
 {
-    "name": "dtts-client",
-    "private": true,
+    "name": "osu-pulse-client",
+    "author": {
+        "name": "T1MON"
+    },
+    "description": "OSU Music player",
+    "license": "AGPL-3.0",
     "packageManager": "yarn@1.22.0",
+    "version": "0.9.0",
     "scripts": {
-        "dev": "vite --open --host",
-        "build": "vite build",
-        "preview": "vite preview --host",
+        "web:dev": "cross-env VITE_PLATFORM=web vite --open --host --port 8080",
+        "web:build": "cross-env VITE_PLATFORM=web vite build",
+        "electron:dev": "cross-env VITE_PLATFORM=electron concurrently --kill-others \"vite --host --port 3000\" \"tsc electron/main.ts electron/preload.ts && electron electron/main.js\"",
+        "electron:build": "cross-env VITE_PLATFORM=electron vite build && tsc electron/main.ts electron/preload.ts && electron-builder --config --win",
         "lint": "eslint . --fix",
         "format": "prettier . --write",
         "test": "vitest run --coverage"
@@ -14,6 +20,7 @@
         "@apollo/client": "^3.6.9",
         "@vue/apollo-composable": "^4.0.0-alpha.18",
         "@vueuse/core": "^9.2.0",
+        "asar": "^3.2.0",
         "axios": "^0.27.2",
         "bootstrap-icons-vue": "^1.8.1",
         "graphql": "^16.5.0",
@@ -35,6 +42,10 @@
         "@vue/eslint-config-prettier": "^7.0.0",
         "@vue/eslint-config-typescript": "^11.0.0",
         "@vue/test-utils": "^2.0.0-rc.21",
+        "concurrently": "^7.6.0",
+        "cross-env": "^7.0.3",
+        "electron": "^22.2.0",
+        "electron-builder": "^23.6.0",
         "eslint": "^8.18.0",
         "eslint-plugin-vue": "^9.1.1",
         "prettier": "^2.7.1",
@@ -47,6 +58,7 @@
         "unplugin-auto-import": "^0.11.2",
         "unplugin-vue-components": "^0.22.4",
         "vite": "^3.1.0",
-        "vitest": "^0.25.3"
+        "vitest": "^0.25.3",
+        "webpack-env": "^0.8.0"
     }
 }

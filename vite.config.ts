@@ -7,9 +7,7 @@ import { PrimeVueResolver } from 'unplugin-vue-components/resolvers';
 import { iconNames } from 'bootstrap-icons-vue';
 
 export default defineConfig({
-  server: {
-    port: 8080,
-  },
+  base: './',
 
   resolve: {
     alias: {

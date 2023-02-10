@@ -1,35 +1,38 @@
 <script lang="ts" setup>
-import TheSideMenu from '~/core/components/TheSideMenu.vue';
-import TheQueue from '~/core/components/TheQueue.vue';
-import { useAuthentication } from '~/auth/stores/authentication';
+const { isAuthenticated, login } = useAuthentication();
 
-const { isAuthenticated, auth } = useAuthentication();
-
-tryOnMounted(auth);
+const { isLoading, isOffline } = useOffline();
+whenever(() => !isOffline.value, login, { immediate: true });
 </script>
 
 <template>
-  <Transition mode="out-in">
-    <div v-if="isAuthenticated" class="app">
-      <TheSideMenu class="side-menu" />
+  <div class="app-component">
+    <TheTitleBar v-if="platform === Platform.ELECTRON" class="title-bar" />
 
-      <div class="main-section">
-        <div class="page-container">
-          <RouterView v-slot="{ Component }">
-            <Transition mode="out-in">
-              <Component :is="Component" />
-            </Transition>
-          </RouterView>
+    <div class="window">
+      <Transition mode="out-in">
+        <div v-if="!isLoading && (isAuthenticated || isOffline)" class="body">
+          <TheSideMenu class="side-menu" />
+
+          <main class="main-section">
+            <div class="page-container">
+              <RouterView v-slot="{ Component }">
+                <Transition mode="out-in">
+                  <Component :is="Component" />
+                </Transition>
+              </RouterView>
+            </div>
+
+            <ThePlayer class="player"></ThePlayer>
+          </main>
+
+          <TheQueue class="queue"></TheQueue>
         </div>
 
-        <ThePlayer class="player"></ThePlayer>
-      </div>
-
-      <TheQueue class="queue"></TheQueue>
+        <PageLoader v-else class="loader" />
+      </Transition>
     </div>
-
-    <PageLoader v-else class="loader" />
-  </Transition>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -37,42 +40,58 @@ tryOnMounted(auth);
 @use 'shared/styles/constants';
 @use 'shared/styles/mixins';
 
-.app,
-.loader {
-  @include transitions.fade();
-}
-
-.loader {
-  margin: auto;
-}
-
-.app {
+.app-component {
+  @include mixins.size(fill);
   flex: auto;
   display: flex;
-  gap: 10px;
-  overflow: auto;
-  background-color: constants.$clr-secondary;
+  flex-direction: column;
 
-  .side-menu {
+  .title-bar {
+    flex: none;
   }
 
-  .main-section {
-    display: flex;
+  .window {
     flex: auto;
-    flex-direction: column;
+    overflow: auto;
+    display: flex;
 
-    .page-container {
-      overflow: auto;
-      flex: auto;
+    .body,
+    .loader {
+      @include transitions.fade();
     }
+
+    .loader {
+      margin: auto;
+    }
+
+    .body {
+      flex: auto;
+      display: flex;
+      gap: 10px;
+      overflow: auto;
+      background-color: constants.$clr-secondary;
+
+      .side-menu {
+        flex: none;
+      }
+
+      .main-section {
+        display: flex;
+        flex: auto;
+        flex-direction: column;
+
+        .page-container {
+          overflow: auto;
+          flex: auto;
+        }
 
     .player {
       margin-bottom: 10px;
       flex: auto;
     }
-  }
 
-  .queue {
+    .queue {
+    }
   }
 }
 </style>

@@ -1,8 +1,13 @@
 import type { User } from '~/shared/dto/user';
 import { useUsersService } from '~/shared/services/users';
+import { useAuthentication } from '~/auth/stores/authentication';
 
 const useUserState = createGlobalState(() => ({
-  user: shallowRef<User>(),
+  user: useLocalStorage<User | undefined>('user', undefined, {
+    serializer,
+    shallow: true,
+    writeDefaults: true,
+  }),
 }));
 
 export const useUser = createSharedComposable(() => {
@@ -10,7 +15,10 @@ export const useUser = createSharedComposable(() => {
 
   const usersService = useUsersService();
   const { result } = usersService.me();
-  whenever(result, (result) => (user.value = result.me));
+  whenever(result, (result) => (user.value = result.me), { immediate: true });
+
+  const { onLogout } = useAuthentication();
+  watch(onLogout, () => (user.value = undefined));
 
   return {
     user: readonly(user),

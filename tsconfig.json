@@ -20,7 +20,7 @@
     "sourceMap": true,
     "types": ["webpack-env", "vite/client"],
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["src/*", "electron/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
