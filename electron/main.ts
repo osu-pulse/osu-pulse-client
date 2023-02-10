@@ -44,7 +44,6 @@ async function createWindow() {
     width: 1000,
     height: 800,
     icon: path.resolve(ROOT, 'electron', 'assets', 'app.ico'),
-    autoHideMenuBar: true,
     frame: false,
     webPreferences: {
       preload: path.resolve(ROOT, 'electron', 'preload.js'),

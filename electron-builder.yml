@@ -20,7 +20,8 @@ files:
 
 extraResources:
   - dist
-  - electron
+  - electron/assets
+  - electron/preload.js
 
 directories:
   output: dist-electron
