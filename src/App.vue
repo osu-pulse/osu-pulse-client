@@ -10,27 +10,27 @@ whenever(() => !isOffline.value, login, { immediate: true });
     <TheTitleBar v-if="platform === Platform.ELECTRON" class="title-bar" />
 
     <div class="window">
-      <Transition mode="out-in">
-        <div v-if="!isLoading && (isAuthenticated || isOffline)" class="body">
-          <TheSideMenu class="side-menu" />
+      <RouterView v-slot="{ Component }">
+        <Transition mode="out-in">
+          <div v-if="!isLoading && (isAuthenticated || isOffline)" class="body">
+            <TheSideMenu class="side-menu" />
 
-          <main class="main-section">
-            <div class="page-container">
-              <RouterView v-slot="{ Component }">
+            <main class="main-section">
+              <div class="page-container">
                 <Transition mode="out-in">
-                  <Component :is="Component" />
+                  <Component :is="Component" class="page" />
                 </Transition>
-              </RouterView>
-            </div>
+              </div>
 
-            <ThePlayer class="player"></ThePlayer>
-          </main>
+              <ThePlayer class="player"></ThePlayer>
+            </main>
 
-          <TheQueue class="queue"></TheQueue>
-        </div>
+            <TheQueue class="queue"></TheQueue>
+          </div>
 
-        <PageLoader v-else class="loader" />
-      </Transition>
+          <PageLoader v-else class="loader" />
+        </Transition>
+      </RouterView>
     </div>
   </div>
 </template>
@@ -79,18 +79,26 @@ whenever(() => !isOffline.value, login, { immediate: true });
         display: flex;
         flex: auto;
         flex-direction: column;
+        gap: 10px;
 
         .page-container {
+          padding: 0 20px;
           overflow: auto;
           flex: auto;
+
+          .page {
+            @include transitions.fade();
+          }
         }
 
-    .player {
-      margin-bottom: 10px;
-      flex: auto;
-    }
+        .player {
+          margin-bottom: 10px;
+          flex: auto;
+        }
+      }
 
-    .queue {
+      .queue {
+      }
     }
   }
 }
