@@ -13,6 +13,7 @@
 
 <style scoped lang="scss">
 @use 'src/shared/styles/mixins';
+@use 'src/shared/styles/constants';
 
 @keyframes circle-scale {
   0%,
@@ -45,7 +46,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    background-color: #eb7898;
+    background-color: constants.$clr-osu;
     border-radius: 50%;
     opacity: 0.6;
   }

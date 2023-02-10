@@ -275,6 +275,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 
         .icon,
         .label {
+          color: constants.$clr-inactive;
           transition: constants.$trn-normal-out;
         }
 

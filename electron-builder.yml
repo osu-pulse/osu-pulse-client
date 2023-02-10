@@ -20,7 +20,7 @@ files:
 
 extraResources:
   - dist
-  - electron/assets
+  - electron
 
 directories:
   output: dist-electron

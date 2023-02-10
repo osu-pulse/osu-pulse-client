@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { BrowserWindow, Menu, Tray, app, nativeTheme } from 'electron';
+import { BrowserWindow, Menu, Tray, app, ipcMain, nativeTheme } from 'electron';
 
 let window: BrowserWindow;
 let tray: Tray;
@@ -27,17 +27,28 @@ function createTray() {
     );
   });
 
-  tray.on('click', () => window.show());
+  tray.on('click', () => {
+    if (!window.isVisible()) {
+      window.show();
+    }
+  });
 
+  window.on('minimize', () => window.hide());
   window.on('close', () => tray?.destroy());
 }
 
 async function createWindow() {
   window = new BrowserWindow({
+    minWidth: 400,
+    minHeight: 500,
     width: 1000,
     height: 800,
     icon: path.resolve(ROOT, 'electron', 'assets', 'app.ico'),
     autoHideMenuBar: true,
+    frame: false,
+    webPreferences: {
+      preload: path.resolve(ROOT, 'electron', 'preload.js'),
+    },
   });
 
   const indexUrl = 'http://127.0.0.1:3000';
@@ -59,6 +70,11 @@ async function createWindow() {
       }
     }
   });
+
+  ipcMain.on('minimize', () => window.minimize());
+  ipcMain.on('maximize', () => window.maximize());
+  ipcMain.on('unMaximize', () => window.unmaximize());
+  ipcMain.on('close', () => window.close());
 }
 
 app.whenReady().then(async () => {
