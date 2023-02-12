@@ -1,8 +1,22 @@
 <script lang="ts" setup>
-const { isAuthenticated, login } = useAuthentication();
+import { usePlayer } from '~/player/stores/player';
+import { useQueue } from '~/shared/stores/queue';
 
-const { isLoading, isOffline } = useOffline();
-whenever(() => !isOffline.value, login, { immediate: true });
+const { authenticated } = useAuthentication();
+const { loading, offline } = useOffline();
+const ready = computed(
+  () => !loading.value && (offline.value || authenticated.value),
+);
+
+const { track } = usePlayer();
+const { queue } = useQueue();
+let a = true;
+watch(queue, () => {
+  if (queue.value.length > 0 && a) {
+    a = false;
+    return (track.value = queue.value[0]);
+  }
+});
 </script>
 
 <template>
@@ -12,7 +26,7 @@ whenever(() => !isOffline.value, login, { immediate: true });
     <div class="window">
       <RouterView v-slot="{ Component }">
         <Transition mode="out-in">
-          <div v-if="!isLoading && (isAuthenticated || isOffline)" class="body">
+          <div v-if="ready" class="body">
             <TheSideMenu class="side-menu" />
 
             <main class="main-section">
@@ -28,7 +42,7 @@ whenever(() => !isOffline.value, login, { immediate: true });
             <TheQueue class="queue"></TheQueue>
           </div>
 
-          <PageLoader v-else class="loader" />
+          <TheIntroLoader v-else class="loader" />
         </Transition>
       </RouterView>
     </div>
@@ -52,16 +66,20 @@ whenever(() => !isOffline.value, login, { immediate: true });
 
   .window {
     flex: auto;
-    overflow: auto;
+    overflow: hidden;
     display: flex;
 
     .body,
     .loader {
       @include transitions.fade();
+
+      &.loader.v-leave-to {
+        transform: scale(1.2);
+      }
     }
 
     .loader {
-      margin: auto;
+      flex: auto;
     }
 
     .body {
@@ -93,7 +111,6 @@ whenever(() => !isOffline.value, login, { immediate: true });
 
         .player {
           margin-bottom: 10px;
-          flex: auto;
         }
       }
 

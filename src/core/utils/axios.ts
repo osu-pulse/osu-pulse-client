@@ -13,12 +13,11 @@ export const axiosApi = Axios.create({
 });
 
 axiosApi.interceptors.request.use(async (request) => {
-  const { accessToken } = useAuthentication();
+  const { getToken } = useAuthentication();
 
-  const token = accessToken.value;
   request.headers = {
     ...request.headers,
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${await getToken()}`,
   };
   return request;
 });

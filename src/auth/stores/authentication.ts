@@ -13,8 +13,20 @@ const useAuthenticationState = createGlobalState(() => ({
 
 export const useAuthentication = createSharedComposable(() => {
   const { accessToken, refreshToken } = useAuthenticationState();
+  const authenticated = computed(() => Boolean(accessToken.value));
 
-  const isAuthenticated = computed(() => Boolean(accessToken.value));
+  function getToken(): Promise<string> {
+    return new Promise((resolve) => {
+      if (accessToken.value) {
+        resolve(accessToken.value);
+      } else {
+        const stop = whenever(accessToken, (value) => {
+          stop();
+          resolve(value);
+        });
+      }
+    });
+  }
 
   function redirect() {
     window.location.href = `${AUTH_URL}/authorize`;
@@ -71,6 +83,8 @@ export const useAuthentication = createSharedComposable(() => {
       redirect();
     }
   }
+  const { offline } = useOffline();
+  whenever(() => !offline.value, login, { immediate: true });
 
   const onLogout = ref<void>();
   function logout(): void {
@@ -81,12 +95,11 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   return {
-    accessToken: readonly(accessToken),
-    refreshToken: readonly(refreshToken),
-    isAuthenticated,
+    authenticated,
 
     onLogout: readonly(onLogout),
 
+    getToken,
     login,
     logout,
   };

@@ -15,13 +15,13 @@ import { useAuthentication } from '~/auth/stores/authentication';
 const httpLink = new HttpLink({
   uri: GQL_URL,
   fetch: async (uri, options) => {
-    const { accessToken } = useAuthentication();
+    const { getToken } = useAuthentication();
 
     options = {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: `Bearer ${accessToken.value}`,
+        Authorization: `Bearer ${await getToken()}`,
       },
     };
     return fetch(uri, options);
@@ -32,10 +32,10 @@ const wsLink = new GraphQLWsLink(
   createClient({
     url: GQL_WS_URL,
     connectionParams: async () => {
-      const { accessToken } = useAuthentication();
+      const { getToken } = useAuthentication();
 
       return {
-        Authorization: `Bearer ${accessToken.value}`,
+        Authorization: `Bearer ${await getToken()}`,
       };
     },
   }),

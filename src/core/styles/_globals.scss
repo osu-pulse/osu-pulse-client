@@ -8,7 +8,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+body, p {
   margin: 0;
 }
 
@@ -22,7 +22,9 @@ a {
 }
 
 button {
+  background: none;
   border: none;
+  outline: none;
 }
 
 ol,

@@ -30,7 +30,8 @@
         "react": "^18.2.0",
         "socket.io-client": "^4.5.4",
         "vue": "^3.2.37",
-        "vue-router": "^4.0.16"
+        "vue-router": "^4.0.16",
+        "vue-spinner": "^1.0.4"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^0.26.3",
@@ -58,6 +59,7 @@
         "unplugin-auto-import": "^0.11.2",
         "unplugin-vue-components": "^0.22.4",
         "vite": "^3.1.0",
+        "vite-svg-loader": "^4.0.0",
         "vitest": "^0.25.3",
         "webpack-env": "^0.8.0"
     }

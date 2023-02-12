@@ -52,7 +52,6 @@ type PlaylistObject {
 
 type Query {
     devices: [DeviceObject!]!
-    health: Boolean!
     me: UserObject!
     myPlaylist(playlistId: String!): PlaylistObject!
     myPlaylists(search: String): [PlaylistObject!]!
@@ -77,6 +76,7 @@ type TrackObject {
     artist: String!
     cover: TrackCoverObject!
     id: ID!
+    length: Float!
     liked: Float!
     played: Float!
     title: String!

@@ -5,6 +5,7 @@ import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vitest/config';
 import { PrimeVueResolver } from 'unplugin-vue-components/resolvers';
 import { iconNames } from 'bootstrap-icons-vue';
+import SvgLoader from 'vite-svg-loader';
 
 export default defineConfig({
   base: './',
@@ -33,6 +34,8 @@ export default defineConfig({
 
   plugins: [
     Vue(),
+
+    SvgLoader(),
 
     AutoImport({
       imports: [

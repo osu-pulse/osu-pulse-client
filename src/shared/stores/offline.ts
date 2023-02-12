@@ -1,30 +1,30 @@
 const useOfflineState = createGlobalState(() => ({
-  isHealthy: ref(false),
-  isLoading: ref(true),
-  isOffline: ref(true),
+  healthy: ref(false),
+  loading: ref(true),
+  offline: ref(true),
 }));
 
 export const useOffline = createSharedComposable(() => {
-  const { isHealthy, isLoading, isOffline } = useOfflineState();
+  const { healthy, loading, offline } = useOfflineState();
 
-  watch(isHealthy, (isHealthy) => (isOffline.value = !isHealthy));
+  watch(healthy, (healthy) => (offline.value = !healthy));
 
   const healthService = useHealthService();
   async function check() {
     try {
       await healthService.health();
-      isHealthy.value = true;
+      healthy.value = true;
     } catch {
-      isHealthy.value = false;
+      healthy.value = false;
     } finally {
-      isLoading.value = false;
+      loading.value = false;
     }
   }
   tryOnMounted(check);
 
   return {
-    isOffline: readonly(isOffline),
-    isHealthy: readonly(isHealthy),
-    isLoading: readonly(isLoading),
+    offline: readonly(offline),
+    healthy: readonly(healthy),
+    loading: readonly(loading),
   };
 });

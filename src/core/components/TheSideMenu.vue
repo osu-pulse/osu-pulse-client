@@ -45,10 +45,15 @@ const itemsControl: SideMenuItem[] = [
 ];
 
 const { user } = useUser();
-const { isOffline } = useOffline();
+const { offline } = useOffline();
 const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
 const username = computed(() => user.value?.username ?? 'UNKNOWN');
 const listening = ref<string>('Time Is Ticking Out - TheCranberries');
+
+function goProfile() {
+  const url = user.value?.url?.profile;
+  window.open(url, '_blank')?.focus();
+}
 </script>
 
 <template>
@@ -59,13 +64,18 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
     </RouterLink>
 
     <div class="user">
-      <img class="avatar" alt="avatar" :src="avatar" />
+      <div class="avatar-wrap">
+        <img class="avatar" alt="avatar" :src="avatar" />
+        <div v-if="user" class="overlay" @click="goProfile">
+          <BIconEye class="icon" />
+        </div>
+      </div>
 
       <div class="info">
         <div class="title">
           <BIconCircleFill
             class="status"
-            :class="isOffline ? '_offline' : '_online'"
+            :class="offline ? '_offline' : '_online'"
           />
 
           <div class="name">{{ username }}</div>
@@ -182,11 +192,44 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
     display: flex;
     gap: 15px;
 
-    .avatar {
+    .avatar-wrap {
       @include mixins.size(73px);
-      object-fit: cover;
-      object-position: center;
-      border-radius: constants.$cmn-border-radius;
+      position: relative;
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+
+      .avatar {
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .overlay {
+        @include mixins.size(fill);
+        position: absolute;
+        display: flex;
+        background: rgba(black, 0.5);
+        opacity: 0;
+        transition: constants.$trn-normal-out;
+        cursor: pointer;
+
+        .icon {
+          margin: auto;
+          font-size: 30px;
+          color: constants.$clr-background;
+          opacity: 0.7;
+          transform: scale(0.5);
+          transition: constants.$trn-normal-out;
+        }
+
+        &:hover {
+          opacity: 1;
+
+          .icon {
+            transform: scale(1);
+          }
+        }
+      }
     }
 
     .info {
@@ -270,7 +313,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         display: flex;
         align-items: center;
         gap: 20px;
-        border-radius: constants.$cmn-border-radius;
+        border-radius: 10px;
         transition: constants.$trn-normal-out;
 
         .icon,
@@ -294,11 +337,10 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       &::after {
         @include mixins.pseudo();
         position: static;
-        width: constants.$cmn-border-radius;
-        border-top-left-radius: constants.$cmn-border-radius;
-        border-bottom-left-radius: constants.$cmn-border-radius;
+        width: 10px;
+        border-radius: 10px 0 0 10px;
         background-color: constants.$clr-primary;
-        transform: translateX(constants.$cmn-border-radius);
+        transform: translateX(100%);
         transition: constants.$trn-fast-out;
       }
 
