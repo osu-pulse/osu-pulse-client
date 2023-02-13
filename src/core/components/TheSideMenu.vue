@@ -28,11 +28,6 @@ const itemsMusic: SideMenuItem[] = [
 
 const itemsControl: SideMenuItem[] = [
   {
-    label: 'Devices',
-    icon: BIconCast,
-    to: { name: RouteName.DEVICES },
-  },
-  {
     label: 'Themes',
     icon: BIconPalette,
     to: { name: RouteName.THEMES },
@@ -48,7 +43,11 @@ const { user } = useUser();
 const { offline } = useOffline();
 const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
 const username = computed(() => user.value?.username ?? 'UNKNOWN');
-const listening = ref<string>('Time Is Ticking Out - TheCranberries');
+
+const { playing, track } = usePlayer();
+const listening = computed(
+  () => track.value && `${track.value.title} - ${track.value.artist}`,
+);
 
 function goProfile() {
   const url = user.value?.url?.profile;
@@ -57,7 +56,7 @@ function goProfile() {
 </script>
 
 <template>
-  <div class="side-component">
+  <div class="side-menu-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
       <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
       <span class="label">Pulse</span>
@@ -81,10 +80,14 @@ function goProfile() {
           <div class="name">{{ username }}</div>
         </div>
 
-        <div v-show="listening" class="listening">
-          <BIconMusicNoteBeamed class="icon" />
-          <span class="text">Time Is Ticking Out - TheCranberries</span>
-        </div>
+        <Transition>
+          <div v-show="listening && playing" class="listening">
+            <BIconMusicNoteBeamed class="icon" />
+            <Transition mode="out-in">
+              <span :key="listening" class="text">{{ listening }}</span>
+            </Transition>
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -125,6 +128,7 @@ function goProfile() {
 <style lang="scss" scoped>
 @use '../src/shared/styles/mixins';
 @use '../src/shared/styles/constants';
+@use '../src/shared/styles/transitions';
 
 @keyframes heartbeat {
   0% {
@@ -153,14 +157,15 @@ function goProfile() {
   }
 }
 
-.side-menu {
-  width: 330px;
+.side-menu-component {
+  width: 350px;
   overflow: auto;
   padding-top: 20px;
   display: flex;
   flex-direction: column;
   background-color: constants.$clr-background;
   box-shadow: constants.$cmn-shadow-block;
+  transition: constants.$trn-normal-out;
 
   .logo {
     margin: 0 auto 30px;
@@ -193,7 +198,8 @@ function goProfile() {
     gap: 15px;
 
     .avatar-wrap {
-      @include mixins.size(73px);
+      @include mixins.size(70px);
+      flex: none;
       position: relative;
       display: flex;
       border-radius: 10px;
@@ -265,6 +271,7 @@ function goProfile() {
       }
 
       .listening {
+        @include transitions.fade();
         gap: 5px;
         overflow: hidden;
         display: flex;
@@ -273,6 +280,7 @@ function goProfile() {
         font-size: 14px;
 
         .text {
+          @include transitions.fade();
           flex: auto;
           width: 110px;
           overflow: hidden;
@@ -304,12 +312,12 @@ function goProfile() {
 
     .section {
       display: flex;
-      overflow: hidden;
 
       .section-inner {
         margin: 0 30px;
         flex: auto;
         padding: 20px;
+        overflow: hidden;
         display: flex;
         align-items: center;
         gap: 20px;
@@ -340,24 +348,28 @@ function goProfile() {
         width: 10px;
         border-radius: 10px 0 0 10px;
         background-color: constants.$clr-primary;
-        transform: translateX(100%);
+        transform: scaleX(0);
+        transform-origin: right;
         transition: constants.$trn-fast-out;
       }
 
       &:hover {
-        .section-inner {
-          background-color: constants.$clr-secondary;
-          cursor: pointer;
-          transition: constants.$trn-fast-in;
-
-          .icon {
-            transform: scale(1.1);
-          }
-
-          .icon,
-          .label {
-            color: constants.$clr-text;
+        &:not(.router-link-active) {
+          .section-inner {
+            box-shadow: constants.$cmn-shadow-element;
+            transform: scale(1.01);
+            background: constants.$clr-secondary;
             transition: constants.$trn-fast-in;
+
+            .icon,
+            .label {
+              color: constants.$clr-text;
+              transition: constants.$trn-fast-in;
+            }
+
+            .icon {
+              transform: scale(1.1);
+            }
           }
         }
       }
@@ -379,6 +391,78 @@ function goProfile() {
         &::after {
           transform: none;
           transition: constants.$trn-normal-out;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: constants.$bpt-xxl) {
+  .side-menu-component {
+    width: 300px;
+  }
+}
+
+@media (max-width: constants.$bpt-xl) {
+  .side-menu-component {
+    width: 80px;
+
+    .logo {
+      margin-bottom: 20px;
+
+      .icon {
+        margin: auto;
+      }
+
+      .label {
+        display: none;
+      }
+    }
+
+    .user {
+      margin: 0 0 10px;
+
+      .avatar-wrap {
+        @include mixins.size(50px);
+        margin: auto;
+
+        .overlay {
+          .icon {
+            font-size: 20px;
+          }
+        }
+      }
+
+      .info {
+        display: none;
+      }
+    }
+
+    .divider {
+      margin: 10px 20px;
+    }
+
+    .sections-list {
+      .section {
+        .section-inner {
+          margin: 0 15px;
+          padding: 15px;
+
+          .label {
+            display: none;
+          }
+        }
+
+        &::after {
+          display: none;
+        }
+
+        &:hover {
+          &:not(.router-link-active) {
+            .section-inner {
+              transform: scale(1.05);
+            }
+          }
         }
       }
     }

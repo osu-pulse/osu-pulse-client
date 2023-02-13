@@ -1,11 +1,10 @@
 import type { Track } from '~/shared/dto/track';
-import { calcBuffer, crossFade } from '~/player/utils/audio';
+import { calcBuffer } from '~/player/utils/audio';
 import { useTracksService } from '~/shared/services/tracks';
 
 const usePlayerState = createGlobalState(() => ({
   track: shallowRef<Track>(),
 
-  fade: ref<number | undefined>(300),
   audio: shallowRef(new Audio()),
   caching: ref(false),
 
@@ -15,12 +14,12 @@ const usePlayerState = createGlobalState(() => ({
   duration: ref(0),
   volume: ref(1),
   muted: ref(false),
+  ended: ref(false),
 }));
 
 export const usePlayer = createSharedComposable(() => {
   const {
     track,
-    fade,
     audio,
     playing,
     caching,
@@ -29,16 +28,16 @@ export const usePlayer = createSharedComposable(() => {
     duration,
     volume,
     muted,
+    ended,
   } = usePlayerState();
 
   // TODO: Вынести в хук с кэшами
   const tracksService = useTracksService();
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack();
-  const mutateCacheTrackDebounced = useDebounceFn(mutateCacheTrack, 300);
   async function cacheTrack() {
     if (track.value && !track.value.url.audio) {
       caching.value = true;
-      const result = await mutateCacheTrackDebounced({
+      const result = await mutateCacheTrack({
         trackId: track.value.id,
       });
 
@@ -49,104 +48,92 @@ export const usePlayer = createSharedComposable(() => {
       }
     }
   }
+  const cacheTrackDebounced = useDebounceFn(cacheTrack, 500, { maxWait: 0 });
 
   const { ignoreUpdates: ignorePlayingUpdates } = watchIgnorable(
     playing,
     async (value) => {
-      if (value) {
-        await cacheTrack();
+      if (!value) {
+        audio.value.pause();
+      } else if (track.value?.url?.audio) {
         audio.value.play();
       } else {
-        audio.value.pause();
+        cacheTrackDebounced().then();
       }
     },
+    { immediate: true },
   );
   const { ignoreUpdates: ignoreProgressUpdates } = watchIgnorable(
     progress,
     (value) => (audio.value.currentTime = value),
+    { immediate: true },
   );
   const { ignoreUpdates: ignoreVolumeUpdates } = watchIgnorable(
     volume,
     (value) => (audio.value.volume = value),
+    { immediate: true },
   );
   const { ignoreUpdates: ignoreMuteUpdates } = watchIgnorable(
     muted,
     (value) => (audio.value.muted = value),
+    { immediate: true },
   );
 
-  const listeners: Pick<
-    Record<keyof GlobalEventHandlersEventMap, () => void>,
-    | 'canplay'
-    | 'play'
-    | 'pause'
-    | 'timeupdate'
-    | 'progress'
-    | 'durationchange'
-    | 'volumechange'
-  > = {
-    canplay: () => playing.value && audio.value.play(),
-    play: () => ignorePlayingUpdates(() => (playing.value = true)),
-    pause: () => ignorePlayingUpdates(() => (playing.value = false)),
-    timeupdate: () =>
-      ignoreProgressUpdates(() => (progress.value = audio.value.currentTime)),
-    progress: () =>
-      (buffer.value = calcBuffer(audio.value.buffered, progress.value)),
-    durationchange: () => (duration.value = audio.value.duration),
-    volumechange: () =>
-      ignoreVolumeUpdates(() =>
-        ignoreMuteUpdates(() => {
-          volume.value = audio.value.volume;
-          muted.value = audio.value.muted;
-        }),
-      ),
-  };
-
-  function createAudio(src: string) {
-    audio.value = new Audio(src);
-    audio.value.volume = volume.value;
-    audio.value.muted = muted.value;
-    listeners.timeupdate();
-    listeners.progress();
-    listeners.durationchange();
-    Object.entries(listeners).forEach(([event, handler]) =>
-      audio.value.addEventListener(event, handler),
-    );
-    return audio.value;
-  }
-  function cleanAudio() {
-    Object.entries(listeners).forEach(([event, handler]) =>
-      audio.value.removeEventListener(event, handler),
-    );
-    const cache = audio.value;
-    audio.value = new Audio();
-    listeners.timeupdate();
-    listeners.progress();
-    listeners.durationchange();
-    return cache;
-  }
+  useEventListener(audio, 'canplay', () => playing.value && audio.value.play());
+  useEventListener(audio, 'play', () =>
+    ignorePlayingUpdates(() => (playing.value = true)),
+  );
+  useEventListener(audio, 'pause', () =>
+    ignorePlayingUpdates(() => (playing.value = false)),
+  );
+  useEventListener(audio, 'timeupdate', () =>
+    ignoreProgressUpdates(() => (progress.value = audio.value.currentTime)),
+  );
+  useEventListener(
+    audio,
+    'progress',
+    () => (buffer.value = calcBuffer(audio.value.buffered, progress.value)),
+  );
+  useEventListener(
+    audio,
+    'durationchange',
+    () =>
+      (duration.value = isNaN(audio.value.duration) ? 0 : audio.value.duration),
+  );
+  useEventListener(audio, 'volumechange', () =>
+    ignoreVolumeUpdates(() =>
+      ignoreMuteUpdates(() => {
+        volume.value = audio.value.volume;
+        muted.value = audio.value.muted;
+      }),
+    ),
+  );
+  useEventListener(audio, 'ended', () => (ended.value = true));
+  useEventListener(audio, 'playing', () => (ended.value = false));
 
   watch(track, async (value, oldValue) => {
     const oldSrc = oldValue?.url?.audio;
     const src = value?.url?.audio;
 
     if (oldSrc !== src) {
-      const oldAudio = cleanAudio();
+      duration.value = 0;
+      caching.value = false;
 
       if (src) {
-        const newAudio = createAudio(src);
-        // await crossFade(oldAudio, newAudio, { duration: 3000 });
+        audio.value.src = src;
+      } else if (playing.value) {
+        audio.value.src = '';
+        cacheTrackDebounced().then();
       }
-    }
 
-    if (!src && playing.value) {
-      await cacheTrack();
+      ignoreProgressUpdates(() => (progress.value = 0));
+      duration.value = 0;
     }
   });
 
   return {
     track,
 
-    fade,
     audio: readonly(audio),
     caching: readonly(caching),
 
@@ -156,5 +143,6 @@ export const usePlayer = createSharedComposable(() => {
     muted,
     buffer: readonly(buffer),
     duration: readonly(duration),
+    ended: readonly(ended),
   };
 });

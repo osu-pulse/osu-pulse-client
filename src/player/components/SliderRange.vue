@@ -2,6 +2,7 @@
 const props = withDefaults(
   defineProps<{
     value: number;
+    buffer?: number;
     wide?: boolean;
   }>(),
   {
@@ -11,11 +12,14 @@ const props = withDefaults(
 
 const emits = defineEmits<{
   (e: 'update:value', value: number): void;
+  (e: 'changeStart'): void;
+  (e: 'changeEnd'): void;
 }>();
 
 const value = useVModel(props, 'value', emits);
 
 const changing = ref(false);
+watch(changing, (value) => (value ? emits('changeStart') : emits('changeEnd')));
 const { pressed } = useMousePressed();
 whenever(
   () => !pressed.value,
@@ -44,7 +48,10 @@ whenever(changing, change);
     <div
       ref="trackRef"
       class="track"
-      :style="{ '--length': `${value * 100}%` }"
+      :style="{
+        '--value': `${value * 100}%`,
+        '--buffer': `${props.buffer * 100}%`,
+      }"
       @mousedown.prevent="changing = true"
     />
 
@@ -70,7 +77,8 @@ whenever(changing, change);
 
   .track {
     @include mixins.size(fill);
-    --length: 0%;
+    --value: 0%;
+    --buffer: 0%;
     position: relative;
     height: 6px;
     overflow: hidden;
@@ -80,11 +88,20 @@ whenever(changing, change);
     transition: constants.$trn-normal-out;
     cursor: pointer;
 
+    &::before,
     &::after {
       @include mixins.pseudo();
       background: constants.$clr-primary;
-      width: var(--length);
-      transition: constants.$trn-fast-out;
+      transition: constants.$trn-normal-out;
+    }
+
+    &::before {
+      width: var(--buffer);
+      opacity: 0.3;
+    }
+
+    &::after {
+      width: var(--value);
     }
   }
 
