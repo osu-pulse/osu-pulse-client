@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { watch } from 'vue'
-import { tryOnMounted } from '@vueuse/core'
+import { tryOnMounted, watchOnce } from '@vueuse/core'
 import { usePlayer } from '@/core/stores/player'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
@@ -10,18 +9,14 @@ import ThePlayer from '@/core/components/ThePlayer.vue'
 import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
 import TheQueue from '@/core/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
+import { useOffline } from '@/core/stores/offline'
 
-const { isPending } = useAuthentication()
+const { authenticated } = useAuthentication()
+const { loading } = useOffline()
 
 const { track } = usePlayer()
 const { queue } = useQueue()
-let a = true
-watch(queue, () => {
-  if (queue.value.length > 0 && a) {
-    a = false
-    return (track.value = queue.value[0])
-  }
-})
+watchOnce(queue, () => track.value = queue.value[0])
 
 tryOnMounted(() => {
   console.clear()
@@ -37,7 +32,7 @@ tryOnMounted(() => {
     <div class="window">
       <RouterView v-slot="{ Component }">
         <Transition mode="out-in">
-          <TheIntroLoader v-if="isPending" class="loader" />
+          <TheIntroLoader v-if="!authenticated && loading" class="loader" />
 
           <div v-else class="body">
             <TheSideMenu class="side-menu" />

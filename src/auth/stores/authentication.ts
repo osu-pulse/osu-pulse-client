@@ -26,7 +26,7 @@ const useAuthenticationState = createGlobalState(() => ({
 export const useAuthentication = createSharedComposable(() => {
   const { accessToken, refreshToken } = useAuthenticationState()
 
-  const isPending = computed(() => !refreshToken.value)
+  const authenticated = computed(() => refreshToken.value)
 
   function getToken(): Promise<string> {
     return new Promise((resolve) => {
@@ -89,10 +89,10 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   async function login(): Promise<void> {
-    if (isUrlClaimable())
-      await claimUrl()
-    else if (refreshToken.value)
+    if (authenticated.value)
       await rotate()
+    else if (isUrlClaimable())
+      await claimUrl()
     else
       redirect()
   }
@@ -108,7 +108,7 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   return {
-    isPending,
+    authenticated,
 
     onLogout: readonly(onLogout),
 
