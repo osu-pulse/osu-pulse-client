@@ -30,6 +30,7 @@ type Mutation {
     addMyTrack(trackId: String!): TrackObject!
     addPlaylistTrack(playlistId: String!, trackId: String!): TrackObject!
     cacheTrack(trackId: String!): TrackObject!
+    cancelCacheTrack(trackId: String!): TrackObject!
     copyPlaylist(playlistId: String!): PlaylistObject!
     createMyPlaylist(payload: CreatePlaylistInput!): PlaylistObject!
     deleteMyPlaylist(playlistId: String!): PlaylistObject!
@@ -52,7 +53,6 @@ type PlaylistObject {
 
 type Query {
     devices: [DeviceObject!]!
-    health: Boolean!
     me: UserObject!
     myPlaylist(playlistId: String!): PlaylistObject!
     myPlaylists(search: String): [PlaylistObject!]!
@@ -71,6 +71,7 @@ type Subscription {
 type TrackCoverObject {
     normal: String!
     small: String!
+    wide: String!
 }
 
 type TrackObject {

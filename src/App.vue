@@ -1,10 +1,28 @@
 <script lang="ts" setup>
-import TheTitlebar from '~/core/components/TheTitleBar.vue';
+import { tryOnMounted, watchOnce } from '@vueuse/core'
+import { usePlayer } from '@/core/stores/player'
+import { useQueue } from '@/core/stores/queue'
+import { Platform, platform } from '@/shared/constants/platform'
+import TheTitleBar from '@/core/components/TheTitleBar.vue'
+import TheSideMenu from '@/core/components/TheSideMenu.vue'
+import ThePlayer from '@/core/components/ThePlayer.vue'
+import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
+import TheQueue from '@/core/components/TheQueue.vue'
+import { useAuthentication } from '@/auth/stores/authentication'
+import { useOffline } from '@/core/stores/offline'
 
-const { isAuthenticated, login } = useAuthentication();
+const { authenticated } = useAuthentication()
+const { loading } = useOffline()
 
-const { isLoading, isOffline } = useOffline();
-whenever(() => !isOffline.value, login, { immediate: true });
+const { track } = usePlayer()
+const { queue } = useQueue()
+watchOnce(queue, () => track.value = queue.value[0])
+
+tryOnMounted(() => {
+  console.clear()
+  console.log('This app in the development state')
+  console.log('GitHub organization: https://github.com/osu-pulse')
+})
 </script>
 
 <template>
@@ -12,27 +30,27 @@ whenever(() => !isOffline.value, login, { immediate: true });
     <TheTitleBar v-if="platform === Platform.ELECTRON" class="title-bar" />
 
     <div class="window">
-      <Transition mode="out-in">
-        <div v-if="!isLoading && (isAuthenticated || isOffline)" class="body">
-          <TheSideMenu class="side-menu" />
+      <RouterView v-slot="{ Component }">
+        <Transition mode="out-in">
+          <TheIntroLoader v-if="!authenticated && loading" class="loader" />
 
-          <main class="main-section">
-            <div class="page-container">
-              <RouterView v-slot="{ Component }">
+          <div v-else class="body">
+            <TheSideMenu class="side-menu" />
+
+            <main class="main-section">
+              <div class="page-container">
                 <Transition mode="out-in">
-                  <Component :is="Component" />
+                  <Component :is="Component" class="page" />
                 </Transition>
-              </RouterView>
-            </div>
+              </div>
 
-            <ThePlayer class="player"></ThePlayer>
-          </main>
+              <ThePlayer class="player" />
+            </main>
 
-          <TheQueue class="queue"></TheQueue>
-        </div>
-
-        <PageLoader v-else class="loader" />
-      </Transition>
+            <TheQueue class="queue" />
+          </div>
+        </Transition>
+      </RouterView>
     </div>
   </div>
 </template>
@@ -54,16 +72,20 @@ whenever(() => !isOffline.value, login, { immediate: true });
 
   .window {
     flex: auto;
-    overflow: auto;
+    overflow: hidden;
     display: flex;
 
     .body,
     .loader {
       @include transitions.fade();
+
+      &.loader.v-leave-to {
+        transform: scale(1.2);
+      }
     }
 
     .loader {
-      margin: auto;
+      flex: auto;
     }
 
     .body {
@@ -81,13 +103,22 @@ whenever(() => !isOffline.value, login, { immediate: true });
         display: flex;
         flex: auto;
         flex-direction: column;
+        gap: 10px;
 
         .page-container {
+          padding: 0 20px;
           overflow: auto;
           flex: auto;
+
+          .page {
+            @include transitions.fade();
+            position: relative;
+            display: flex;
+          }
         }
 
         .player {
+          margin-bottom: 10px;
         }
       }
 
@@ -108,6 +139,7 @@ whenever(() => !isOffline.value, login, { immediate: true });
   --color-primary: #000000;
   --color-secondary: #f4f5fe;
   --color-background: #ffffff;
+  --color-text: #000000;
   --color-text-inactive: #8f91a5;
 }
 

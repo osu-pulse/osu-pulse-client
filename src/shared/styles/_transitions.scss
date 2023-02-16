@@ -1,7 +1,7 @@
 @use 'constants';
 
 @mixin fade(
-  $transition: constants.$trn-slow-out,
+  $transition: constants.$trn-normal-out,
   $name: v,
   $this: true,
   $enter: true,
@@ -33,7 +33,7 @@
 @mixin move(
   $x: 0,
   $y: 0,
-  $transition: constants.$trn-slow-out,
+  $transition: constants.$trn-normal-out,
   $name: v,
   $this: true,
   $enter: true,
@@ -67,7 +67,7 @@
   $x: 1,
   $y: 1,
   $origin: center,
-  $transition: constants.$trn-slow-out,
+  $transition: constants.$trn-normal-out,
   $name: v,
   $this: true,
   $enter: true,
@@ -102,7 +102,7 @@
   $ratio: 1,
   $width: 1,
   $height: 1,
-  $transition: constants.$trn-slow-out,
+  $transition: constants.$trn-normal-out,
   $name: v,
   $this: true,
   $enter: true,

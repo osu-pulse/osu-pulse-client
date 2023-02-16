@@ -1,7 +1,22 @@
 <script lang="ts" setup>
-import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url';
-import type { SideMenuItem } from '~/core/types/side-menu-item';
-import { useUser } from '~/shared/stores/user';
+import {
+  BIconBook,
+  BIconCircleFill,
+  BIconEye,
+  BIconGear,
+  BIconHouse,
+  BIconMusicNoteBeamed,
+  BIconMusicNoteList,
+  BIconPalette,
+  BIconPeople,
+} from 'bootstrap-icons-vue'
+import { computed } from 'vue'
+import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url'
+import type { SideMenuItem } from '@/core/types/side-menu-item'
+import { useUser } from '@/core/stores/user'
+import { useOffline } from '@/core/stores/offline'
+import { RouteName } from '@/shared/constants/route-name'
+import { usePlayer } from '@/core/stores/player'
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -24,14 +39,9 @@ const itemsMusic: SideMenuItem[] = [
     icon: BIconPeople,
     to: { name: RouteName.FRIENDS },
   },
-];
+]
 
 const itemsControl: SideMenuItem[] = [
-  {
-    label: 'Devices',
-    icon: BIconCast,
-    to: { name: RouteName.DEVICES },
-  },
   {
     label: 'Themes',
     icon: BIconPalette,
@@ -42,39 +52,59 @@ const itemsControl: SideMenuItem[] = [
     icon: BIconGear,
     to: { name: RouteName.SETTINGS },
   },
-];
+]
 
-const { user } = useUser();
-const { isOffline } = useOffline();
-const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
-const username = computed(() => user.value?.username ?? 'UNKNOWN');
-const listening = ref<string>('Time Is Ticking Out - TheCranberries');
+const { user } = useUser()
+const { offline } = useOffline()
+const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl)
+const username = computed(() => user.value?.username ?? 'UNKNOWN')
+
+const { playing, track } = usePlayer()
+const listening = computed(
+  () => track.value && `${track.value.title} - ${track.value.artist}`,
+)
+
+function goProfile() {
+  const url = user.value?.url?.profile
+  window.open(url, '_blank')?.focus()
+}
 </script>
 
 <template>
-  <div class="side-component">
+  <div class="side-menu-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
-      <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
+      <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
       <span class="label">Pulse</span>
     </RouterLink>
 
     <div class="user">
-      <img class="avatar" alt="avatar" :src="avatar" />
+      <div class="avatar-wrap">
+        <img class="avatar" alt="avatar" :src="avatar">
+        <div v-if="user" class="overlay" @click="goProfile">
+          <BIconEye class="icon" />
+        </div>
+      </div>
 
       <div class="info">
         <div class="title">
           <BIconCircleFill
             class="status"
-            :class="isOffline ? '_offline' : '_online'"
+            :class="offline ? '_offline' : '_online'"
           />
 
-          <div class="name">{{ username }}</div>
+          <div class="name">
+            {{ username }}
+          </div>
         </div>
 
-        <div v-show="listening" class="listening">
-          <BIconMusicNoteBeamed class="icon" />
-          <span class="text">Time Is Ticking Out - TheCranberries</span>
-        </div>
+        <Transition>
+          <div v-show="listening && playing" class="listening">
+            <BIconMusicNoteBeamed class="icon" />
+            <Transition mode="out-in">
+              <span :key="listening" class="text">{{ listening }}</span>
+            </Transition>
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -89,7 +119,9 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       >
         <div class="section-inner">
           <Component :is="item.icon" class="icon" />
-          <div class="label">{{ item.label }}</div>
+          <div class="label">
+            {{ item.label }}
+          </div>
         </div>
       </RouterLink>
     </div>
@@ -105,7 +137,9 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       >
         <div class="section-inner">
           <Component :is="item.icon" class="icon" />
-          <div class="label">{{ item.label }}</div>
+          <div class="label">
+            {{ item.label }}
+          </div>
         </div>
       </RouterLink>
     </div>
@@ -115,6 +149,7 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 <style lang="scss" scoped>
 @use '../src/shared/styles/mixins';
 @use '../src/shared/styles/constants';
+@use '../src/shared/styles/transitions';
 
 @keyframes heartbeat {
   0% {
@@ -143,14 +178,15 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
   }
 }
 
-.side-menu {
-  width: 330px;
+.side-menu-component {
+  width: 350px;
   overflow: auto;
   padding-top: 20px;
   display: flex;
   flex-direction: column;
   background-color: constants.$clr-background;
   box-shadow: constants.$cmn-shadow-block;
+  transition: constants.$trn-normal-out;
 
   .logo {
     margin: 0 auto 30px;
@@ -182,11 +218,45 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
     display: flex;
     gap: 15px;
 
-    .avatar {
-      @include mixins.size(73px);
-      object-fit: cover;
-      object-position: center;
-      border-radius: constants.$cmn-border-radius;
+    .avatar-wrap {
+      @include mixins.size(70px);
+      flex: none;
+      position: relative;
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+
+      .avatar {
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .overlay {
+        @include mixins.size(fill);
+        position: absolute;
+        display: flex;
+        background: rgba(black, 0.5);
+        opacity: 0;
+        transition: constants.$trn-normal-out;
+        cursor: pointer;
+
+        .icon {
+          margin: auto;
+          font-size: 30px;
+          color: constants.$clr-background;
+          opacity: 0.7;
+          transform: scale(0.5);
+          transition: constants.$trn-normal-out;
+        }
+
+        &:hover {
+          opacity: 1;
+
+          .icon {
+            transform: scale(1);
+          }
+        }
+      }
     }
 
     .info {
@@ -222,14 +292,16 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       }
 
       .listening {
+        @include transitions.fade();
         gap: 5px;
         overflow: hidden;
         display: flex;
         align-items: center;
-        color: constants.$clr-inactive;
+        color: constants.$clr-text-inactive;
         font-size: 14px;
 
         .text {
+          @include transitions.fade();
           flex: auto;
           width: 110px;
           overflow: hidden;
@@ -247,8 +319,8 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
     background: linear-gradient(
       90deg,
       transparent 0%,
-      constants.$clr-inactive 40%,
-      constants.$clr-inactive 60%,
+      constants.$clr-text-inactive 40%,
+      constants.$clr-text-inactive 60%,
       transparent 100%
     );
   }
@@ -261,21 +333,21 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
 
     .section {
       display: flex;
-      overflow: hidden;
 
       .section-inner {
         margin: 0 30px;
         flex: auto;
         padding: 20px;
+        overflow: hidden;
         display: flex;
         align-items: center;
         gap: 20px;
-        border-radius: constants.$cmn-border-radius;
+        border-radius: 10px;
         transition: constants.$trn-normal-out;
 
         .icon,
         .label {
-          color: constants.$clr-inactive;
+          color: constants.$clr-text-inactive;
           transition: constants.$trn-normal-out;
         }
 
@@ -294,28 +366,31 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
       &::after {
         @include mixins.pseudo();
         position: static;
-        width: constants.$cmn-border-radius;
-        border-top-left-radius: constants.$cmn-border-radius;
-        border-bottom-left-radius: constants.$cmn-border-radius;
+        width: 10px;
+        border-radius: 10px 0 0 10px;
         background-color: constants.$clr-primary;
-        transform: translateX(constants.$cmn-border-radius);
+        transform: scaleX(0);
+        transform-origin: right;
         transition: constants.$trn-fast-out;
       }
 
       &:hover {
-        .section-inner {
-          background-color: constants.$clr-secondary;
-          cursor: pointer;
-          transition: constants.$trn-fast-in;
-
-          .icon {
-            transform: scale(1.1);
-          }
-
-          .icon,
-          .label {
-            color: constants.$clr-text;
+        &:not(.router-link-active) {
+          .section-inner {
+            box-shadow: constants.$cmn-shadow-element;
+            transform: scale(1.01);
+            background: constants.$clr-secondary;
             transition: constants.$trn-fast-in;
+
+            .icon,
+            .label {
+              color: constants.$clr-text;
+              transition: constants.$trn-fast-in;
+            }
+
+            .icon {
+              transform: scale(1.1);
+            }
           }
         }
       }
@@ -337,6 +412,78 @@ const listening = ref<string>('Time Is Ticking Out - TheCranberries');
         &::after {
           transform: none;
           transition: constants.$trn-normal-out;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: constants.$bpt-xxl) {
+  .side-menu-component {
+    width: 300px;
+  }
+}
+
+@media (max-width: constants.$bpt-xl) {
+  .side-menu-component {
+    width: 80px;
+
+    .logo {
+      margin-bottom: 20px;
+
+      .icon {
+        margin: auto;
+      }
+
+      .label {
+        display: none;
+      }
+    }
+
+    .user {
+      margin: 0 0 10px;
+
+      .avatar-wrap {
+        @include mixins.size(50px);
+        margin: auto;
+
+        .overlay {
+          .icon {
+            font-size: 20px;
+          }
+        }
+      }
+
+      .info {
+        display: none;
+      }
+    }
+
+    .divider {
+      margin: 10px 20px;
+    }
+
+    .sections-list {
+      .section {
+        .section-inner {
+          margin: 0 15px;
+          padding: 15px;
+
+          .label {
+            display: none;
+          }
+        }
+
+        &::after {
+          display: none;
+        }
+
+        &:hover {
+          &:not(.router-link-active) {
+            .section-inner {
+              transform: scale(1.05);
+            }
+          }
         }
       }
     }
