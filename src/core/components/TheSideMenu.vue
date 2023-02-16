@@ -1,7 +1,22 @@
 <script lang="ts" setup>
-import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url';
-import type { SideMenuItem } from '~/core/types/side-menu-item';
-import { useUser } from '~/shared/stores/user';
+import {
+  BIconBook,
+  BIconCircleFill,
+  BIconEye,
+  BIconGear,
+  BIconHouse,
+  BIconMusicNoteBeamed,
+  BIconMusicNoteList,
+  BIconPalette,
+  BIconPeople,
+} from 'bootstrap-icons-vue'
+import { computed } from 'vue'
+import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url'
+import type { SideMenuItem } from '@/core/types/side-menu-item'
+import { useUser } from '@/core/stores/user'
+import { useOffline } from '@/core/stores/offline'
+import { RouteName } from '@/shared/constants/route-name'
+import { usePlayer } from '@/core/stores/player'
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -24,7 +39,7 @@ const itemsMusic: SideMenuItem[] = [
     icon: BIconPeople,
     to: { name: RouteName.FRIENDS },
   },
-];
+]
 
 const itemsControl: SideMenuItem[] = [
   {
@@ -37,34 +52,34 @@ const itemsControl: SideMenuItem[] = [
     icon: BIconGear,
     to: { name: RouteName.SETTINGS },
   },
-];
+]
 
-const { user } = useUser();
-const { offline } = useOffline();
-const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl);
-const username = computed(() => user.value?.username ?? 'UNKNOWN');
+const { user } = useUser()
+const { offline } = useOffline()
+const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl)
+const username = computed(() => user.value?.username ?? 'UNKNOWN')
 
-const { playing, track } = usePlayer();
+const { playing, track } = usePlayer()
 const listening = computed(
   () => track.value && `${track.value.title} - ${track.value.artist}`,
-);
+)
 
 function goProfile() {
-  const url = user.value?.url?.profile;
-  window.open(url, '_blank')?.focus();
+  const url = user.value?.url?.profile
+  window.open(url, '_blank')?.focus()
 }
 </script>
 
 <template>
   <div class="side-menu-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
-      <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
+      <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
       <span class="label">Pulse</span>
     </RouterLink>
 
     <div class="user">
       <div class="avatar-wrap">
-        <img class="avatar" alt="avatar" :src="avatar" />
+        <img class="avatar" alt="avatar" :src="avatar">
         <div v-if="user" class="overlay" @click="goProfile">
           <BIconEye class="icon" />
         </div>
@@ -77,7 +92,9 @@ function goProfile() {
             :class="offline ? '_offline' : '_online'"
           />
 
-          <div class="name">{{ username }}</div>
+          <div class="name">
+            {{ username }}
+          </div>
         </div>
 
         <Transition>
@@ -102,7 +119,9 @@ function goProfile() {
       >
         <div class="section-inner">
           <Component :is="item.icon" class="icon" />
-          <div class="label">{{ item.label }}</div>
+          <div class="label">
+            {{ item.label }}
+          </div>
         </div>
       </RouterLink>
     </div>
@@ -118,7 +137,9 @@ function goProfile() {
       >
         <div class="section-inner">
           <Component :is="item.icon" class="icon" />
-          <div class="label">{{ item.label }}</div>
+          <div class="label">
+            {{ item.label }}
+          </div>
         </div>
       </RouterLink>
     </div>
@@ -276,7 +297,7 @@ function goProfile() {
         overflow: hidden;
         display: flex;
         align-items: center;
-        color: constants.$clr-inactive;
+        color: constants.$clr-text-inactive;
         font-size: 14px;
 
         .text {
@@ -298,8 +319,8 @@ function goProfile() {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      constants.$clr-inactive 40%,
-      constants.$clr-inactive 60%,
+      constants.$clr-text-inactive 40%,
+      constants.$clr-text-inactive 60%,
       transparent 100%
     );
   }
@@ -326,7 +347,7 @@ function goProfile() {
 
         .icon,
         .label {
-          color: constants.$clr-inactive;
+          color: constants.$clr-text-inactive;
           transition: constants.$trn-normal-out;
         }
 

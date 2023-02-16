@@ -1,6 +1,11 @@
-import type { Ref } from 'vue';
-import type { TracksWithCursor } from '~/shared/dto/tracks-with-cursor';
-import type { Track } from '~/shared/dto/track';
+import type { Ref } from 'vue'
+import { createGlobalState } from '@vueuse/core'
+import { useMutation, useQuery } from '@vue/apollo-composable'
+import gql from 'graphql-tag'
+import type { TracksWithCursor } from '@/shared/dto/tracks-with-cursor'
+import type { Track } from '@/shared/dto/track'
+import { TRACKS_WITH_CURSOR } from '@/shared/dto/tracks-with-cursor'
+import { TRACK } from '@/shared/dto/track'
 
 export const useTracksService = createGlobalState(() => ({
   tracks: (
@@ -54,4 +59,16 @@ export const useTracksService = createGlobalState(() => ({
         ${TRACK}
       `,
     ),
-}));
+
+  cancelCacheTrack: () =>
+    useMutation<{ cancelCacheTrack: Track }, { trackId: string }>(
+      gql`
+        mutation cancelCacheTrack($trackId: String!) {
+          cancelCacheTrack(trackId: $trackId) {
+            ...Track
+          }
+        }
+        ${TRACK}
+      `,
+    ),
+}))

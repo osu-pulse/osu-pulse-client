@@ -1,5 +1,8 @@
-import type { User } from '~/shared/dto/user';
-import { USER } from '~/shared/dto/user';
+import { createGlobalState } from '@vueuse/core'
+import gql from 'graphql-tag'
+import { useQuery } from '@vue/apollo-composable'
+import { USER } from '@/shared/dto/user'
+import type { User } from '@/shared/dto/user'
 
 export const useUsersService = createGlobalState(() => ({
   me: () =>
@@ -13,4 +16,4 @@ export const useUsersService = createGlobalState(() => ({
         ${USER}
       `,
     ),
-}));
+}))

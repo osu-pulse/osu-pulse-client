@@ -1,7 +1,9 @@
+import gql from 'graphql-tag'
+
 export interface UserUrl {
-  profile: string;
-  avatar: string;
-  cover: string;
+  profile: string
+  avatar: string
+  cover: string
 }
 
 export const USER_URL = gql`
@@ -10,4 +12,4 @@ export const USER_URL = gql`
     avatar
     cover
   }
-`;
+`

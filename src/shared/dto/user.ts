@@ -1,10 +1,11 @@
-import type { UserUrl } from '~/shared/dto/user-url';
-import { USER_URL } from '~/shared/dto/user-url';
+import gql from 'graphql-tag'
+import type { UserUrl } from '@/shared/dto/user-url'
+import { USER_URL } from '@/shared/dto/user-url'
 
 export interface User {
-  id: string;
-  username: string;
-  url: UserUrl;
+  id: string
+  username: string
+  url: UserUrl
 }
 
 export const USER = gql`
@@ -16,4 +17,4 @@ export const USER = gql`
     }
   }
   ${USER_URL}
-`;
+`

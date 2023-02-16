@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue';
+import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue'
 </script>
 
 <template>
   <div class="intro-loader-component">
-    <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
+    <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
 
     <ScaleLoader margin="4px" color="#fa94b2" />
   </div>

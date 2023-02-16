@@ -8,6 +8,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  color: constants.$clr-text;
+}
+
 body, p {
   margin: 0;
 }

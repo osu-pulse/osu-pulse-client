@@ -1,22 +1,33 @@
 <script lang="ts" setup>
-import { usePlayer } from '~/player/stores/player';
-import { useQueue } from '~/shared/stores/queue';
+import { watch } from 'vue'
+import { tryOnMounted } from '@vueuse/core'
+import { usePlayer } from '@/core/stores/player'
+import { useQueue } from '@/core/stores/queue'
+import { Platform, platform } from '@/shared/constants/platform'
+import TheTitleBar from '@/core/components/TheTitleBar.vue'
+import TheSideMenu from '@/core/components/TheSideMenu.vue'
+import ThePlayer from '@/core/components/ThePlayer.vue'
+import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
+import TheQueue from '@/core/components/TheQueue.vue'
+import { useAuthentication } from '@/auth/stores/authentication'
 
-const { authenticated } = useAuthentication();
-const { loading, offline } = useOffline();
-const ready = computed(
-  () => !loading.value && (offline.value || authenticated.value),
-);
+const { isPending } = useAuthentication()
 
-const { track } = usePlayer();
-const { queue } = useQueue();
-let a = true;
+const { track } = usePlayer()
+const { queue } = useQueue()
+let a = true
 watch(queue, () => {
   if (queue.value.length > 0 && a) {
-    a = false;
-    return (track.value = queue.value[0]);
+    a = false
+    return (track.value = queue.value[0])
   }
-});
+})
+
+tryOnMounted(() => {
+  console.clear()
+  console.log('This app in the development state')
+  console.log('GitHub organization: https://github.com/osu-pulse')
+})
 </script>
 
 <template>
@@ -26,7 +37,9 @@ watch(queue, () => {
     <div class="window">
       <RouterView v-slot="{ Component }">
         <Transition mode="out-in">
-          <div v-if="ready" class="body">
+          <TheIntroLoader v-if="isPending" class="loader" />
+
+          <div v-else class="body">
             <TheSideMenu class="side-menu" />
 
             <main class="main-section">
@@ -36,13 +49,11 @@ watch(queue, () => {
                 </Transition>
               </div>
 
-              <ThePlayer class="player"></ThePlayer>
+              <ThePlayer class="player" />
             </main>
 
-            <TheQueue class="queue"></TheQueue>
+            <TheQueue class="queue" />
           </div>
-
-          <TheIntroLoader v-else class="loader" />
         </Transition>
       </RouterView>
     </div>
@@ -106,6 +117,8 @@ watch(queue, () => {
 
           .page {
             @include transitions.fade();
+            position: relative;
+            display: flex;
           }
         }
 
@@ -131,6 +144,7 @@ watch(queue, () => {
   --color-primary: #000000;
   --color-secondary: #f4f5fe;
   --color-background: #ffffff;
+  --color-text: #000000;
   --color-text-inactive: #8f91a5;
 }
 

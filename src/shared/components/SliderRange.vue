@@ -1,46 +1,48 @@
 <script lang="ts" setup>
+import { ref, shallowRef, watch } from 'vue'
+import { useMouse, useMousePressed, useVModel, whenever } from '@vueuse/core'
+
 const props = withDefaults(
   defineProps<{
-    value: number;
-    buffer?: number;
-    wide?: boolean;
+    value: number
+    buffer?: number
+    wide?: boolean
   }>(),
   {
     wide: false,
   },
-);
+)
 
 const emits = defineEmits<{
-  (e: 'update:value', value: number): void;
-  (e: 'changeStart'): void;
-  (e: 'changeEnd'): void;
-}>();
+  (e: 'update:value', value: number): void
+  (e: 'changeStart'): void
+  (e: 'changeEnd'): void
+}>()
 
-const value = useVModel(props, 'value', emits);
+const value = useVModel(props, 'value', emits)
 
-const changing = ref(false);
-watch(changing, (value) => (value ? emits('changeStart') : emits('changeEnd')));
-const { pressed } = useMousePressed();
+const changing = ref(false)
+watch(changing, value => (value ? emits('changeStart') : emits('changeEnd')))
+const { pressed } = useMousePressed()
 whenever(
   () => !pressed.value,
   () => (changing.value = false),
-);
+)
 
-const trackRef = shallowRef<HTMLDivElement>();
-const { x } = useMouse();
+const trackRef = shallowRef<HTMLDivElement>()
+const { x } = useMouse()
 function change() {
   if (trackRef.value) {
-    const { left, right } = trackRef.value.getBoundingClientRect();
-    const newValue = (x.value - left) / (right - left);
-    value.value = Math.max(0, Math.min(1, newValue));
+    const { left, right } = trackRef.value.getBoundingClientRect()
+    const newValue = (x.value - left) / (right - left)
+    value.value = Math.max(0, Math.min(1, newValue))
   }
 }
 watch(x, () => {
-  if (changing.value) {
-    change();
-  }
-});
-whenever(changing, change);
+  if (changing.value)
+    change()
+})
+whenever(changing, change)
 </script>
 
 <template>
@@ -66,9 +68,9 @@ whenever(changing, change);
 
 <style lang="scss" scoped>
 @use 'sass:math';
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .range-component {
   position: relative;
@@ -82,7 +84,7 @@ whenever(changing, change);
     position: relative;
     height: 6px;
     overflow: hidden;
-    background: constants.$clr-inactive;
+    background: constants.$clr-text-inactive;
     border-radius: 10px;
     transform: scaleY(0.5);
     transition: constants.$trn-normal-out;
@@ -97,7 +99,7 @@ whenever(changing, change);
 
     &::before {
       width: var(--buffer);
-      opacity: 0.3;
+      opacity: 0.2;
     }
 
     &::after {

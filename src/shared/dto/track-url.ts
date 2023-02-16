@@ -1,7 +1,9 @@
+import gql from 'graphql-tag'
+
 export interface TrackUrl {
-  audio: string;
-  file: string;
-  page: string;
+  audio: string
+  file: string
+  page: string
 }
 
 export const TRACK_URL = gql`
@@ -10,4 +12,4 @@ export const TRACK_URL = gql`
     file
     page
   }
-`;
+`

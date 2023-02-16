@@ -1,27 +1,32 @@
 <script lang="ts" setup>
-const isMaximized = ref(false);
+import { BIconArrowsAngleContract, BIconArrowsAngleExpand, BIconCaretDown, BIconXLg } from 'bootstrap-icons-vue'
+import { ref } from 'vue'
+
+const isMaximized = ref(false)
 
 function handleMinimize() {
-  window.electron.minimize();
+  window.electron.minimize()
 }
 
 function handleMaximize() {
-  window.electron.maximize();
-  isMaximized.value = true;
+  window.electron.maximize()
+  isMaximized.value = true
 }
 function handleUnmaximize() {
-  window.electron.unmaximize();
-  isMaximized.value = false;
+  window.electron.unmaximize()
+  isMaximized.value = false
 }
 
 function handleClose() {
-  window.electron.close();
+  window.electron.close()
 }
 </script>
 
 <template>
   <div class="title-bar-component">
-    <div class="title">osu</div>
+    <div class="title">
+      osu
+    </div>
 
     <div class="controls">
       <button class="button" @click="handleMinimize">

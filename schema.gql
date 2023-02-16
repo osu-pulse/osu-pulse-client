@@ -30,6 +30,7 @@ type Mutation {
     addMyTrack(trackId: String!): TrackObject!
     addPlaylistTrack(playlistId: String!, trackId: String!): TrackObject!
     cacheTrack(trackId: String!): TrackObject!
+    cancelCacheTrack(trackId: String!): TrackObject!
     copyPlaylist(playlistId: String!): PlaylistObject!
     createMyPlaylist(payload: CreatePlaylistInput!): PlaylistObject!
     deleteMyPlaylist(playlistId: String!): PlaylistObject!
@@ -70,13 +71,13 @@ type Subscription {
 type TrackCoverObject {
     normal: String!
     small: String!
+    wide: String!
 }
 
 type TrackObject {
     artist: String!
     cover: TrackCoverObject!
     id: ID!
-    length: Float!
     liked: Float!
     played: Float!
     title: String!

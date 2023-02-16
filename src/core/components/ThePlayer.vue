@@ -1,10 +1,28 @@
 <script lang="ts" setup>
-import { breakpointsTailwind } from '@vueuse/core';
-import ColorThief from 'color-thief-ts';
-import Loader from '~/player/assets/loader.svg?component';
-import { usePlayer } from '~/player/stores/player';
-import SliderRange from '~/player/components/SliderRange.vue';
-import { useQueue } from '~/shared/stores/queue';
+import MoonLoader from 'vue-spinner/src/MoonLoader.vue'
+import {
+  breakpointsTailwind,
+  useBreakpoints,
+  whenever,
+} from '@vueuse/core'
+import { computed, customRef, ref, shallowRef, watch } from 'vue'
+import {
+  BIconArrowRepeat,
+  BIconPauseFill,
+  BIconPlayFill,
+  BIconShuffle,
+  BIconSkipEndFill,
+  BIconSkipStartFill,
+  BIconThreeDotsVertical,
+  BIconVolumeMute,
+  BIconVolumeUp,
+} from 'bootstrap-icons-vue'
+import SliderRange from '@/shared/components/SliderRange.vue'
+import { usePlayer } from '@/core/stores/player'
+import { useQueue } from '@/core/stores/queue'
+import { randomArrayElement } from '@/shared/utils/random'
+import { getAccent } from '@/core/utils/color'
+import { useColors } from '@/core/stores/colors'
 
 const {
   track,
@@ -16,104 +34,122 @@ const {
   duration,
   ended,
   buffer,
-} = usePlayer();
+} = usePlayer()
 
-const { greater } = useBreakpoints(breakpointsTailwind);
+const { greater } = useBreakpoints(breakpointsTailwind)
 const coverSrc = computed(() =>
   greater('lg').value ? track.value?.cover?.normal : track.value?.cover?.wide,
-);
-const coverLoaded = ref(false);
-watch(coverSrc, () => (coverLoaded.value = false));
+)
+const coverLoaded = ref(false)
+watch(coverSrc, () => (coverLoaded.value = false))
+
+const coverRef = shallowRef<HTMLImageElement>()
+const { primary, background } = useColors()
+const accentColor = computed(() => {
+  return (coverRef.value && coverLoaded.value)
+    ? getAccent(coverRef.value, background.value)
+    : primary.value
+})
 
 const volumeIcon = computed(() =>
   muted.value ? BIconVolumeMute : BIconVolumeUp,
-);
+)
+
+const volumeGain = ref(2)
+// TODO: Remove
+window.changeVolumeGain = (value: number) => (volumeGain.value = value)
+const volumeScaled = customRef(() => ({
+  get: () => volume.value ** (1 / volumeGain.value),
+  set: value => (volume.value = value ** volumeGain.value),
+}))
 
 const playBtnIcon = computed(() =>
   playing.value ? BIconPauseFill : BIconPlayFill,
-);
+)
 
 interface TimeSplit {
-  h: string;
-  m: string;
+  h: string
+  m: string
 }
 
 const progressSplit = computed<TimeSplit>(() => ({
   h: Math.floor(progress.value / 60).toString(),
   m: `0${Math.floor(progress.value % 60)}`.slice(-2),
-}));
+}))
 
 const durationSplit = computed<TimeSplit>(() => ({
   h: Math.floor(duration.value / 60).toString(),
   m: `0${Math.floor(duration.value % 60)}`.slice(-2),
-}));
+}))
 
 const progressScaled = customRef(() => ({
-  get: () => (duration.value > 0 ? progress.value / duration.value : 0),
-  set: (value) => (progress.value = duration.value * value),
-}));
-const wasPlaying = ref(false);
+  get: () => duration.value > 0 ? progress.value / duration.value : 0,
+  set: value => progress.value = duration.value * value,
+}))
+
+const progressChanging = ref(false)
+const wasPlaying = ref(false)
 function handleProgressChangeStart() {
-  wasPlaying.value = playing.value;
-  playing.value = false;
+  wasPlaying.value = playing.value
+  playing.value = false
+  progressChanging.value = true
 }
 function handleProgressChangeEnd() {
-  playing.value = wasPlaying.value;
-  wasPlaying.value = false;
+  playing.value = wasPlaying.value
+  wasPlaying.value = false
+  progressChanging.value = false
 }
 
 const bufferScaled = computed(() =>
   duration.value > 0 ? buffer.value / duration.value : 0,
-);
+)
 
-const { queue } = useQueue();
-const repeating = ref(false);
-const shuffling = ref(false);
+const { queue } = useQueue()
+const repeating = ref(false)
+const shuffling = ref(false)
 
-whenever(ended, () => {
-  if (repeating.value) {
-    progress.value = 0;
-    playing.value = true;
-  } else {
-    next();
-  }
-});
+whenever(
+  () => ended.value && playing.value && !progressChanging.value,
+  () => repeating.value ? progress.value = 0 : next(),
+)
 
 const hasPrev = computed(() => {
   if (shuffling.value) {
-    return true;
-  } else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id);
-    return index > -1 && queue.value[index - 1];
+    return true
   }
-});
+  else {
+    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
+    return index > -1 && queue.value[index - 1]
+  }
+})
 const hasNext = computed(() => {
   if (shuffling.value) {
-    return true;
-  } else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id);
-    return index > -1 && queue.value[index + 1];
+    return true
   }
-});
+  else {
+    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
+    return index > -1 && queue.value[index + 1]
+  }
+})
 
 function next() {
   if (shuffling.value) {
-    track.value = randomArrayElement(queue.value);
-  } else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id);
-    if (index > -1) {
-      track.value = queue.value[index + 1];
-    }
+    track.value = randomArrayElement(queue.value)
+  }
+  else {
+    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
+    if (index > -1)
+      track.value = queue.value[index + 1]
   }
 }
 function prev() {
   if (shuffling.value) {
-    track.value = randomArrayElement(queue.value);
-  } else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id);
-    if (index > -1) {
-      track.value = queue.value[index - 1];
-    }
+    track.value = randomArrayElement(queue.value)
+  }
+  else {
+    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
+    if (index > -1)
+      track.value = queue.value[index - 1]
   }
 }
 </script>
@@ -126,12 +162,15 @@ function prev() {
           <img
             v-if="coverSrc"
             v-show="coverLoaded"
+            ref="coverRef"
             :key="coverSrc"
             class="image"
+            crossorigin="anonymous"
             :src="coverSrc"
             alt="cover"
             @load="coverLoaded = true"
-        /></Transition>
+          >
+        </Transition>
       </div>
 
       <div class="meta">
@@ -155,13 +194,16 @@ function prev() {
           </button>
 
           <SliderRange
-            v-model:value="volume"
+            v-model:value="volumeScaled"
             :class="{ _collapsed: muted }"
             class="range"
           />
         </div>
 
-        <div class="main">
+        <div
+          class="main"
+          :style="{ '--color': accentColor }"
+        >
           <button
             class="button backward"
             :class="{ _disabled: !hasPrev }"
@@ -176,7 +218,12 @@ function prev() {
             @click="playing = !playing"
           >
             <Transition mode="out-in">
-              <Loader v-if="caching" class="icon loader" />
+              <MoonLoader
+                v-if="caching"
+                size="30px"
+                color="white"
+                class="icon loader"
+              />
               <Component :is="playBtnIcon" v-else class="icon play" />
             </Transition>
           </button>
@@ -212,9 +259,10 @@ function prev() {
           </button>
         </div>
       </div>
-
       <div class="timeline">
-        <div class="time">{{ progressSplit.h }}:{{ progressSplit.m }}</div>
+        <div class="time">
+          {{ progressSplit.h }}:{{ progressSplit.m }}
+        </div>
         <SliderRange
           v-model:value="progressScaled"
           :buffer="bufferScaled"
@@ -223,7 +271,9 @@ function prev() {
           @change-start="handleProgressChangeStart"
           @change-end="handleProgressChangeEnd"
         />
-        <div class="time">{{ durationSplit.h }}:{{ durationSplit.m }}</div>
+        <div class="time">
+          {{ durationSplit.h }}:{{ durationSplit.m }}
+        </div>
       </div>
     </div>
   </div>
@@ -360,7 +410,7 @@ function prev() {
 
           .icon {
             @include transitions.fade();
-            color: constants.$clr-inactive;
+            color: constants.$clr-text-inactive;
             font-size: 20px;
             transform: translateY(2px);
             transition: constants.$trn-normal-out;
@@ -397,11 +447,11 @@ function prev() {
       }
 
       .main {
+        --color: constants.$clr-primary;
         padding-top: 10px;
         display: flex;
         align-items: center;
         gap: 10px;
-        color: constants.$clr-primary;
 
         .button {
           cursor: pointer;
@@ -419,7 +469,14 @@ function prev() {
 
           &.backward,
           &.forward {
+            &._disabled {
+              opacity: 0;
+              transform: scale(0.8);
+              pointer-events: none;
+            }
+
             .icon {
+              color: var(--color);
               font-size: 30px;
               transition: constants.$trn-fast-out;
             }
@@ -440,7 +497,7 @@ function prev() {
           &.play {
             @include mixins.size(40px);
             display: flex;
-            background: constants.$clr-primary;
+            background: var(--color);
             border-radius: 100%;
 
             &:hover {
@@ -457,12 +514,6 @@ function prev() {
               margin: auto;
               font-size: 26px;
               color: constants.$clr-background;
-
-              &.loader {
-                stroke: white;
-                stroke-width: 4;
-                width: 30px;
-              }
             }
           }
         }
@@ -480,7 +531,7 @@ function prev() {
 
           .icon {
             @include transitions.fade();
-            color: constants.$clr-inactive;
+            color: constants.$clr-text-inactive;
             font-size: 20px;
             transform: translateY(2px);
             transition: constants.$trn-normal-out;
@@ -522,7 +573,6 @@ function prev() {
 
       .time {
         width: 40px;
-        color: constants.$clr-primary;
         font-size: 15px;
         text-align: center;
       }

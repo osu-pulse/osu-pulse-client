@@ -3,8 +3,6 @@
 /node_modules
 /electron/*.js
 /s3
-/src/auto-imports.d.ts
-/src/components.d.ts
 
 # Environment
 /.env*.local
