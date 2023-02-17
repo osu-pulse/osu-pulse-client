@@ -5245,6 +5245,11 @@ yaml@^2.0.0:
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.2.1.tgz#3014bf0482dcd15147aa8e56109ce8632cd60ce4"
   integrity sha512-e0WHiYql7+9wr4cWMx3TVQrNwejKaEe7/rHNmQmqRjazfOP5W8PB6Jpebb5o6fIapbz9o9+2ipcaTM2ZwDI6lw==
 
+yandex-metrika-vue3@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/yandex-metrika-vue3/-/yandex-metrika-vue3-1.1.6.tgz#c981a60aee8484ebd16b928350dc1fde48678c2b"
+  integrity sha512-aSHnfvYUD1zLpTIbOopt0cP4BqAXJyN/WyPf4N3SDm6cVJQzmJf/WULUYBQbj6RXDvCMeZN6t7zESdeNNRoMaA==
+
 yargs-parser@^20.2.2, yargs-parser@^20.2.9:
   version "20.2.9"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.9.tgz#2eb7dc3b0289718fc295f362753845c41a0c94ee"

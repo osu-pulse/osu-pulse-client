@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { provideApolloClient } from '@vue/apollo-composable'
 import { createApp } from 'vue'
+import { initYandexMetrika } from 'yandex-metrika-vue3'
 import App from '@/App.vue'
 import { friendsRoute } from '@/friends/router'
 import { homeRoute } from '@/home/router'
@@ -11,6 +12,7 @@ import { RouteName } from '@/shared/constants/route-name'
 import { playlistsRoute } from '@/playlists/router'
 import { libraryRoute } from '@/library/router'
 import { themesRoute } from '@/themes/router'
+import { metrikaId } from '@/core/constants/metrika'
 
 provideApolloClient(apolloClient)
 
@@ -30,5 +32,12 @@ const router = createRouter({
   ],
 })
 app.use(router)
+
+app.use(initYandexMetrika, {
+  id: metrikaId,
+  router,
+  env: import.meta.env.MODE,
+  scriptSrc: 'https://mc.yandex.ru/metrika/tag.js',
+})
 
 app.mount('#app')
