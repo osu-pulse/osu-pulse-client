@@ -30,10 +30,10 @@
     "jwt-decode": "^3.1.2",
     "react": "^18.2.0",
     "socket.io-client": "^4.5.4",
+    "typescript-yandex-metrica": "^1.0.1",
     "vue": "^3.2.37",
     "vue-router": "^4.0.16",
-    "vue-spinner": "^1.0.4",
-    "yandex-metrika-vue3": "^1.1.6"
+    "vue-spinner": "^1.0.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.35.2",

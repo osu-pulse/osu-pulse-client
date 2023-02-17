@@ -10,6 +10,9 @@ import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
 import TheQueue from '@/core/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
+import { useMetrika } from '@/core/stores/metrika'
+
+useMetrika()
 
 const { authenticated } = useAuthentication()
 const { loading } = useOffline()
