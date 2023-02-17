@@ -36,7 +36,7 @@ app.use(router)
 app.use(initYandexMetrika, {
   id: metrikaId,
   router,
-  env: 'production',
+  env: import.meta.env.MODE,
   scriptSrc: 'https://mc.yandex.ru/metrika/tag.js',
 })
 
