@@ -1,17 +1,16 @@
 import Axios from 'axios'
-import { API_URL, AUTH_URL } from '@/shared/constants/url-config'
 import { useAuthentication } from '@/auth/stores/authentication'
 
 export const axiosBase = Axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
 })
 
 export const axiosAuth = Axios.create({
-  baseURL: AUTH_URL,
+  baseURL: import.meta.env.VITE_AUTH_URL,
 })
 
 export const axiosApi = Axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
 })
 
 axiosApi.interceptors.request.use(async (request) => {

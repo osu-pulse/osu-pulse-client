@@ -9,7 +9,6 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthenticationService } from '@/auth/services/authentication'
 import type { JwtPayload } from '@/auth/types/jwt-payload'
-import { AUTH_URL } from '@/shared/constants/url-config'
 import { useOffline } from '@/core/stores/offline'
 import { serializer } from '@/shared/utils/serializer'
 import { omit } from '@/shared/utils/object'
@@ -43,7 +42,7 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   function redirect() {
-    window.location.href = `${AUTH_URL}/authorize`
+    window.location.href = `${import.meta.env.VITE_AUTH_URL}/authorize`
   }
 
   function schedule() {

@@ -11,10 +11,9 @@ import { onError } from '@apollo/client/link/error'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import { useAuthentication } from '@/auth/stores/authentication'
-import { GQL_URL, GQL_WS_URL } from '@/shared/constants/url-config'
 
 const httpLink = new HttpLink({
-  uri: GQL_URL,
+  uri: import.meta.env.VITE_GQL_URL,
   fetch: async (uri, options) => {
     const { getToken } = useAuthentication()
 
@@ -31,7 +30,7 @@ const httpLink = new HttpLink({
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: GQL_WS_URL,
+    url: import.meta.env.VITE_GQL_URL.replace(/^http/, 'ws'),
     connectionParams: async () => {
       const { getToken } = useAuthentication()
 
