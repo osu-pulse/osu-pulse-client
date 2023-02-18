@@ -4,33 +4,18 @@ import { BrowserWindow, Menu, Tray, app, ipcMain, nativeTheme } from 'electron'
 let window: BrowserWindow
 let tray: Tray
 
-const ROOT = app.isPackaged
-  ? process.resourcesPath
-  : path.resolve(__dirname, '..')
+const ROOT = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, '..')
 
 function createTray() {
   const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
-  tray = new Tray(
-    path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`),
-  )
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: 'Show', click: () => window.show() },
-      { label: 'Quit', click: () => app.quit() },
-    ]),
-  )
+  tray = new Tray(path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`))
 
   nativeTheme.on('updated', () => {
     const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
-    tray.setImage(
-      path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`),
-    )
+    tray.setImage(path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`))
   })
 
-  tray.on('click', () => {
-    if (!window.isVisible())
-      window.show()
-  })
+  tray.on('click', () => window.isVisible() ? window.hide(): window.show())
 
   window.on('minimize', () => window.hide())
   window.on('close', () => tray?.destroy())
