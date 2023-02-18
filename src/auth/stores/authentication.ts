@@ -75,28 +75,33 @@ export const useAuthentication = createSharedComposable(() => {
   })
   const authenticated = computed(() => refreshToken.value || isUrlClaimable.value)
 
-  async function claimUrl() {
+  async function cleanUrl() {
+    await router.replace({
+      query: omit(route.query, ['access_token', 'refresh_token']),
+    })
+  }
+  function claimUrl() {
     const params = new URLSearchParams(window.location.search)
 
     accessToken.value = params.get('access_token') as string
     refreshToken.value = params.get('refresh_token') as string
-
-    await router.replace({
-      query: omit(route.query, ['access_token', 'refresh_token']),
-    })
-
     isUrlClaimable.value = false
 
     schedule()
   }
 
   async function login(): Promise<void> {
-    if (refreshToken.value)
+    if (refreshToken.value) {
       await rotate()
-    else if (isUrlClaimable.value)
-      await claimUrl()
-    else
+      await cleanUrl()
+    }
+    else if (isUrlClaimable.value) {
+      claimUrl()
+      await cleanUrl()
+    }
+    else {
       redirect()
+    }
   }
   const { offline } = useOffline()
   whenever(() => !offline.value, login)
