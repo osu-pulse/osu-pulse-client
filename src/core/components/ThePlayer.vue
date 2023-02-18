@@ -42,14 +42,21 @@ const coverSrc = computed(() =>
 )
 const coverLoaded = ref(false)
 watch(coverSrc, () => (coverLoaded.value = false))
+function handleLoad(src: string) {
+  coverLoaded.value = src === coverSrc.value
+}
 
 const coverRef = shallowRef<HTMLImageElement>()
 const { primary, background } = useColors()
-const accentColor = computed(() => {
-  return (coverRef.value && coverLoaded.value)
-    ? getAccent(coverRef.value, background.value)
-    : primary.value
-})
+const accentColor = ref(primary.value)
+watch(
+  [coverRef, coverSrc, coverLoaded],
+  ([coverRef, coverSrc, coverLoaded]) => {
+    accentColor.value = (coverRef && coverSrc && coverLoaded)
+      ? getAccent(coverRef, background.value)
+      : primary.value
+  },
+)
 
 const volumeIcon = computed(() =>
   muted.value ? BIconVolumeMute : BIconVolumeUp,
@@ -168,7 +175,7 @@ function prev() {
             crossorigin="anonymous"
             :src="coverSrc"
             alt="cover"
-            @load="coverLoaded = true"
+            @load="handleLoad($event.target.src)"
           >
         </Transition>
       </div>
@@ -458,8 +465,7 @@ function prev() {
           transition: constants.$trn-normal-out;
 
           &._disabled {
-            opacity: 0.7;
-            pointer-events: none;
+            opacity: 0.5;
           }
 
           &:hover {
@@ -470,8 +476,6 @@ function prev() {
           &.backward,
           &.forward {
             &._disabled {
-              opacity: 0;
-              transform: scale(0.8);
               pointer-events: none;
             }
 

@@ -6,6 +6,7 @@ const colorThief = new ColorThief()
 
 export function getAccent(image: HTMLImageElement, background: string): string {
   const contrast = Color(background)
+
   const accent = Color(colorThief.getColor(image, { colorType: 'hex' }))
 
   const delta = accent.contrast(contrast) / 21

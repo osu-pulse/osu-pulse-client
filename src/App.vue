@@ -10,7 +10,7 @@ import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
 import TheQueue from '@/core/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
-import { useMetrika } from '@/core/stores/metrika'
+import { useMetrika } from '@/core/hooks/metrika'
 
 useMetrika()
 
