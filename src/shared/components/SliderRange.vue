@@ -84,7 +84,7 @@ whenever(changing, change)
     position: relative;
     height: 6px;
     overflow: hidden;
-    background: constants.$clr-text-inactive;
+    background: rgb(constants.$clr-text-inactive);
     border-radius: 10px;
     transform: scaleY(0.5);
     transition: constants.$trn-normal-out;
@@ -93,7 +93,7 @@ whenever(changing, change)
     &::before,
     &::after {
       @include mixins.pseudo();
-      background: constants.$clr-primary;
+      background: rgb(constants.$clr-primary);
       transition: constants.$trn-normal-out;
     }
 
@@ -114,7 +114,7 @@ whenever(changing, change)
     position: absolute;
     display: flex;
     left: calc(var(--offset) - #{$size});
-    background: constants.$clr-primary;
+    background: rgb(constants.$clr-primary);
     border-radius: $size;
     transform: scale(0);
     transition: constants.$trn-normal-out;
@@ -127,7 +127,7 @@ whenever(changing, change)
 
     &::after {
       @include mixins.pseudo();
-      background: constants.$clr-background;
+      background: rgb(constants.$clr-background);
       border-radius: $size;
       transform: scale(0);
       opacity: 0;

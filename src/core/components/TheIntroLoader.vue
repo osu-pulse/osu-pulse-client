@@ -6,23 +6,18 @@ import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue'
   <div class="intro-loader-component">
     <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
 
-    <ScaleLoader margin="4px" color="#fa94b2" />
+    <ScaleLoader margin="4px" color="var(--color-osu)" />
   </div>
 </template>
 
 <style scoped lang="scss">
-@use 'src/shared/styles/constants';
-
 .intro-loader-component {
+  --color-osu: #FA94B2;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 30px;
-  background: radial-gradient(
-    circle,
-    #{constants.$clr-background} 50%,
-    #{constants.$clr-osu} 150%
-  );
+  background: radial-gradient(circle, white 50%, var(--color-osu) 100%);
 }
 </style>

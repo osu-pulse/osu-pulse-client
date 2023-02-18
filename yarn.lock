@@ -752,6 +752,11 @@
     ts-essentials "^9.1.2"
     vue-demi "^0.13.1"
 
+"@vue/apollo-util@^4.0.0-alpha.18":
+  version "4.0.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@vue/apollo-util/-/apollo-util-4.0.0-alpha.18.tgz#00fe7f5c3e461ed86617c406f5a1c653c0f613f1"
+  integrity sha512-mA22fthOANRC3xPhlKvZq343Ka+tPLLZpWklbtLN38Px8UO8YUiRUshpBYiwQ5JFMxWICUYWQBrpIfBcl7+4FQ==
+
 "@vue/compiler-core@3.2.47":
   version "3.2.47"
   resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.2.47.tgz#3e07c684d74897ac9aa5922c520741f3029267f8"

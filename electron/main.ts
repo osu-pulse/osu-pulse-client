@@ -49,7 +49,7 @@ async function createWindow() {
     },
   })
 
-  const indexUrl = 'http://127.0.0.1:3000'
+  const indexUrl = 'http://127.0.0.1:4000'
   const indexPath = path.resolve(ROOT, 'dist', 'index.html')
 
   if (app.isPackaged)

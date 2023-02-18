@@ -41,30 +41,44 @@ export const usePlayer = createSharedComposable(() => {
   // TODO: Вынести в хук с кэшами
   const tracksService = useTracksService()
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack()
-  async function cacheTrack() {
+  async function cacheTrack(trackId: string) {
     if (track.value && !track.value.url.audio) {
       caching.value = true
-      const result = await mutateCacheTrack({
-        trackId: track.value.id,
-      })
 
-      const cachedTrack = result?.data?.cacheTrack
-      if (cachedTrack && cachedTrack.id === track.value?.id) {
-        track.value = result?.data?.cacheTrack
-        caching.value = false
+      try {
+        const result = await mutateCacheTrack({ trackId })
+        const cachedTrack = result?.data?.cacheTrack
+
+        if (cachedTrack && (!track || trackId === track.value?.id)) {
+          track.value = cachedTrack
+          caching.value = false
+        }
       }
+      catch {}
     }
+  }
+  const { mutate: mutateCancelCacheTrack } = tracksService.cancelCacheTrack()
+  function cancelCacheTrack(trackId: string) {
+    caching.value = false
+    void mutateCancelCacheTrack({ trackId })
   }
 
   const { ignoreUpdates: ignorePlayingUpdates } = watchIgnorable(
     playing,
     (value) => {
-      if (!value)
-        audio.value.pause()
-      else if (track.value?.url?.audio)
-        audio.value.play().catch(() => {})
-      else
-        void cacheTrack()
+      if (track.value) {
+        if (!value) {
+          audio.value.pause()
+          if (caching.value && track.value)
+            cancelCacheTrack(track.value.id)
+        }
+        else {
+          if (track.value?.url?.audio)
+            audio.value.play().catch(() => {})
+          else
+            void cacheTrack(track.value.id)
+        }
+      }
     },
     { immediate: true },
   )
@@ -119,29 +133,25 @@ export const usePlayer = createSharedComposable(() => {
   useEventListener(audio, 'ended', () => ended.value = true)
   useEventListener(audio, 'playing', () => ended.value = false)
 
-  const { mutate: mutateCancelCacheTrack } = tracksService.cancelCacheTrack()
   watch(track, (value, oldValue) => {
-    const oldId = oldValue?.id
-    const id = value?.id
-    if (oldId !== id) {
-      ignoreProgressUpdates(() => (progress.value = 0))
-      duration.value = 0
+    ignoreProgressUpdates(() => (progress.value = 0))
+    duration.value = 0
 
-      if (caching.value) {
-        caching.value = false
+    if (caching.value && oldValue)
+      cancelCacheTrack(oldValue.id)
 
-        if (oldId)
-          void mutateCancelCacheTrack({ trackId: oldId })
+    if (value) {
+      const src = value.url.audio
+      if (src) {
+        audio.value.src = src
+      }
+      else if (playing.value) {
+        audio.value.src = ''
+        void cacheTrack(value.id)
       }
     }
-
-    const src = value?.url?.audio
-    if (src) {
-      audio.value.src = src
-    }
-    else if (playing.value) {
+    else {
       audio.value.src = ''
-      void cacheTrack()
     }
   })
 

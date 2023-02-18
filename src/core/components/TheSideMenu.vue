@@ -184,7 +184,7 @@ function goProfile() {
   padding-top: 20px;
   display: flex;
   flex-direction: column;
-  background-color: constants.$clr-background;
+  background-color: rgb(constants.$clr-background);
   box-shadow: constants.$cmn-shadow-block;
   transition: constants.$trn-normal-out;
 
@@ -201,7 +201,7 @@ function goProfile() {
     }
 
     .label {
-      color: constants.$clr-text;
+      color: rgb(constants.$clr-text);
       font-family: 'Michroma', sans-serif;
       font-size: 26px;
     }
@@ -243,7 +243,7 @@ function goProfile() {
         .icon {
           margin: auto;
           font-size: 30px;
-          color: constants.$clr-background;
+          color: rgb(constants.$clr-background);
           opacity: 0.7;
           transform: scale(0.5);
           transition: constants.$trn-normal-out;
@@ -284,7 +284,7 @@ function goProfile() {
         }
 
         .name {
-          color: constants.$clr-text;
+          color: rgb(constants.$clr-text);
           font-size: 20px;
           font-weight: bold;
           letter-spacing: 1px;
@@ -297,7 +297,7 @@ function goProfile() {
         overflow: hidden;
         display: flex;
         align-items: center;
-        color: constants.$clr-text-inactive;
+        color: rgb(constants.$clr-text-inactive);
         font-size: 14px;
 
         .text {
@@ -319,8 +319,8 @@ function goProfile() {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      constants.$clr-text-inactive 40%,
-      constants.$clr-text-inactive 60%,
+      rgb(constants.$clr-text-inactive) 40%,
+      rgb(constants.$clr-text-inactive) 60%,
       transparent 100%
     );
   }
@@ -347,7 +347,7 @@ function goProfile() {
 
         .icon,
         .label {
-          color: constants.$clr-text-inactive;
+          color: rgb(constants.$clr-text-inactive);
           transition: constants.$trn-normal-out;
         }
 
@@ -368,7 +368,7 @@ function goProfile() {
         position: static;
         width: 10px;
         border-radius: 10px 0 0 10px;
-        background-color: constants.$clr-primary;
+        background-color: rgb(constants.$clr-primary);
         transform: scaleX(0);
         transform-origin: right;
         transition: constants.$trn-fast-out;
@@ -379,12 +379,12 @@ function goProfile() {
           .section-inner {
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.01);
-            background: constants.$clr-secondary;
+            background: rgb(constants.$clr-secondary);
             transition: constants.$trn-fast-in;
 
             .icon,
             .label {
-              color: constants.$clr-text;
+              color: rgb(constants.$clr-text);
               transition: constants.$trn-fast-in;
             }
 
@@ -397,7 +397,7 @@ function goProfile() {
 
       &.router-link-active {
         .section-inner {
-          background-color: constants.$clr-primary;
+          background-color: rgb(constants.$clr-primary);
 
           .icon {
             transform: scale(1.1);
@@ -405,7 +405,7 @@ function goProfile() {
 
           .icon,
           .label {
-            color: constants.$clr-background;
+            color: rgb(constants.$clr-background);
           }
         }
 

@@ -54,13 +54,14 @@ function handleClose() {
 .title-bar-component {
   min-width: max-content;
   display: flex;
-  background: constants.$clr-osu;
+  background: rgb(constants.$clr-primary);
   user-select: none;
   -webkit-app-region: drag;
 
   .title {
     margin: auto 0 auto 15px;
     height: 20px;
+    color: rgb(constants.$clr-background);
     font-weight: bold;
     font-size: 14px;
     letter-spacing: 1px;
@@ -68,14 +69,14 @@ function handleClose() {
 
   .controls {
     margin-left: auto;
-    padding: 5px 7px;
+    padding: 5px 5px;
     display: flex;
     gap: 10px;
 
     .button {
       display: flex;
       font-size: 12px;
-      padding: 3px 8px;
+      padding: 3px 10px;
       border: none;
       background: transparent;
       border-radius: 6px;
@@ -83,16 +84,26 @@ function handleClose() {
       transition: constants.$trn-normal-out;
       -webkit-app-region: no-drag;
 
+      .icon {
+        color: rgb(constants.$clr-background);
+        transition: constants.$trn-normal-out;
+      }
+
       &:hover {
-        background: rgba(white, 0.3);
+        background: rgb(constants.$clr-background);
         transform: scale(1.1);
-        box-shadow: 0 3px 5px rgba(black, 0.1);
+        box-shadow: constants.$cmn-shadow-element;
         transition: constants.$trn-fast-out;
+
+        .icon {
+          color: constants.$clr-primary;
+          transition: constants.$trn-fast-out;
+        }
       }
 
       &.close {
         &:hover {
-          background: rgba(red, 0.5);
+          background: rgba(red, 0.7);
         }
       }
     }

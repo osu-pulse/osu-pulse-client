@@ -2,7 +2,7 @@ import jwtDecode from 'jwt-decode'
 import { computed, readonly, ref } from 'vue'
 import {
   createGlobalState,
-  createSharedComposable,
+  createSharedComposable, tryOnMounted,
   useLocalStorage,
   whenever,
 } from '@vueuse/core'
@@ -24,8 +24,6 @@ const useAuthenticationState = createGlobalState(() => ({
 
 export const useAuthentication = createSharedComposable(() => {
   const { accessToken, refreshToken } = useAuthenticationState()
-
-  const authenticated = computed(() => refreshToken.value)
 
   function getToken(): Promise<string> {
     return new Promise((resolve) => {
@@ -70,10 +68,13 @@ export const useAuthentication = createSharedComposable(() => {
   const route = useRoute()
   const router = useRouter()
 
-  function isUrlClaimable() {
+  const isUrlClaimable = ref(false)
+  tryOnMounted(() => {
     const params = new URLSearchParams(window.location.search)
-    return params.has('access_token') && params.has('refresh_token')
-  }
+    isUrlClaimable.value = params.has('access_token') && params.has('refresh_token')
+  })
+  const authenticated = computed(() => refreshToken.value || isUrlClaimable.value)
+
   async function claimUrl() {
     const params = new URLSearchParams(window.location.search)
 
@@ -84,19 +85,21 @@ export const useAuthentication = createSharedComposable(() => {
       query: omit(route.query, ['access_token', 'refresh_token']),
     })
 
+    isUrlClaimable.value = false
+
     schedule()
   }
 
   async function login(): Promise<void> {
-    if (authenticated.value)
+    if (refreshToken.value)
       await rotate()
-    else if (isUrlClaimable())
+    else if (isUrlClaimable.value)
       await claimUrl()
     else
       redirect()
   }
   const { offline } = useOffline()
-  whenever(() => !offline.value, login, { immediate: true })
+  whenever(() => !offline.value, login)
 
   const onLogout = ref<void>()
   function logout(): void {

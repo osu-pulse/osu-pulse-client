@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import MoonLoader from 'vue-spinner/src/MoonLoader.vue'
 import {
-  breakpointsTailwind,
+  breakpointsTailwind, syncRefs,
   useBreakpoints,
   whenever,
 } from '@vueuse/core'
@@ -21,7 +21,6 @@ import SliderRange from '@/shared/components/SliderRange.vue'
 import { usePlayer } from '@/core/stores/player'
 import { useQueue } from '@/core/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
-import { getAccent } from '@/core/utils/color'
 import { useColors } from '@/core/stores/colors'
 
 const {
@@ -40,23 +39,19 @@ const { greater } = useBreakpoints(breakpointsTailwind)
 const coverSrc = computed(() =>
   greater('lg').value ? track.value?.cover?.normal : track.value?.cover?.wide,
 )
+
 const coverLoaded = ref(false)
 watch(coverSrc, () => (coverLoaded.value = false))
-function handleLoad(src: string) {
-  coverLoaded.value = src === coverSrc.value
+const coverRef = shallowRef<HTMLImageElement>()
+
+function handleLoad(event: Event) {
+  const target = event.target as HTMLImageElement
+  if (target.src === coverRef.value?.src)
+    coverLoaded.value = true
 }
 
-const coverRef = shallowRef<HTMLImageElement>()
-const { primary, background } = useColors()
-const accentColor = ref(primary.value)
-watch(
-  [coverRef, coverSrc, coverLoaded],
-  ([coverRef, coverSrc, coverLoaded]) => {
-    accentColor.value = (coverRef && coverSrc && coverLoaded)
-      ? getAccent(coverRef, background.value)
-      : primary.value
-  },
-)
+const { accentImage } = useColors()
+syncRefs(coverRef, accentImage)
 
 const volumeIcon = computed(() =>
   muted.value ? BIconVolumeMute : BIconVolumeUp,
@@ -96,11 +91,13 @@ const progressScaled = customRef(() => ({
 
 const progressChanging = ref(false)
 const wasPlaying = ref(false)
+
 function handleProgressChangeStart() {
   wasPlaying.value = playing.value
   playing.value = false
   progressChanging.value = true
 }
+
 function handleProgressChangeEnd() {
   playing.value = wasPlaying.value
   wasPlaying.value = false
@@ -149,6 +146,7 @@ function next() {
       track.value = queue.value[index + 1]
   }
 }
+
 function prev() {
   if (shuffling.value) {
     track.value = randomArrayElement(queue.value)
@@ -175,7 +173,7 @@ function prev() {
             crossorigin="anonymous"
             :src="coverSrc"
             alt="cover"
-            @load="handleLoad($event.target.src)"
+            @load="handleLoad"
           >
         </Transition>
       </div>
@@ -207,10 +205,7 @@ function prev() {
           />
         </div>
 
-        <div
-          class="main"
-          :style="{ '--color': accentColor }"
-        >
+        <div class="main">
           <button
             class="button backward"
             :class="{ _disabled: !hasPrev }"
@@ -221,17 +216,15 @@ function prev() {
 
           <button
             class="button play"
-            :class="{ _disabled: caching || !track }"
+            :class="{ _disabled: !track }"
             @click="playing = !playing"
           >
             <Transition mode="out-in">
               <MoonLoader
-                v-if="caching"
-                size="30px"
-                color="white"
-                class="icon loader"
+                v-if="caching" size="30px" color="white"
+                class="icon"
               />
-              <Component :is="playBtnIcon" v-else class="icon play" />
+              <Component :is="playBtnIcon" v-else class="icon" />
             </Transition>
           </button>
 
@@ -296,7 +289,7 @@ function prev() {
   height: 100px;
   overflow: hidden;
   border-radius: 10px;
-  background-color: constants.$clr-background;
+  background-color: rgb(constants.$clr-background);
   box-shadow: constants.$cmn-shadow-block;
   transition: constants.$trn-normal-out;
 
@@ -332,19 +325,10 @@ function prev() {
         z-index: 1;
         left: 0;
         background: linear-gradient(
-          to right,
-          transparent 0,
-          #{constants.$clr-background} 100%
-        );
-      }
-
-      &::before {
-        @include mixins.pseudo();
-        z-index: 1;
-        background: linear-gradient(
-          to right,
-          transparent 20%,
-          #{constants.$clr-background} 100%
+            to right,
+            transparent 0%,
+            rgba(constants.$clr-background, 0.8) 60%,
+            rgb(constants.$clr-background) 100%
         );
       }
     }
@@ -417,20 +401,20 @@ function prev() {
 
           .icon {
             @include transitions.fade();
-            color: constants.$clr-text-inactive;
+            color: rgb(constants.$clr-text-inactive);
             font-size: 20px;
             transform: translateY(2px);
             transition: constants.$trn-normal-out;
           }
 
           &:hover {
-            background: constants.$clr-secondary;
+            background: rgb(constants.$clr-secondary);
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.1);
             transition: constants.$trn-fast-out;
 
             .icon {
-              color: constants.$clr-primary;
+              color: rgb(constants.$clr-primary);
               transition: constants.$trn-fast-out;
             }
           }
@@ -454,7 +438,7 @@ function prev() {
       }
 
       .main {
-        --color: constants.$clr-primary;
+        --color: rgb(constants.$clr-primary);
         padding-top: 10px;
         display: flex;
         align-items: center;
@@ -465,7 +449,8 @@ function prev() {
           transition: constants.$trn-normal-out;
 
           &._disabled {
-            opacity: 0.5;
+            pointer-events: none;
+            opacity: 0;
           }
 
           &:hover {
@@ -475,12 +460,9 @@ function prev() {
 
           &.backward,
           &.forward {
-            &._disabled {
-              pointer-events: none;
-            }
 
             .icon {
-              color: var(--color);
+              color: rgb(constants.$clr-accent);
               font-size: 30px;
               transition: constants.$trn-fast-out;
             }
@@ -501,7 +483,7 @@ function prev() {
           &.play {
             @include mixins.size(40px);
             display: flex;
-            background: var(--color);
+            background: rgb(constants.$clr-accent);;
             border-radius: 100%;
 
             &:hover {
@@ -517,7 +499,7 @@ function prev() {
               @include transitions.fade(constants.$trn-fast-out);
               margin: auto;
               font-size: 26px;
-              color: constants.$clr-background;
+              color: rgb(constants.$clr-background);
             }
           }
         }
@@ -535,20 +517,20 @@ function prev() {
 
           .icon {
             @include transitions.fade();
-            color: constants.$clr-text-inactive;
+            color: rgb(constants.$clr-text-inactive);
             font-size: 20px;
             transform: translateY(2px);
             transition: constants.$trn-normal-out;
           }
 
           &:hover {
-            background: constants.$clr-secondary;
+            background: rgb(constants.$clr-secondary);
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.1);
             transition: constants.$trn-fast-out;
 
             .icon {
-              color: constants.$clr-primary;
+              color: rgb(constants.$clr-primary);
               transition: constants.$trn-fast-out;
             }
           }
@@ -559,10 +541,10 @@ function prev() {
           }
 
           &._turned {
-            background: constants.$clr-primary;
+            background: rgb(constants.$clr-primary);
 
             .icon {
-              color: constants.$clr-background;
+              color: rgb(constants.$clr-background);
             }
           }
         }
@@ -598,9 +580,10 @@ function prev() {
 
         &::after {
           background: linear-gradient(
-            to right,
-            transparent -30%,
-            #{constants.$clr-background} 100%
+              to right,
+              transparent 0%,
+              rgba(constants.$clr-background, 0.8) 50%,
+              rgb(constants.$clr-background) 100%
           );
         }
       }
@@ -622,21 +605,24 @@ function prev() {
         width: 100%;
 
         &::after {
+          left: 0;
           opacity: 0.8;
           background: linear-gradient(
-            to right,
-            transparent 0%,
-            #{constants.$clr-background} 30%,
-            #{constants.$clr-background} 70%,
-            transparent 100%
+              to right,
+              transparent 0%,
+              rgb(constants.$clr-background) 30%,
+              rgb(constants.$clr-background) 70%,
+              transparent 100%
           );
         }
 
         &::before {
+          @include mixins.pseudo();
+          z-index: 1;
           background: linear-gradient(
-            to top,
-            #{constants.$clr-background} 0%,
-            transparent 50%
+              to top,
+              rgb(constants.$clr-background) 0%,
+              transparent 50%
           );
         }
       }

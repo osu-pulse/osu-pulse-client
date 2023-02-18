@@ -96,7 +96,7 @@ tryOnMounted(() => {
       display: flex;
       gap: 10px;
       overflow: auto;
-      background-color: constants.$clr-secondary;
+      background-color: rgb(constants.$clr-secondary);
 
       .side-menu {
         flex: none;
@@ -139,11 +139,12 @@ tryOnMounted(() => {
 @import 'core/styles/fonts';
 
 :root {
-  --color-primary: #000000;
-  --color-secondary: #f4f5fe;
-  --color-background: #ffffff;
-  --color-text: #000000;
-  --color-text-inactive: #8f91a5;
+  --color-primary: 0, 0, 0;
+  --color-secondary: 244, 245, 254;
+  --color-background: 255, 255, 255;
+  --color-text: 0, 0, 0;
+  --color-text-inactive: 143, 145, 165;
+  --color-accent: var(--color-primary);
 }
 
 #app {
