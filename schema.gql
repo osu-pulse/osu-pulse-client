@@ -76,7 +76,9 @@ type TrackCoverObject {
 
 type TrackObject {
     artist: String!
+    cached: Boolean!
     cover: TrackCoverObject!
+    duration: Float!
     id: ID!
     liked: Float!
     played: Float!

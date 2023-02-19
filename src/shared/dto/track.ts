@@ -8,6 +8,8 @@ export interface Track {
   id: string
   title: string
   artist: string
+  cached: boolean
+  duration?: number
   cover: TrackCover
   url: TrackUrl
 }
@@ -17,6 +19,8 @@ export const TRACK = gql`
     id
     title
     artist
+    cached
+    duration
     cover {
       ...TrackCover
     }

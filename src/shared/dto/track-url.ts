@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
 export interface TrackUrl {
-  audio: string
+  audio?: string
   file: string
   page: string
 }

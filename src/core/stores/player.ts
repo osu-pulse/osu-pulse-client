@@ -42,7 +42,7 @@ export const usePlayer = createSharedComposable(() => {
   const tracksService = useTracksService()
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack()
   async function cacheTrack(trackId: string) {
-    if (track.value && !track.value.url.audio) {
+    if (track.value && !track.value.cached) {
       caching.value = true
 
       try {
@@ -73,7 +73,7 @@ export const usePlayer = createSharedComposable(() => {
             cancelCacheTrack(track.value.id)
         }
         else {
-          if (track.value?.url?.audio)
+          if (track.value?.cached)
             audio.value.play().catch(() => {})
           else
             void cacheTrack(track.value.id)
@@ -117,11 +117,6 @@ export const usePlayer = createSharedComposable(() => {
     'progress',
     () => buffer.value = calcBuffer(audio.value.buffered, progress.value),
   )
-  useEventListener(
-    audio,
-    'durationchange',
-    () => duration.value = isNaN(audio.value.duration) ? 0 : audio.value.duration,
-  )
   useEventListener(audio, 'volumechange', () =>
     ignoreVolumeUpdates(() =>
       ignoreMuteUpdates(() => {
@@ -135,24 +130,14 @@ export const usePlayer = createSharedComposable(() => {
 
   watch(track, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
-    duration.value = 0
+    duration.value = value?.duration ?? 0
 
     if (caching.value && oldValue)
       cancelCacheTrack(oldValue.id)
 
-    if (value) {
-      const src = value.url.audio
-      if (src) {
-        audio.value.src = src
-      }
-      else if (playing.value) {
-        audio.value.src = ''
-        void cacheTrack(value.id)
-      }
-    }
-    else {
-      audio.value.src = ''
-    }
+    audio.value.src = value?.url?.audio ?? ''
+    if (value && !value.cached && playing.value)
+      void cacheTrack(value.id)
   })
 
   return {
