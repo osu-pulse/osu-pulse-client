@@ -17,6 +17,7 @@ import { useUser } from '@/core/stores/user'
 import { useOffline } from '@/core/stores/offline'
 import { RouteName } from '@/shared/constants/route-name'
 import { usePlayer } from '@/core/stores/player'
+import { useCurrentTrack } from '@/core/stores/current-track'
 
 const itemsMusic: SideMenuItem[] = [
   {
@@ -59,9 +60,10 @@ const { offline } = useOffline()
 const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl)
 const username = computed(() => user.value?.username ?? 'UNKNOWN')
 
-const { playing, track } = usePlayer()
+const { playing } = usePlayer()
+const { currentTrack } = useCurrentTrack()
 const listening = computed(
-  () => track.value && `${track.value.title} - ${track.value.artist}`,
+  () => currentTrack.value && `${currentTrack.value.title} - ${currentTrack.value.artist}`,
 )
 
 function goProfile() {

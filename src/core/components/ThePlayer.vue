@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import MoonLoader from 'vue-spinner/src/MoonLoader.vue'
 import {
-  breakpointsTailwind, syncRefs,
+  breakpointsTailwind,
+  syncRefs,
   useBreakpoints,
   whenever,
 } from '@vueuse/core'
 import { computed, customRef, ref, shallowRef, watch } from 'vue'
 import {
   BIconArrowRepeat,
+  BIconListUl,
   BIconPauseFill,
   BIconPlayFill,
   BIconShuffle,
@@ -19,12 +21,11 @@ import {
 } from 'bootstrap-icons-vue'
 import SliderRange from '@/shared/components/SliderRange.vue'
 import { usePlayer } from '@/core/stores/player'
-import { useQueue } from '@/core/stores/queue'
-import { randomArrayElement } from '@/shared/utils/random'
 import { useColors } from '@/core/stores/colors'
+import { useCurrentTrack } from '@/core/stores/current-track'
+import { RepeatMode } from '@/core/constants/repeat-mode'
 
 const {
-  track,
   playing,
   muted,
   volume,
@@ -35,9 +36,11 @@ const {
   buffer,
 } = usePlayer()
 
+const { currentTrackId, currentTrack, repeating, shuffling, hasPrev, hasNext, prev, next } = useCurrentTrack()
+
 const { greater } = useBreakpoints(breakpointsTailwind)
 const coverSrc = computed(() =>
-  greater('lg').value ? track.value?.cover?.normal : track.value?.cover?.wide,
+  greater('lg').value ? currentTrack.value?.cover?.normal : currentTrack.value?.cover?.wide,
 )
 
 const coverLoaded = ref(false)
@@ -65,9 +68,7 @@ const volumeScaled = customRef(() => ({
   set: value => (volume.value = value ** volumeGain.value),
 }))
 
-const playBtnIcon = computed(() =>
-  playing.value ? BIconPauseFill : BIconPlayFill,
-)
+const playBtnIcon = computed(() => playing.value ? BIconPauseFill : BIconPlayFill)
 
 interface TimeSplit {
   h: string
@@ -78,12 +79,12 @@ const progressSplit = computed<TimeSplit>(() => ({
   h: Math.floor(progress.value / 60).toString(),
   m: `0${Math.floor(progress.value % 60)}`.slice(-2),
 }))
-
 const durationSplit = computed<TimeSplit>(() => ({
   h: Math.floor(duration.value / 60).toString(),
   m: `0${Math.floor(duration.value % 60)}`.slice(-2),
 }))
 
+const bufferScaled = computed(() => duration.value > 0 ? buffer.value / duration.value : 0)
 const progressScaled = customRef(() => ({
   get: () => duration.value > 0 ? progress.value / duration.value : 0,
   set: value => progress.value = duration.value * value,
@@ -91,71 +92,37 @@ const progressScaled = customRef(() => ({
 
 const progressChanging = ref(false)
 const wasPlaying = ref(false)
-
 function handleProgressChangeStart() {
   wasPlaying.value = playing.value
   playing.value = false
   progressChanging.value = true
 }
-
 function handleProgressChangeEnd() {
   playing.value = wasPlaying.value
   wasPlaying.value = false
   progressChanging.value = false
 }
 
-const bufferScaled = computed(() =>
-  duration.value > 0 ? buffer.value / duration.value : 0,
-)
-
-const { queue } = useQueue()
-const repeating = ref(false)
-const shuffling = ref(false)
-
 whenever(
   () => ended.value && playing.value && !progressChanging.value,
-  () => repeating.value ? progress.value = 0 : next(),
+  () => {
+    if (repeating.value === RepeatMode.SINGLE)
+      progress.value = 0
+    else if (hasNext.value)
+      next()
+    else
+      playing.value = false
+  },
 )
 
-const hasPrev = computed(() => {
-  if (shuffling.value) {
-    return true
-  }
-  else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
-    return index > -1 && queue.value[index - 1]
-  }
-})
-const hasNext = computed(() => {
-  if (shuffling.value) {
-    return true
-  }
-  else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
-    return index > -1 && queue.value[index + 1]
-  }
-})
-
-function next() {
-  if (shuffling.value) {
-    track.value = randomArrayElement(queue.value)
-  }
-  else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
-    if (index > -1)
-      track.value = queue.value[index + 1]
-  }
-}
-
-function prev() {
-  if (shuffling.value) {
-    track.value = randomArrayElement(queue.value)
-  }
-  else {
-    const index = queue.value.findIndex(({ id }) => id === track.value?.id)
-    if (index > -1)
-      track.value = queue.value[index - 1]
-  }
+const repeatBtnIcon = computed(() => repeating.value === RepeatMode.LIST ? BIconListUl : BIconArrowRepeat)
+function handleChangeRepeat() {
+  if (!repeating.value)
+    repeating.value = RepeatMode.SINGLE
+  else if (repeating.value === RepeatMode.SINGLE)
+    repeating.value = RepeatMode.LIST
+  else if (repeating.value === RepeatMode.LIST)
+    repeating.value = false
 }
 </script>
 
@@ -180,11 +147,11 @@ function prev() {
 
       <div class="meta">
         <Transition mode="out-in">
-          <span :key="track?.title" class="title">{{ track?.title }}</span>
+          <span :key="currentTrack?.title" class="title">{{ currentTrack?.title }}</span>
         </Transition>
 
         <Transition mode="out-in">
-          <span :key="track?.artist" class="artist">{{ track?.artist }}</span>
+          <span :key="currentTrack?.artist" class="artist">{{ currentTrack?.artist }}</span>
         </Transition>
       </div>
     </div>
@@ -216,7 +183,7 @@ function prev() {
 
           <button
             class="button play"
-            :class="{ _disabled: !track }"
+            :class="{ _disabled: !currentTrackId }"
             @click="playing = !playing"
           >
             <Transition mode="out-in">
@@ -241,9 +208,11 @@ function prev() {
           <button
             class="button"
             :class="{ _turned: repeating }"
-            @click="repeating = !repeating"
+            @click="handleChangeRepeat"
           >
-            <BIconArrowRepeat class="icon" />
+            <Transition mode="out-in">
+              <Component :is="repeatBtnIcon" class="icon" />
+            </Transition>
           </button>
 
           <button
@@ -606,12 +575,11 @@ function prev() {
 
         &::after {
           left: 0;
-          opacity: 0.8;
           background: linear-gradient(
               to right,
               transparent 0%,
-              rgb(constants.$clr-background) 30%,
-              rgb(constants.$clr-background) 70%,
+              rgba(constants.$clr-background, 0.8) 30%,
+              rgba(constants.$clr-background, 0.8) 70%,
               transparent 100%
           );
         }

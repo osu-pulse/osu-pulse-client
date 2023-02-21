@@ -5,13 +5,11 @@ import {
   useEventListener,
   watchIgnorable,
 } from '@vueuse/core'
-import type { Track } from '@/shared/dto/track'
 import { calcBuffer } from '@/core/utils/audio'
 import { useTracksService } from '@/shared/services/tracks'
+import { useCurrentTrack } from '@/core/stores/current-track'
 
 const usePlayerState = createGlobalState(() => ({
-  track: shallowRef<Track>(),
-
   audio: shallowRef(new Audio()),
   caching: ref(false),
 
@@ -26,7 +24,6 @@ const usePlayerState = createGlobalState(() => ({
 
 export const usePlayer = createSharedComposable(() => {
   const {
-    track,
     audio,
     playing,
     caching,
@@ -38,21 +35,21 @@ export const usePlayer = createSharedComposable(() => {
     ended,
   } = usePlayerState()
 
+  const { currentTrack } = useCurrentTrack()
+
   // TODO: Вынести в хук с кэшами
   const tracksService = useTracksService()
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack()
   async function cacheTrack(trackId: string) {
-    if (track.value && !track.value.cached) {
+    if (currentTrack.value && !currentTrack.value.cached) {
       caching.value = true
 
       try {
         const result = await mutateCacheTrack({ trackId })
         const cachedTrack = result?.data?.cacheTrack
 
-        if (cachedTrack && (!track || trackId === track.value?.id)) {
-          track.value = cachedTrack
+        if (cachedTrack && (!currentTrack || trackId === currentTrack.value?.id))
           caching.value = false
-        }
       }
       catch {}
     }
@@ -66,17 +63,17 @@ export const usePlayer = createSharedComposable(() => {
   const { ignoreUpdates: ignorePlayingUpdates } = watchIgnorable(
     playing,
     (value) => {
-      if (track.value) {
+      if (currentTrack.value) {
         if (!value) {
           audio.value.pause()
-          if (caching.value && track.value)
-            cancelCacheTrack(track.value.id)
+          if (caching.value && currentTrack.value?.id)
+            cancelCacheTrack(currentTrack.value.id)
         }
         else {
-          if (track.value?.cached)
+          if (currentTrack.value?.cached)
             audio.value.play().catch(() => {})
           else
-            void cacheTrack(track.value.id)
+            void cacheTrack(currentTrack.value.id)
         }
       }
     },
@@ -128,7 +125,7 @@ export const usePlayer = createSharedComposable(() => {
   useEventListener(audio, 'ended', () => ended.value = true)
   useEventListener(audio, 'playing', () => ended.value = false)
 
-  watch(track, (value, oldValue) => {
+  watch(currentTrack, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
     duration.value = value?.duration ?? 0
 
@@ -141,8 +138,6 @@ export const usePlayer = createSharedComposable(() => {
   })
 
   return {
-    track,
-
     audio: readonly(audio),
     caching: readonly(caching),
 

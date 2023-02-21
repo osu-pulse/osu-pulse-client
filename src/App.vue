@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { tryOnMounted, watchOnce } from '@vueuse/core'
-import { usePlayer } from '@/core/stores/player'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
@@ -11,15 +10,16 @@ import TheQueue from '@/core/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
+import { useCurrentTrack } from '@/core/stores/current-track'
 
 useMetrika()
 
 const { authenticated } = useAuthentication()
 const { loading } = useOffline()
 
-const { track } = usePlayer()
 const { queue } = useQueue()
-watchOnce(queue, () => track.value = queue.value[0])
+const { currentTrackId } = useCurrentTrack()
+watchOnce(queue, () => currentTrackId.value = queue.value[0]?.id)
 
 tryOnMounted(() => {
   console.clear()
