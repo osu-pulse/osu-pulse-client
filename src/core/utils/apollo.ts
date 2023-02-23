@@ -58,8 +58,8 @@ const omitTypenameLink = new ApolloLink((operation, forward) => {
   if (operation.variables) {
     operation.variables = JSON.parse(
       JSON.stringify(operation.variables),
-      (k, v) => (k === '__typename') ? undefined : v,
-    )
+      (k: string, v: unknown) => ((k === '__typename') ? undefined : v),
+    ) as Record<string, unknown>
   }
   return forward(operation)
 })

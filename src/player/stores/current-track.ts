@@ -1,14 +1,14 @@
 import {
   createGlobalState,
   createSharedComposable,
-  useArrayMap,
+  useArrayMap, useRefHistory,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useQueue } from '@/core/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
 import type { Track } from '@/shared/dto/track'
-import { RepeatMode } from '@/core/constants/repeat-mode'
+import { RepeatMode } from '@/player/constants/repeat-mode'
 import { switchAssign } from '@/shared/utils/switch'
 
 const useCurrentTrackState = createGlobalState(() => ({
@@ -24,11 +24,14 @@ export const useCurrentTrack = createSharedComposable(() => {
   const queueIds = useArrayMap(queue as ComputedRef<Track[]>, ({ id }) => id)
   const currentTrack = computed(() => queue.value.find(({ id }) => id === currentTrackId.value))
 
+  const { undo, canUndo, clear } = useRefHistory(currentTrackId)
+  watch(shuffling, clear)
+
   const hasPrev = computed(() => {
     if (!currentTrackId.value)
       return false
     if (shuffling.value)
-      return true
+      return canUndo.value
     if (repeating.value) {
       return switchAssign(repeating.value, {
         [RepeatMode.LIST]: true,
@@ -36,13 +39,15 @@ export const useCurrentTrack = createSharedComposable(() => {
       })
     }
 
-    return queueIds.value.some((id, index) => queueIds.value[index + 1] === currentTrackId.value)
+    return queueIds.value.some(
+      (id, index) => queueIds.value[index + 1] === currentTrackId.value,
+    )
   })
   const hasNext = computed(() => {
     if (!currentTrackId.value)
       return false
     if (shuffling.value)
-      return true
+      return queueIds.value.length > 1
     if (repeating.value) {
       return switchAssign(repeating.value, {
         [RepeatMode.LIST]: true,
@@ -50,7 +55,9 @@ export const useCurrentTrack = createSharedComposable(() => {
       })
     }
 
-    return queueIds.value.some((id, index) => queueIds.value[index - 1] === currentTrackId.value)
+    return queueIds.value.some(
+      (id, index) => queueIds.value[index - 1] === currentTrackId.value,
+    )
   })
 
   function next() {
@@ -67,7 +74,7 @@ export const useCurrentTrack = createSharedComposable(() => {
   function prev() {
     if (hasPrev.value) {
       if (shuffling.value)
-        currentTrackId.value = randomArrayElement(queueIds.value)
+        undo()
       else if (repeating.value === RepeatMode.LIST)
         currentTrackId.value = queueIds.value.find((id, index) => queueIds.value[index + 1] === currentTrackId.value) ?? queueIds.value.at(-1)
       else if (!repeating.value)

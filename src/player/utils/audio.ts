@@ -7,8 +7,8 @@ export interface FadeOptions {
 }
 
 type FadeId = string
-const intervals: Record<FadeId, any> = {}
-const multiIntervals: Record<FadeId, any> = {}
+const intervals: Record<FadeId, number> = {}
+const multiIntervals: Record<FadeId, number> = {}
 const multiAudios: Record<FadeId, HTMLMediaElement> = {}
 const multiQueue: FadeId[] = []
 
@@ -55,7 +55,6 @@ export async function fade(
 
     const intervalId = setInterval(() => {
       if (cache !== audio.volume) {
-        console.log('invalid')
         finish()
         resolve(undefined)
       }
@@ -64,7 +63,6 @@ export async function fade(
         cache = audio.volume
       }
       else {
-        console.log('finished')
         audio.volume = target
         finish()
         resolve(undefined)
@@ -72,14 +70,13 @@ export async function fade(
     }, duration / (Math.abs(audio.volume - target) / step))
 
     if (multi) {
-      multiIntervals[id] = intervalId
+      multiIntervals[id] = intervalId as unknown as number
       multiAudios[id] = audio
       multiQueue.push(id)
-      console.log(multiQueue.length)
       multiQueue.slice(0, -2).forEach(removeMulti)
     }
     else {
-      intervals[id] = intervalId
+      intervals[id] = intervalId as unknown as number
     }
   })
 }

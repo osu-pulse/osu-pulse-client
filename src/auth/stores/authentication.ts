@@ -48,7 +48,9 @@ export const useAuthentication = createSharedComposable(() => {
       const { exp } = jwtDecode<JwtPayload>(accessToken.value)
       const time = (exp - new Date().getTime() / 1000 - 10) * 1000
 
-      setTimeout(rotate, time)
+      setTimeout(() => {
+        void rotate()
+      }, time)
     }
   }
 
@@ -92,8 +94,7 @@ export const useAuthentication = createSharedComposable(() => {
       await claimUrl()
     else if (refreshToken.value)
       await rotate()
-    else
-      redirect()
+    else redirect()
   }
   const { offline } = useOffline()
   whenever(() => !offline.value, login)

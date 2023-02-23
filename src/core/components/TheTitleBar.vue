@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { BIconArrowsAngleContract, BIconArrowsAngleExpand, BIconCaretDown, BIconXLg } from 'bootstrap-icons-vue'
 import { ref } from 'vue'
+import BIcon from '@/shared/components/BIcon.vue'
 
 const isMaximized = ref(false)
 
@@ -30,18 +30,18 @@ function handleClose() {
 
     <div class="controls">
       <button class="button" @click="handleMinimize">
-        <BIconCaretDown class="icon" />
+        <BIcon name="caret-down" class="icon" />
       </button>
 
       <button v-if="isMaximized" class="button" @click="handleUnmaximize">
-        <BIconArrowsAngleContract class="icon" />
+        <BIcon name="arrows-angle-contract" class="icon" />
       </button>
       <button v-else class="button" @click="handleMaximize">
-        <BIconArrowsAngleExpand class="icon" />
+        <BIcon name="arrows-angle-expand" class="icon" />
       </button>
 
       <button class="button close" @click="handleClose">
-        <BIconXLg class="icon" />
+        <BIcon name="x-lg" class="icon" />
       </button>
     </div>
   </div>
@@ -89,7 +89,7 @@ function handleClose() {
         transition: constants.$trn-normal-out;
       }
 
-      &:hover {
+      @mixin hovered {
         background: rgb(constants.$clr-background);
         transform: scale(1.1);
         box-shadow: constants.$cmn-shadow-element;
@@ -101,9 +101,33 @@ function handleClose() {
         }
       }
 
-      &.close {
+      @media (hover: hover) {
         &:hover {
+          @include hovered
+        }
+      }
+
+      @media (hover: none) {
+        &:active {
+          @include hovered;
+        }
+      }
+
+      &.close {
+        @mixin hovered {
           background: rgba(red, 0.7);
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            @include hovered
+          }
+        }
+
+        @media (hover: none) {
+          &:active {
+            @include hovered;
+          }
         }
       }
     }

@@ -21,10 +21,10 @@ export function switchExec<
   if (value != null) {
     const handler = map[value as Exclude<V, null | undefined>]
     if (handler)
-      return handler(value) as any
+      return handler(value) as ReturnType<typeof map[keyof typeof map]>
   }
   if (fallback)
-    return fallback(value) as any
+    return fallback(value) as ReturnType<typeof fallback>
 }
 
 export function switchThrow<
@@ -33,8 +33,8 @@ export function switchThrow<
   if (value != null) {
     const reason = map[value as Exclude<V, null | undefined>]
     if (reason)
-      throw reason
+      throw reason as unknown as Error
   }
   if (fallback)
-    throw fallback
+    throw fallback as unknown as Error
 }

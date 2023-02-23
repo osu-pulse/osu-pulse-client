@@ -1,3 +1,6 @@
+import { describe, expect, it } from 'vitest'
+import { map, omit, pick } from '@/shared/utils/object'
+
 describe('omit', () => {
   it('removes fields', () => {
     const omitted = omit({ a: 1, b: 2, c: 3 }, ['a', 'b'])

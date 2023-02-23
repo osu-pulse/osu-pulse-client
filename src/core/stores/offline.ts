@@ -1,9 +1,5 @@
 import { readonly, ref } from 'vue'
-import {
-  createGlobalState,
-  createSharedComposable,
-  tryOnMounted,
-} from '@vueuse/core'
+import { createGlobalState, createSharedComposable } from '@vueuse/core'
 import { useHealthService } from '@/shared/services/health'
 
 const useOfflineState = createGlobalState(() => ({
@@ -27,12 +23,11 @@ export const useOffline = createSharedComposable(() => {
       loading.value = false
     }
   }
-  tryOnMounted(() => {
-    void check()
-  })
 
   return {
     offline: readonly(offline),
     loading: readonly(loading),
+
+    check,
   }
 })

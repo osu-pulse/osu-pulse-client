@@ -5,9 +5,9 @@ import {
   useEventListener,
   watchIgnorable,
 } from '@vueuse/core'
-import { calcBuffer } from '@/core/utils/audio'
+import { calcBuffer } from '@/player/utils/audio'
 import { useTracksService } from '@/shared/services/tracks'
-import { useCurrentTrack } from '@/core/stores/current-track'
+import { useCurrentTrack } from '@/player/stores/current-track'
 
 const usePlayerState = createGlobalState(() => ({
   audio: shallowRef(new Audio()),
@@ -48,7 +48,10 @@ export const usePlayer = createSharedComposable(() => {
         const result = await mutateCacheTrack({ trackId })
         const cachedTrack = result?.data?.cacheTrack
 
-        if (cachedTrack && (!currentTrack || trackId === currentTrack.value?.id))
+        if (
+          cachedTrack
+          && (!currentTrack || trackId === currentTrack.value?.id)
+        )
           caching.value = false
       }
       catch {}
@@ -72,8 +75,7 @@ export const usePlayer = createSharedComposable(() => {
         else {
           if (currentTrack.value?.cached)
             audio.value.play().catch(() => {})
-          else
-            void cacheTrack(currentTrack.value.id)
+          else void cacheTrack(currentTrack.value.id)
         }
       }
     },
@@ -81,17 +83,17 @@ export const usePlayer = createSharedComposable(() => {
   )
   const { ignoreUpdates: ignoreProgressUpdates } = watchIgnorable(
     progress,
-    value => audio.value.currentTime = value,
+    value => (audio.value.currentTime = value),
     { immediate: true },
   )
   const { ignoreUpdates: ignoreVolumeUpdates } = watchIgnorable(
     volume,
-    value => audio.value.volume = value,
+    value => (audio.value.volume = value),
     { immediate: true },
   )
   const { ignoreUpdates: ignoreMuteUpdates } = watchIgnorable(
     muted,
-    value => audio.value.muted = value,
+    value => (audio.value.muted = value),
     { immediate: true },
   )
 
@@ -100,19 +102,19 @@ export const usePlayer = createSharedComposable(() => {
       audio.value.play().catch(() => {})
   })
   useEventListener(audio, 'play', () =>
-    ignorePlayingUpdates(() => playing.value = true),
+    ignorePlayingUpdates(() => (playing.value = true)),
   )
   useEventListener(audio, 'pause', () => {
     if (audio.value.currentTime !== audio.value.duration)
-      ignorePlayingUpdates(() => playing.value = false)
+      ignorePlayingUpdates(() => (playing.value = false))
   })
   useEventListener(audio, 'timeupdate', () =>
-    ignoreProgressUpdates(() => progress.value = audio.value.currentTime),
+    ignoreProgressUpdates(() => (progress.value = audio.value.currentTime)),
   )
   useEventListener(
     audio,
     'progress',
-    () => buffer.value = calcBuffer(audio.value.buffered, progress.value),
+    () => (buffer.value = calcBuffer(audio.value.buffered, progress.value)),
   )
   useEventListener(audio, 'volumechange', () =>
     ignoreVolumeUpdates(() =>
@@ -122,8 +124,8 @@ export const usePlayer = createSharedComposable(() => {
       }),
     ),
   )
-  useEventListener(audio, 'ended', () => ended.value = true)
-  useEventListener(audio, 'playing', () => ended.value = false)
+  useEventListener(audio, 'ended', () => (ended.value = true))
+  useEventListener(audio, 'playing', () => (ended.value = false))
 
   watch(currentTrack, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
