@@ -39,16 +39,14 @@ export async function fade(
       multiAudios[id].pause()
       delete multiIntervals[id]
       delete multiAudios[id]
-      const index = multiQueue.findIndex(el => el === id)
+      const index = multiQueue.findIndex((el) => el === id)
       multiQueue.splice(index, 1)
     }
 
     function finish() {
-      if (intervals[id])
-        removeSingle(id)
+      if (intervals[id]) removeSingle(id)
 
-      if (multiIntervals[id])
-        removeMulti(id)
+      if (multiIntervals[id]) removeMulti(id)
     }
 
     finish()
@@ -58,12 +56,10 @@ export async function fade(
         console.log('invalid')
         finish()
         resolve(undefined)
-      }
-      else if (Math.abs(audio.volume - target) > step) {
+      } else if (Math.abs(audio.volume - target) > step) {
         audio.volume += (target > source ? 1 : -1) * step
         cache = audio.volume
-      }
-      else {
+      } else {
         console.log('finished')
         audio.volume = target
         finish()
@@ -77,8 +73,7 @@ export async function fade(
       multiQueue.push(id)
       console.log(multiQueue.length)
       multiQueue.slice(0, -2).forEach(removeMulti)
-    }
-    else {
+    } else {
       intervals[id] = intervalId
     }
   })
@@ -101,8 +96,8 @@ export async function crossFade(
   }
   await Promise.all(
     [
-      sourceAudio
-        && fade(sourceAudio, { source: target, target: 0, duration, multi: true }),
+      sourceAudio &&
+        fade(sourceAudio, { source: target, target: 0, duration, multi: true }),
       targetAudio && fade(targetAudio, { source: 0, target, duration }),
     ].filter(Boolean),
   )

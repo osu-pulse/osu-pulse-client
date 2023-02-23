@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import { ref, shallowRef, watch } from 'vue'
-import { useMouse, useMousePressed, useVModel, whenever } from '@vueuse/core'
+import { ref, shallowRef, watch, watchEffect } from 'vue'
+import {
+  useMouseInElement,
+  useMousePressed,
+  useVModel,
+  whenever,
+} from '@vueuse/core'
 
 const props = withDefaults(
   defineProps<{
@@ -30,19 +35,12 @@ whenever(
 )
 
 const trackRef = shallowRef<HTMLDivElement>()
-const { x } = useMouse()
-function change() {
-  if (trackRef.value) {
-    const { left, right } = trackRef.value.getBoundingClientRect()
-    const newValue = (x.value - left) / (right - left)
-    value.value = Math.max(0, Math.min(1, newValue))
-  }
-}
-watch(x, () => {
+const { elementX, elementWidth } = useMouseInElement(trackRef)
+watchEffect(() => {
+  const rel = elementX.value / elementWidth.value
   if (changing.value)
-    change()
+    value.value = Math.max(0, Math.min(1, rel))
 })
-whenever(changing, change)
 </script>
 
 <template>
@@ -55,6 +53,7 @@ whenever(changing, change)
         '--buffer': `${props.buffer * 100}%`,
       }"
       @mousedown.prevent="changing = true"
+      @touchstart="changing = true"
     />
 
     <div
@@ -62,15 +61,16 @@ whenever(changing, change)
       :class="{ _wide: props.wide }"
       :style="{ '--offset': `${value * 100}%` }"
       @mousedown.prevent="changing = true"
+      @touchstart="changing = true"
     />
   </div>
 </template>
 
 <style lang="scss" scoped>
 @use 'sass:math';
-@use '../styles/mixins';
-@use '../styles/constants';
-@use '../styles/transitions';
+@use '../../shared/styles/mixins';
+@use '../../shared/styles/constants';
+@use '../../shared/styles/transitions';
 
 .range-component {
   position: relative;
@@ -142,8 +142,7 @@ whenever(changing, change)
     }
   }
 
-  &:hover,
-  &._changing {
+  @mixin hovered {
     .track {
       transform: scaleY(1);
     }
@@ -153,11 +152,21 @@ whenever(changing, change)
     }
   }
 
+  @media (hover: hover) {
+    &:hover {
+      @include hovered;
+    }
+  }
+
   &._changing {
-    .track,
-    .track::after,
+    @include hovered;
+
+    .track::after {
+      transition: width 0s;
+    }
+
     .thumb {
-      transition: none;
+      transition: left 0s;
     }
 
     .thumb::after {

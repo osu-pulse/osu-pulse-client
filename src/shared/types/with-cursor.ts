@@ -1,4 +1,4 @@
 export interface WithCursor<T> {
-  data: T[]
-  cursor?: string
+  data: T[];
+  cursor?: string;
 }

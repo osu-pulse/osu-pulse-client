@@ -1,9 +1,7 @@
 <script lang="ts" setup></script>
 
 <template>
-  <div class="queue-component">
-    queue
-  </div>
+  <div class="queue-component">queue</div>
 </template>
 
 <style lang="scss" scoped>

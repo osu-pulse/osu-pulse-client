@@ -1,43 +1,37 @@
 <script lang="ts" setup>
-import {
-  BIconBook,
-  BIconCircleFill,
-  BIconEye,
-  BIconGear,
-  BIconHouse,
-  BIconMusicNoteBeamed,
-  BIconMusicNoteList,
-  BIconPalette,
-  BIconPeople,
-} from 'bootstrap-icons-vue'
 import { computed } from 'vue'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import EmptyAvatarUrl from '../../shared/assets/empty-avatar.webp?url'
 import type { SideMenuItem } from '@/core/types/side-menu-item'
 import { useUser } from '@/core/stores/user'
 import { useOffline } from '@/core/stores/offline'
 import { RouteName } from '@/shared/constants/route-name'
-import { usePlayer } from '@/core/stores/player'
-import { useCurrentTrack } from '@/core/stores/current-track'
+import { usePlayer } from '@/player/stores/player'
+import { useCurrentTrack } from '@/player/stores/current-track'
+import BIcon from '@/shared/components/BIcon.vue'
+
+const { greater } = useBreakpoints(breakpointsTailwind)
+const greaterSm = greater('sm')
 
 const itemsMusic: SideMenuItem[] = [
   {
     label: 'Home',
-    icon: BIconHouse,
+    icon: 'house',
     to: { name: RouteName.HOME },
   },
   {
     label: 'Library',
-    icon: BIconBook,
+    icon: 'book',
     to: { name: RouteName.LIBRARY },
   },
   {
     label: 'Playlists',
-    icon: BIconMusicNoteList,
+    icon: 'music-note-list',
     to: { name: RouteName.PLAYLISTS },
   },
   {
     label: 'Friends',
-    icon: BIconPeople,
+    icon: 'people',
     to: { name: RouteName.FRIENDS },
   },
 ]
@@ -45,12 +39,12 @@ const itemsMusic: SideMenuItem[] = [
 const itemsControl: SideMenuItem[] = [
   {
     label: 'Themes',
-    icon: BIconPalette,
+    icon: 'palette',
     to: { name: RouteName.THEMES },
   },
   {
     label: 'Settings',
-    icon: BIconGear,
+    icon: 'gear',
     to: { name: RouteName.SETTINGS },
   },
 ]
@@ -83,13 +77,14 @@ function goProfile() {
       <div class="avatar-wrap">
         <img class="avatar" alt="avatar" :src="avatar">
         <div v-if="user" class="overlay" @click="goProfile">
-          <BIconEye class="icon" />
+          <BIcon name="eye" class="icon" />
         </div>
       </div>
 
       <div class="info">
         <div class="title">
-          <BIconCircleFill
+          <BIcon
+            name="circle-fill"
             class="status"
             :class="offline ? '_offline' : '_online'"
           />
@@ -101,7 +96,7 @@ function goProfile() {
 
         <Transition>
           <div v-show="listening && playing" class="listening">
-            <BIconMusicNoteBeamed class="icon" />
+            <BIcon name="music-note-beamed" class="icon" />
             <Transition mode="out-in">
               <span :key="listening" class="text">{{ listening }}</span>
             </Transition>
@@ -110,35 +105,33 @@ function goProfile() {
       </div>
     </div>
 
-    <div class="divider" />
+    <template v-if="greaterSm">
+      <div class="divider" />
 
-    <div class="sections-list">
-      <RouterLink
-        v-for="item in itemsMusic"
-        :key="item.label"
-        :to="item.to"
-        class="section"
-      >
-        <div class="section-inner">
-          <Component :is="item.icon" class="icon" />
-          <div class="label">
-            {{ item.label }}
+      <div class="sections-list">
+        <RouterLink
+          v-for="item in itemsMusic" :key="item.label" :to="item.to"
+          class="section"
+        >
+          <div class="section-inner">
+            <BIcon :name="item.icon" class="icon" />
+            <div class="label">
+              {{ item.label }}
+            </div>
           </div>
-        </div>
-      </RouterLink>
-    </div>
+        </RouterLink>
+      </div>
 
-    <div class="divider" />
+      <div class="divider" />
+    </template>
 
     <div class="sections-list">
       <RouterLink
-        v-for="item in itemsControl"
-        :key="item.label"
-        :to="item.to"
+        v-for="item in itemsControl" :key="item.label" :to="item.to"
         class="section"
       >
         <div class="section-inner">
-          <Component :is="item.icon" class="icon" />
+          <BIcon :name="item.icon" class="icon" />
           <div class="label">
             {{ item.label }}
           </div>
@@ -189,6 +182,10 @@ function goProfile() {
   background-color: rgb(constants.$clr-background);
   box-shadow: constants.$cmn-shadow-block;
   transition: constants.$trn-normal-out;
+
+  &._full {
+    width: unset;
+  }
 
   .logo {
     margin: 0 auto 30px;
@@ -251,11 +248,23 @@ function goProfile() {
           transition: constants.$trn-normal-out;
         }
 
-        &:hover {
+        @mixin hovered {
           opacity: 1;
 
           .icon {
             transform: scale(1);
+          }
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            @include hovered;
+          }
+        }
+
+        @media (hover: none) {
+          &:active {
+            @include hovered;
           }
         }
       }
@@ -319,11 +328,11 @@ function goProfile() {
     flex: none;
     height: 2px;
     background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgb(constants.$clr-text-inactive) 40%,
-      rgb(constants.$clr-text-inactive) 60%,
-      transparent 100%
+        90deg,
+        transparent 0%,
+        rgb(constants.$clr-text-inactive) 40%,
+        rgb(constants.$clr-text-inactive) 60%,
+        transparent 100%
     );
   }
 
@@ -355,13 +364,11 @@ function goProfile() {
 
         .icon {
           font-size: 22px;
-          transition: constants.$trn-normal-out;
         }
 
         .label {
           font-size: 18px;
           font-weight: bold;
-          transition: constants.$trn-normal-out;
         }
       }
 
@@ -376,8 +383,8 @@ function goProfile() {
         transition: constants.$trn-fast-out;
       }
 
-      &:hover {
-        &:not(.router-link-active) {
+      &:not(.router-link-active) {
+        @mixin hovered {
           .section-inner {
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.01);
@@ -393,6 +400,18 @@ function goProfile() {
             .icon {
               transform: scale(1.1);
             }
+          }
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            @include hovered;
+          }
+        }
+
+        @media (hover: none) {
+          &:active {
+            @include hovered;
           }
         }
       }
@@ -420,13 +439,13 @@ function goProfile() {
   }
 }
 
-@media (max-width: constants.$bpt-xxl) {
+@media (max-width: constants.$bpt-2xl) and (min-width: constants.$bpt-xl - 1px) {
   .side-menu-component {
     width: 300px;
   }
 }
 
-@media (max-width: constants.$bpt-xl) {
+@media (max-width: constants.$bpt-xl) and (min-width: constants.$bpt-sm - 1px) {
   .side-menu-component {
     width: 80px;
 
@@ -486,6 +505,34 @@ function goProfile() {
               transform: scale(1.05);
             }
           }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: constants.$bpt-sm) {
+  .side-menu-component {
+    padding: 30px 50px 0;
+    width: unset;
+    box-shadow: none;
+
+    .logo {
+      margin-bottom: 40px;
+    }
+
+    .user {
+      margin: 0 0 40px;
+    }
+
+    .sections-list {
+      .section {
+        &::after {
+          display: none;
+        }
+
+        .section-inner {
+          margin: 0;
         }
       }
     }

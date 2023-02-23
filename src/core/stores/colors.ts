@@ -1,7 +1,8 @@
 import {
   createGlobalState,
   createSharedComposable,
-  useCssVar, useEventListener,
+  useCssVar,
+  useEventListener,
 } from '@vueuse/core'
 import { computed, shallowRef, watch } from 'vue'
 import Color from 'color'
@@ -18,9 +19,17 @@ const useColorsState = createGlobalState(() => ({
 }))
 
 export const useColors = createSharedComposable(() => {
-  const { primary, secondary, background, text, textInactive, accent, accentImage } = useColorsState()
+  const {
+    primary,
+    secondary,
+    background,
+    text,
+    textInactive,
+    accent,
+    accentImage,
+  } = useColorsState()
 
-  watch(accentImage, () => accent.value = primary.value)
+  watch(accentImage, () => (accent.value = primary.value))
   const contrast = computed(() => Color(`rgb(${background.value})`))
 
   const CONTRAST_LIMIT = 0.3
@@ -29,14 +38,15 @@ export const useColors = createSharedComposable(() => {
     const target = event.target as HTMLImageElement
 
     if (target.src === accentImage.value?.src) {
-      const raw = Color(colorThief.getColor(accentImage.value, { colorType: 'hex' }))
+      const raw = Color(
+        colorThief.getColor(accentImage.value, { colorType: 'hex' }),
+      )
       const delta = raw.contrast(contrast.value) / 21
 
       let normalized: Color
       if (delta > CONTRAST_LIMIT) {
         normalized = raw
-      }
-      else {
+      } else {
         const weight = CONTRAST_LIMIT - delta
         normalized = raw.negate().mix(contrast.value, weight).negate()
       }

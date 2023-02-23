@@ -1,31 +1,41 @@
 <script lang="ts" setup>
-import { tryOnMounted, watchOnce } from '@vueuse/core'
+import { breakpointsTailwind, tryOnMounted, useBreakpoints, watchOnce } from '@vueuse/core'
+import { ref } from 'vue'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
 import TheSideMenu from '@/core/components/TheSideMenu.vue'
-import ThePlayer from '@/core/components/ThePlayer.vue'
+import ThePlayer from '@/player/components/ThePlayer.vue'
 import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
 import TheQueue from '@/core/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
-import { useCurrentTrack } from '@/core/stores/current-track'
+import { useCurrentTrack } from '@/player/stores/current-track'
+import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
+
+const { greater } = useBreakpoints(breakpointsTailwind)
+const greaterSm = greater('sm')
 
 useMetrika()
+
+const { check } = useOffline()
+tryOnMounted(check)
 
 const { authenticated } = useAuthentication()
 const { loading } = useOffline()
 
 const { queue } = useQueue()
 const { currentTrackId } = useCurrentTrack()
-watchOnce(queue, () => currentTrackId.value = queue.value[0]?.id)
+watchOnce(queue, () => (currentTrackId.value = queue.value[0]?.id))
 
-tryOnMounted(() => {
-  console.clear()
-  console.log('This app in the development state')
-  console.log('GitHub organization: https://github.com/osu-pulse')
-})
+const menuShowed = ref(false)
+
+// tryOnMounted(() => {
+//   console.clear()
+//   console.log('This app in the development state')
+//   console.log('GitHub organization: https://github.com/osu-pulse')
+// })
 </script>
 
 <template>
@@ -34,7 +44,7 @@ tryOnMounted(() => {
 
     <div class="window">
       <RouterView v-slot="{ Component }">
-        <Transition mode="out-in">
+        <Transition v-if="greaterSm" mode="out-in">
           <TheIntroLoader v-if="!authenticated && loading" class="loader" />
 
           <div v-else class="body">
@@ -51,6 +61,28 @@ tryOnMounted(() => {
             </main>
 
             <TheQueue class="queue" />
+          </div>
+        </Transition>
+
+        <Transition v-else mode="out-in">
+          <TheIntroLoader v-if="!authenticated && loading" class="loader" />
+
+          <div v-else class="body">
+            <main class="main-section">
+              <Transition mode="out-in">
+                <TheSideMenu v-if="menuShowed" class="side-menu" />
+
+                <div v-else class="page-container">
+                  <Transition mode="out-in">
+                    <Component :is="Component" class="page" />
+                  </Transition>
+                </div>
+              </Transition>
+
+              <ThePlayer class="player" />
+            </main>
+
+            <TheBottomMenu v-model:menu-showed="menuShowed" class="bottom-menu" />
           </div>
         </Transition>
       </RouterView>
@@ -126,6 +158,40 @@ tryOnMounted(() => {
       }
 
       .queue {
+      }
+    }
+  }
+}
+
+@media (max-width: constants.$bpt-sm) {
+  .app-component {
+    .window {
+      .body {
+        flex-direction: column;
+        gap: 0;
+
+        .main-section {
+          gap: 0;
+
+          .side-menu, .page-container {
+            @include transitions.fade();
+          }
+
+          .side-menu {
+            margin: 10px;
+            flex: auto;
+            border-radius: constants.$cmn-border-radius;
+            box-shadow: constants.$cmn-shadow-block;
+          }
+
+          .player {
+            margin: 0 10px 10px;
+          }
+        }
+
+        .bottom-menu {
+          flex: none;
+        }
       }
     }
   }

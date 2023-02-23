@@ -1,7 +1,6 @@
 import type { RouteLocationRaw } from 'vue-router'
 
-export interface SideMenuItem {
-  label: string
+export interface BottomMenuItem {
   icon: string
   to: RouteLocationRaw
 }

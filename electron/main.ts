@@ -4,18 +4,24 @@ import { BrowserWindow, Menu, Tray, app, ipcMain, nativeTheme } from 'electron'
 let window: BrowserWindow
 let tray: Tray
 
-const ROOT = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, '..')
+const ROOT = app.isPackaged
+  ? process.resourcesPath
+  : path.resolve(__dirname, '..')
 
 function createTray() {
   const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
-  tray = new Tray(path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`))
+  tray = new Tray(
+    path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`),
+  )
 
   nativeTheme.on('updated', () => {
     const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
-    tray.setImage(path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`))
+    tray.setImage(
+      path.resolve(ROOT, 'electron', 'assets', 'tray', `${theme}.ico`),
+    )
   })
 
-  tray.on('click', () => window.isVisible() ? window.hide(): window.show())
+  tray.on('click', () => (window.isVisible() ? window.hide() : window.show()))
 
   window.on('minimize', () => window.hide())
   window.on('close', () => tray?.destroy())
@@ -37,18 +43,14 @@ async function createWindow() {
   const indexUrl = 'http://127.0.0.1:4000'
   const indexPath = path.resolve(ROOT, 'dist', 'index.html')
 
-  if (app.isPackaged)
-    await window.loadFile(indexPath)
-  else
-    await window.loadURL(indexUrl)
+  if (app.isPackaged) await window.loadFile(indexPath)
+  else await window.loadURL(indexUrl)
 
   window.webContents.on('will-redirect', async (event, url) => {
     if (url.includes('access_token')) {
       const tokens = new URL(url).search
-      if (app.isPackaged)
-        await window.loadFile(indexPath, { search: tokens })
-      else
-        await window.loadURL(`${indexUrl}${tokens}`)
+      if (app.isPackaged) await window.loadFile(indexPath, { search: tokens })
+      else await window.loadURL(`${indexUrl}${tokens}`)
     }
   })
 
@@ -63,12 +65,10 @@ app.whenReady().then(async () => {
   createTray()
 
   app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
-      app.quit()
+    if (process.platform !== 'darwin') app.quit()
   })
 
   app.on('activate', async () => {
-    if (BrowserWindow.getAllWindows().length === 0)
-      await createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) await createWindow()
   })
 })

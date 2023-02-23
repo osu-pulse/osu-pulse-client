@@ -7,23 +7,12 @@ import {
   whenever,
 } from '@vueuse/core'
 import { computed, customRef, ref, shallowRef, watch } from 'vue'
-import {
-  BIconArrowRepeat,
-  BIconListUl,
-  BIconPauseFill,
-  BIconPlayFill,
-  BIconShuffle,
-  BIconSkipEndFill,
-  BIconSkipStartFill,
-  BIconThreeDotsVertical,
-  BIconVolumeMute,
-  BIconVolumeUp,
-} from 'bootstrap-icons-vue'
-import SliderRange from '@/shared/components/SliderRange.vue'
-import { usePlayer } from '@/core/stores/player'
+import SliderRange from '@/player/components/SliderRange.vue'
+import { usePlayer } from '@/player/stores/player'
 import { useColors } from '@/core/stores/colors'
-import { useCurrentTrack } from '@/core/stores/current-track'
-import { RepeatMode } from '@/core/constants/repeat-mode'
+import { useCurrentTrack } from '@/player/stores/current-track'
+import { RepeatMode } from '@/player/constants/repeat-mode'
+import BIcon from '@/shared/components/BIcon.vue'
 
 const {
   playing,
@@ -36,11 +25,22 @@ const {
   buffer,
 } = usePlayer()
 
-const { currentTrackId, currentTrack, repeating, shuffling, hasPrev, hasNext, prev, next } = useCurrentTrack()
+const {
+  currentTrackId,
+  currentTrack,
+  repeating,
+  shuffling,
+  hasPrev,
+  hasNext,
+  prev,
+  next,
+}
+  = useCurrentTrack()
 
 const { greater } = useBreakpoints(breakpointsTailwind)
+const greaterLg = greater('lg')
 const coverSrc = computed(() =>
-  greater('lg').value ? currentTrack.value?.cover?.normal : currentTrack.value?.cover?.wide,
+  greaterLg.value ? currentTrack.value?.cover?.normal : currentTrack.value?.cover?.wide,
 )
 
 const coverLoaded = ref(false)
@@ -56,19 +56,14 @@ function handleLoad(event: Event) {
 const { accentImage } = useColors()
 syncRefs(coverRef, accentImage)
 
-const volumeIcon = computed(() =>
-  muted.value ? BIconVolumeMute : BIconVolumeUp,
-)
+const volumeIcon = computed(() => (muted.value ? 'volume-mute' : 'volume-up'))
 
-const volumeGain = ref(2)
-// TODO: Remove
-window.changeVolumeGain = (value: number) => (volumeGain.value = value)
 const volumeScaled = customRef(() => ({
-  get: () => volume.value ** (1 / volumeGain.value),
-  set: value => (volume.value = value ** volumeGain.value),
+  get: () => volume.value ** 0.5,
+  set: value => (volume.value = value ** 2),
 }))
 
-const playBtnIcon = computed(() => playing.value ? BIconPauseFill : BIconPlayFill)
+const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 
 interface TimeSplit {
   h: string
@@ -84,19 +79,21 @@ const durationSplit = computed<TimeSplit>(() => ({
   m: `0${Math.floor(duration.value % 60)}`.slice(-2),
 }))
 
-const bufferScaled = computed(() => duration.value > 0 ? buffer.value / duration.value : 0)
+const bufferScaled = computed(() => (duration.value > 0 ? buffer.value / duration.value : 0))
 const progressScaled = customRef(() => ({
-  get: () => duration.value > 0 ? progress.value / duration.value : 0,
-  set: value => progress.value = duration.value * value,
+  get: () => (duration.value > 0 ? progress.value / duration.value : 0),
+  set: value => (progress.value = duration.value * value),
 }))
 
 const progressChanging = ref(false)
 const wasPlaying = ref(false)
+
 function handleProgressChangeStart() {
   wasPlaying.value = playing.value
   playing.value = false
   progressChanging.value = true
 }
+
 function handleProgressChangeEnd() {
   playing.value = wasPlaying.value
   wasPlaying.value = false
@@ -110,18 +107,20 @@ whenever(
       progress.value = 0
     else if (hasNext.value)
       next()
-    else
-      playing.value = false
+    else playing.value = false
   },
 )
 
-const repeatBtnIcon = computed(() => repeating.value === RepeatMode.LIST ? BIconListUl : BIconArrowRepeat)
+const repeatBtnIcon = computed(() =>
+  repeating.value === RepeatMode.SINGLE ? 'repeat-1' : 'repeat',
+)
+
 function handleChangeRepeat() {
   if (!repeating.value)
-    repeating.value = RepeatMode.SINGLE
-  else if (repeating.value === RepeatMode.SINGLE)
     repeating.value = RepeatMode.LIST
   else if (repeating.value === RepeatMode.LIST)
+    repeating.value = RepeatMode.SINGLE
+  else if (repeating.value === RepeatMode.SINGLE)
     repeating.value = false
 }
 </script>
@@ -161,24 +160,22 @@ function handleChangeRepeat() {
         <div class="sound">
           <button class="button" @click="muted = !muted">
             <Transition mode="out-in">
-              <Component :is="volumeIcon" class="icon" />
+              <BIcon :key="volumeIcon" :name="volumeIcon" class="icon" />
             </Transition>
           </button>
 
           <SliderRange
             v-model:value="volumeScaled"
-            :class="{ _collapsed: muted }"
-            class="range"
+            :class="{ _collapsed: muted }" class="range"
           />
         </div>
 
         <div class="main">
           <button
-            class="button backward"
-            :class="{ _disabled: !hasPrev }"
+            class="button backward" :class="{ _disabled: !hasPrev }"
             @click="prev"
           >
-            <BIconSkipStartFill class="icon" />
+            <BIcon name="skip-start-fill" class="icon" />
           </button>
 
           <button
@@ -191,40 +188,37 @@ function handleChangeRepeat() {
                 v-if="caching" size="30px" color="white"
                 class="icon"
               />
-              <Component :is="playBtnIcon" v-else class="icon" />
+              <BIcon v-else :key="playBtnIcon" :name="playBtnIcon" class="icon" />
             </Transition>
           </button>
 
           <button
-            class="button forward"
-            :class="{ _disabled: !hasNext }"
+            class="button forward" :class="{ _disabled: !hasNext }"
             @click="next"
           >
-            <BIconSkipEndFill class="icon" />
+            <BIcon name="skip-end-fill" class="icon" />
           </button>
         </div>
 
         <div class="settings">
           <button
-            class="button"
-            :class="{ _turned: repeating }"
+            class="button" :class="{ _turned: repeating }"
             @click="handleChangeRepeat"
           >
             <Transition mode="out-in">
-              <Component :is="repeatBtnIcon" class="icon" />
+              <BIcon :key="repeatBtnIcon" :name="repeatBtnIcon" class="icon" />
             </Transition>
           </button>
 
           <button
-            class="button"
-            :class="{ _turned: shuffling }"
+            class="button" :class="{ _turned: shuffling }"
             @click="shuffling = !shuffling"
           >
-            <BIconShuffle class="icon" />
+            <BIcon name="shuffle" class="icon" />
           </button>
 
           <button class="button">
-            <BIconThreeDotsVertical class="icon" />
+            <BIcon name="three-dots-vertical" class="icon" />
           </button>
         </div>
       </div>
@@ -376,7 +370,7 @@ function handleChangeRepeat() {
             transition: constants.$trn-normal-out;
           }
 
-          &:hover {
+          @mixin hovered {
             background: rgb(constants.$clr-secondary);
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.1);
@@ -388,9 +382,21 @@ function handleChangeRepeat() {
             }
           }
 
-          &:active {
-            transform: scale(1);
-            box-shadow: none;
+          @media (hover: hover) {
+            &:hover {
+              @include hovered;
+            }
+
+            &:active {
+              transform: scale(1);
+              box-shadow: none;
+            }
+          }
+
+          @media (hover: none) {
+            &:active {
+              @include hovered;
+            }
           }
         }
 
@@ -422,13 +428,18 @@ function handleChangeRepeat() {
             opacity: 0;
           }
 
-          &:hover {
-            transform: scale(1.1);
-            transition: constants.$trn-fast-out;
-          }
-
           &.backward,
           &.forward {
+            @mixin hovered {
+              transform: scale(1.1);
+              transition: constants.$trn-fast-out;
+            }
+
+            @media (hover: hover) {
+              &:hover {
+                @include hovered;
+              }
+            }
 
             .icon {
               color: rgb(constants.$clr-accent);
@@ -452,16 +463,28 @@ function handleChangeRepeat() {
           &.play {
             @include mixins.size(40px);
             display: flex;
-            background: rgb(constants.$clr-accent);;
+            background: rgb(constants.$clr-accent);
             border-radius: 100%;
 
-            &:hover {
+            @mixin hovered {
               transform: scale(1.07);
             }
 
-            &:active {
-              transform: scale(1);
-              box-shadow: none;
+            @media (hover: hover) {
+              &:hover {
+                @include hovered;
+              }
+
+              &:active {
+                transform: scale(1);
+                box-shadow: none;
+              }
+            }
+
+            @media (hover: none) {
+              &:active {
+                @include hovered;
+              }
             }
 
             .icon {
@@ -492,7 +515,7 @@ function handleChangeRepeat() {
             transition: constants.$trn-normal-out;
           }
 
-          &:hover {
+          @mixin hovered {
             background: rgb(constants.$clr-secondary);
             box-shadow: constants.$cmn-shadow-element;
             transform: scale(1.1);
@@ -504,9 +527,21 @@ function handleChangeRepeat() {
             }
           }
 
-          &:active {
-            transform: scale(1);
-            box-shadow: none;
+          @media (hover: hover) {
+            &:hover {
+              @include hovered;
+            }
+
+            &:active {
+              transform: scale(1);
+              box-shadow: none;
+            }
+          }
+
+          @media (hover: none) {
+            &:active {
+              @include hovered;
+            }
           }
 
           &._turned {
@@ -539,7 +574,7 @@ function handleChangeRepeat() {
   }
 }
 
-@media (max-width: constants.$bpt-xxl) {
+@media (max-width: constants.$bpt-2xl) and (min-width: constants.$bpt-lg + 1px) {
   .player-component {
     .info {
       width: 300px;
@@ -587,11 +622,7 @@ function handleChangeRepeat() {
         &::before {
           @include mixins.pseudo();
           z-index: 1;
-          background: linear-gradient(
-              to top,
-              rgb(constants.$clr-background) 0%,
-              transparent 50%
-          );
+          background: linear-gradient(to top, rgb(constants.$clr-background) 0%, transparent 50%);
         }
       }
 

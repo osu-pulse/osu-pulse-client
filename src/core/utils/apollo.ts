@@ -46,8 +46,8 @@ const apiLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query)
     return (
-      definition.kind === 'OperationDefinition'
-      && definition.operation === 'subscription'
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
     )
   },
   wsLink,
@@ -58,15 +58,14 @@ const omitTypenameLink = new ApolloLink((operation, forward) => {
   if (operation.variables) {
     operation.variables = JSON.parse(
       JSON.stringify(operation.variables),
-      (k, v) => (k === '__typename') ? undefined : v,
+      (k, v) => (k === '__typename' ? undefined : v),
     )
   }
   return forward(operation)
 })
 
 const errorLink = onError((error) => {
-  if (!import.meta.env.PROD)
-    logErrorMessages(error)
+  if (!import.meta.env.PROD) logErrorMessages(error)
 })
 
 export const apolloClient = new ApolloClient({

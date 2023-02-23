@@ -4,7 +4,7 @@ import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue'
 
 <template>
   <div class="intro-loader-component">
-    <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
+    <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
 
     <ScaleLoader margin="4px" color="var(--color-osu)" />
   </div>
@@ -12,7 +12,7 @@ import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue'
 
 <style scoped lang="scss">
 .intro-loader-component {
-  --color-osu: #FA94B2;
+  --color-osu: #fa94b2;
   display: flex;
   flex-direction: column;
   justify-content: center;
