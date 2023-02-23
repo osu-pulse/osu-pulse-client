@@ -27,11 +27,5 @@ jobs:
       - name: Run tests
         run: yarn run test
 
-      - name: Save coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage
-          path: coverage/
-
       - name: Run build
         run: yarn web:build
