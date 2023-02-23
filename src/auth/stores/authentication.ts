@@ -41,7 +41,7 @@ export const useAuthentication = createSharedComposable(() => {
 
   function redirect() {
     const query = new URLSearchParams({
-      redirect_uri: location.origin,
+      redirect_url: location.origin,
     }).toString()
     window.location.href = `${import.meta.env.VITE_AUTH_URL}/authorize?${query}`
   }
