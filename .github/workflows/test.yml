@@ -32,3 +32,8 @@ jobs:
         with:
           name: coverage
           path: coverage/
+
+      - name: Run build
+        run: |
+          yarn web:build
+          yarn electron:build

@@ -4,5 +4,5 @@ export enum Platform {
   WEB = 'web',
 }
 
-export const platform =
-  (import.meta.env.VITE_PLATFORM as Platform) ?? Platform.WEB
+export const platform
+  = (import.meta.env.VITE_PLATFORM as Platform) ?? Platform.WEB

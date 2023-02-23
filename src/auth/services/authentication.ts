@@ -14,7 +14,8 @@ export const useAuthenticationService = createGlobalState(() => ({
         RotateTokenDto
       >('token', { refresh_token: refreshToken })
       return data
-    } catch {
+    }
+    catch {
       throw new AuthenticationError()
     }
   },

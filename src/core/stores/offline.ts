@@ -15,9 +15,11 @@ export const useOffline = createSharedComposable(() => {
     try {
       await healthService.health()
       offline.value = false
-    } catch {
+    }
+    catch {
       offline.value = true
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }

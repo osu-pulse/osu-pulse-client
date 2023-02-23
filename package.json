@@ -13,7 +13,6 @@
     "electron:dev": "cross-env VITE_PLATFORM=electron concurrently --kill-others \"vite --host --port 4000\" \"tsc electron/main.ts electron/preload.ts && electron electron/main.js\"",
     "electron:build": "cross-env VITE_PLATFORM=electron vite build && tsc electron/main.ts electron/preload.ts && electron-builder --config --win",
     "lint": "eslint . --fix",
-    "format": "prettier . --write",
     "test": "vitest run --coverage"
   },
   "dependencies": {

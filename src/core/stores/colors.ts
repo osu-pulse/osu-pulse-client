@@ -46,7 +46,8 @@ export const useColors = createSharedComposable(() => {
       let normalized: Color
       if (delta > CONTRAST_LIMIT) {
         normalized = raw
-      } else {
+      }
+      else {
         const weight = CONTRAST_LIMIT - delta
         normalized = raw.negate().mix(contrast.value, weight).negate()
       }

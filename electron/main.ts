@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { BrowserWindow, Menu, Tray, app, ipcMain, nativeTheme } from 'electron'
+import { BrowserWindow, Tray, app, ipcMain, nativeTheme } from 'electron'
 
 let window: BrowserWindow
 let tray: Tray
@@ -43,14 +43,16 @@ async function createWindow() {
   const indexUrl = 'http://127.0.0.1:4000'
   const indexPath = path.resolve(ROOT, 'dist', 'index.html')
 
-  if (app.isPackaged) await window.loadFile(indexPath)
+  if (app.isPackaged)
+    await window.loadFile(indexPath)
   else await window.loadURL(indexUrl)
 
-  window.webContents.on('will-redirect', async (event, url) => {
+  window.webContents.on('will-redirect', (event, url) => {
     if (url.includes('access_token')) {
       const tokens = new URL(url).search
-      if (app.isPackaged) await window.loadFile(indexPath, { search: tokens })
-      else await window.loadURL(`${indexUrl}${tokens}`)
+      if (app.isPackaged)
+        void window.loadFile(indexPath, { search: tokens })
+      else void window.loadURL(`${indexUrl}${tokens}`)
     }
   })
 
@@ -60,15 +62,17 @@ async function createWindow() {
   ipcMain.on('close', () => window.close())
 }
 
-app.whenReady().then(async () => {
+void app.whenReady().then(async () => {
   await createWindow()
   createTray()
 
   app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit()
+    if (process.platform !== 'darwin')
+      app.quit()
   })
 
-  app.on('activate', async () => {
-    if (BrowserWindow.getAllWindows().length === 0) await createWindow()
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0)
+      void createWindow()
   })
 })

@@ -23,7 +23,7 @@ export const useUser = createSharedComposable(() => {
 
   const usersService = useUsersService()
   const { result } = usersService.me()
-  whenever(result, (result) => (user.value = result.me), { immediate: true })
+  whenever(result, result => (user.value = result.me), { immediate: true })
 
   const { onLogout } = useAuthentication()
   watch(onLogout, () => (user.value = undefined))

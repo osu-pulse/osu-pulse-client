@@ -7,8 +7,8 @@ export interface FadeOptions {
 }
 
 type FadeId = string
-const intervals: Record<FadeId, any> = {}
-const multiIntervals: Record<FadeId, any> = {}
+const intervals: Record<FadeId, number> = {}
+const multiIntervals: Record<FadeId, number> = {}
 const multiAudios: Record<FadeId, HTMLMediaElement> = {}
 const multiQueue: FadeId[] = []
 
@@ -39,28 +39,30 @@ export async function fade(
       multiAudios[id].pause()
       delete multiIntervals[id]
       delete multiAudios[id]
-      const index = multiQueue.findIndex((el) => el === id)
+      const index = multiQueue.findIndex(el => el === id)
       multiQueue.splice(index, 1)
     }
 
     function finish() {
-      if (intervals[id]) removeSingle(id)
+      if (intervals[id])
+        removeSingle(id)
 
-      if (multiIntervals[id]) removeMulti(id)
+      if (multiIntervals[id])
+        removeMulti(id)
     }
 
     finish()
 
     const intervalId = setInterval(() => {
       if (cache !== audio.volume) {
-        console.log('invalid')
         finish()
         resolve(undefined)
-      } else if (Math.abs(audio.volume - target) > step) {
+      }
+      else if (Math.abs(audio.volume - target) > step) {
         audio.volume += (target > source ? 1 : -1) * step
         cache = audio.volume
-      } else {
-        console.log('finished')
+      }
+      else {
         audio.volume = target
         finish()
         resolve(undefined)
@@ -68,13 +70,13 @@ export async function fade(
     }, duration / (Math.abs(audio.volume - target) / step))
 
     if (multi) {
-      multiIntervals[id] = intervalId
+      multiIntervals[id] = intervalId as unknown as number
       multiAudios[id] = audio
       multiQueue.push(id)
-      console.log(multiQueue.length)
       multiQueue.slice(0, -2).forEach(removeMulti)
-    } else {
-      intervals[id] = intervalId
+    }
+    else {
+      intervals[id] = intervalId as unknown as number
     }
   })
 }
@@ -96,8 +98,8 @@ export async function crossFade(
   }
   await Promise.all(
     [
-      sourceAudio &&
-        fade(sourceAudio, { source: target, target: 0, duration, multi: true }),
+      sourceAudio
+        && fade(sourceAudio, { source: target, target: 0, duration, multi: true }),
       targetAudio && fade(targetAudio, { source: 0, target, duration }),
     ].filter(Boolean),
   )

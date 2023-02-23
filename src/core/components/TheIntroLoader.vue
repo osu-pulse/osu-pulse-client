@@ -4,7 +4,7 @@ import ScaleLoader from 'vue-spinner/src/ScaleLoader.vue'
 
 <template>
   <div class="intro-loader-component">
-    <img class="icon" alt="logo" src="../../shared/assets/logo.webp" />
+    <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
 
     <ScaleLoader margin="4px" color="var(--color-osu)" />
   </div>

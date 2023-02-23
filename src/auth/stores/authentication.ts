@@ -29,7 +29,8 @@ export const useAuthentication = createSharedComposable(() => {
     return new Promise((resolve) => {
       if (accessToken.value) {
         resolve(accessToken.value)
-      } else {
+      }
+      else {
         const stop = whenever(accessToken, (value) => {
           stop()
           resolve(value)
@@ -47,15 +48,17 @@ export const useAuthentication = createSharedComposable(() => {
       const { exp } = jwtDecode<JwtPayload>(accessToken.value)
       const time = (exp - new Date().getTime() / 1000 - 10) * 1000
 
-      setTimeout(rotate, time)
+      setTimeout(() => {
+        void rotate()
+      }, time)
     }
   }
 
   const authenticationService = useAuthenticationService()
   async function rotate() {
     if (refreshToken.value) {
-      const { access_token, refresh_token } =
-        await authenticationService.rotate(refreshToken.value)
+      const { access_token, refresh_token }
+        = await authenticationService.rotate(refreshToken.value)
 
       accessToken.value = access_token
       refreshToken.value = refresh_token
@@ -87,8 +90,10 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   async function login(): Promise<void> {
-    if (isUrlClaimable()) await claimUrl()
-    else if (refreshToken.value) await rotate()
+    if (isUrlClaimable())
+      await claimUrl()
+    else if (refreshToken.value)
+      await rotate()
     else redirect()
   }
   const { offline } = useOffline()

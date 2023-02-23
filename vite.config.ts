@@ -1,7 +1,7 @@
-import path from 'path';
-import Vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'vitest/config';
-import SvgLoader from 'vite-svg-loader';
+import path from 'path'
+import Vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vitest/config'
+import SvgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   base: './',
@@ -29,4 +29,4 @@ export default defineConfig({
   },
 
   plugins: [Vue(), SvgLoader()],
-});
+})
