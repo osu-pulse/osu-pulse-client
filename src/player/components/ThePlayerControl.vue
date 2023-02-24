@@ -13,7 +13,7 @@ const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 </script>
 
 <template>
-  <div class="player-control-panel-component">
+  <div class="player-control-panel">
     <button
       class="button backward" :class="{ _disabled: !hasPrev }"
       @click="prev"
@@ -49,7 +49,7 @@ const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 @use '../../shared/styles/constants';
 @use '../../shared/styles/transitions';
 
-.player-control-panel-component {
+.player-control-panel {
   display: flex;
   align-items: center;
   gap: 10px;

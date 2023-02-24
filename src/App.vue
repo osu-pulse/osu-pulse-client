@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import { breakpointsTailwind, tryOnMounted, useBreakpoints, watchOnce } from '@vueuse/core'
+import {
+  breakpointsTailwind,
+  tryOnMounted,
+  useBreakpoints,
+  watchOnce,
+  whenever,
+} from '@vueuse/core'
 import { ref } from 'vue'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
@@ -30,12 +36,20 @@ const { currentTrackId } = useCurrentTrack()
 watchOnce(queue, () => (currentTrackId.value = queue.value[0]?.id))
 
 const menuShowed = ref(false)
+const playerMaximized = ref(false)
+whenever(greaterSm, () => {
+  menuShowed.value = false
+  playerMaximized.value = false
+})
 
-// tryOnMounted(() => {
-//   console.clear()
-//   console.log('This app in the development state')
-//   console.log('GitHub organization: https://github.com/osu-pulse')
-// })
+tryOnMounted(() => {
+  // eslint-disable-next-line no-console
+  console.clear()
+  // eslint-disable-next-line no-console
+  console.log('This app in the development state')
+  // eslint-disable-next-line no-console
+  console.log('GitHub organization: https://github.com/osu-pulse')
+})
 </script>
 
 <template>
@@ -79,7 +93,7 @@ const menuShowed = ref(false)
                 </div>
               </Transition>
 
-              <ThePlayer class="player" />
+              <ThePlayer v-model:maximized="playerMaximized" class="player" />
             </main>
 
             <TheBottomMenu v-model:menu-showed="menuShowed" class="bottom-menu" />
@@ -149,6 +163,10 @@ const menuShowed = ref(false)
             @include transitions.fade();
             position: relative;
             display: flex;
+
+            &.v-leave-active {
+              transition: constants.$trn-fast-out;
+            }
           }
         }
 
@@ -172,9 +190,14 @@ const menuShowed = ref(false)
 
         .main-section {
           gap: 0;
+          overflow: auto;
 
           .side-menu, .page-container {
             @include transitions.fade();
+
+            &.v-leave-active {
+              transition: constants.$trn-fast-out;
+            }
           }
 
           .side-menu {
@@ -185,6 +208,7 @@ const menuShowed = ref(false)
           }
 
           .player {
+            flex: none;
             margin: 0 10px 10px;
           }
         }

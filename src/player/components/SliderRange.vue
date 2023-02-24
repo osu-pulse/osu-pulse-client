@@ -52,7 +52,7 @@ watchEffect(() => {
         '--value': `${value * 100}%`,
         '--buffer': `${props.buffer * 100}%`,
       }"
-      @mousedown.prevent="changing = true"
+      @mousedown="changing = true"
       @touchstart="changing = true"
     />
 
@@ -60,7 +60,7 @@ watchEffect(() => {
       class="thumb"
       :class="{ _wide: props.wide }"
       :style="{ '--offset': `${value * 100}%` }"
-      @mousedown.prevent="changing = true"
+      @mousedown="changing = true"
       @touchstart="changing = true"
     />
   </div>

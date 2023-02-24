@@ -135,6 +135,7 @@ export const usePlayer = createSharedComposable(() => {
       cancelCacheTrack(oldValue.id)
 
     audio.value.src = value?.url?.audio ?? ''
+    audio.value.load()
     if (value && !value.cached && playing.value)
       void cacheTrack(value.id)
   })
