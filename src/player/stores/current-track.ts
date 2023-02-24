@@ -1,7 +1,8 @@
 import {
   createGlobalState,
   createSharedComposable,
-  useArrayMap, useRefHistory,
+  useArrayMap,
+  useRefHistory,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
 import { computed, ref, watch } from 'vue'
@@ -30,14 +31,14 @@ export const useCurrentTrack = createSharedComposable(() => {
   const hasPrev = computed(() => {
     if (!currentTrackId.value)
       return false
-    if (shuffling.value)
-      return canUndo.value
     if (repeating.value) {
       return switchAssign(repeating.value, {
         [RepeatMode.LIST]: true,
         [RepeatMode.SINGLE]: false,
       })
     }
+    if (shuffling.value)
+      return canUndo.value
 
     return queueIds.value.some(
       (id, index) => queueIds.value[index + 1] === currentTrackId.value,
@@ -46,14 +47,14 @@ export const useCurrentTrack = createSharedComposable(() => {
   const hasNext = computed(() => {
     if (!currentTrackId.value)
       return false
-    if (shuffling.value)
-      return queueIds.value.length > 1
     if (repeating.value) {
       return switchAssign(repeating.value, {
         [RepeatMode.LIST]: true,
         [RepeatMode.SINGLE]: false,
       })
     }
+    if (shuffling.value)
+      return queueIds.value.length > 1
 
     return queueIds.value.some(
       (id, index) => queueIds.value[index - 1] === currentTrackId.value,

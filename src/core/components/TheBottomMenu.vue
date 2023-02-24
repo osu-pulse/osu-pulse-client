@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router'
 import { watch } from 'vue'
 import { RouteName } from '@/shared/constants/route-name'
 import type { BottomMenuItem } from '@/core/types/bottom-menu-item'
-import BIcon from '@/shared/components/BIcon.vue'
+import SecondaryPanel from '@/shared/components/SecondaryPanel.vue'
 
 const props = defineProps<{
   menuShowed: boolean
@@ -42,18 +42,16 @@ const items: BottomMenuItem[] = [
 
 <template>
   <div class="bottom-menu-component">
-    <RouterLink
+    <SecondaryPanel
       v-for="item in items"
       :key="item.to.name"
+      class="panel"
+      :icon="item.icon"
       :to="item.to"
-      class="section"
-    >
-      <BIcon :name="item.icon" class="icon" />
-    </RouterLink>
+      :active="item.to.name === route.name"
+    />
 
-    <div class="section" @click="menuShowed = !menuShowed">
-      <BIcon name="list" class="icon" />
-    </div>
+    <SecondaryPanel class="panel" icon="list" @click="menuShowed = !menuShowed" />
   </div>
 </template>
 
@@ -63,61 +61,25 @@ const items: BottomMenuItem[] = [
 @use '../src/shared/styles/transitions';
 
 .bottom-menu-component {
+  min-width: max-content;
   padding: 10px 20px 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   gap: 10px;
   box-shadow: constants.$cmn-shadow-block;
-  overflow: hidden;
+  overflow-y: hidden;
   background-color: rgb(constants.$clr-background);
 
-  .section {
-    padding: 20px;
-    display: flex;
+  .panel {
+    padding: 16px;
     border-radius: 10px 10px 0 0;
-    transition: constants.$trn-normal-out;
 
-    .icon {
-      margin: auto;
-      font-size: 22px;
-      color: rgb(constants.$clr-text-inactive);
-      transition: constants.$trn-normal-out;
+    &._active {
+      pointer-events: none;
     }
 
-    &:not(.router-link-active) {
-      @mixin hovered {
-        box-shadow: constants.$cmn-shadow-element;
-        transform: scale(1.01);
-        background: rgb(constants.$clr-secondary);
-        transition: constants.$trn-fast-in;
-
-        .icon {
-          transform: scale(1.1);
-          color: rgb(constants.$clr-text);
-          transition: constants.$trn-fast-in;
-        }
-      }
-
-      @media (hover: hover) {
-        &:hover {
-          @include hovered;
-        }
-      }
-
-      @media (hover: none) {
-        &:active {
-          @include hovered;
-        }
-      }
-    }
-
-    &.router-link-active {
-      background: rgb(constants.$clr-primary);
-
-      .icon {
-        transform: scale(1.1);
-        color: rgb(constants.$clr-background);
-      }
+    ::v-deep(.icon) {
+      font-size: 18px;
     }
   }
 }
