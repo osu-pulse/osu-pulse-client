@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import MoonLoader from 'vue-spinner/src/MoonLoader.vue'
 import {
   breakpointsTailwind,
   syncRefs,
@@ -13,12 +12,12 @@ import { useColors } from '@/core/stores/colors'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { RepeatMode } from '@/player/constants/repeat-mode'
 import BIcon from '@/shared/components/BIcon.vue'
+import ThePlayerSoundPanel from '@/player/components/ThePlayerSoundPanel.vue'
+import ThePlayerControlPanel
+  from '@/player/components/ThePlayerControlPanel.vue'
 
 const {
   playing,
-  muted,
-  volume,
-  caching,
   progress,
   duration,
   ended,
@@ -26,13 +25,10 @@ const {
 } = usePlayer()
 
 const {
-  currentTrackId,
   currentTrack,
   repeating,
   shuffling,
-  hasPrev,
   hasNext,
-  prev,
   next,
 }
   = useCurrentTrack()
@@ -55,15 +51,6 @@ function handleLoad(event: Event) {
 
 const { accentImage } = useColors()
 syncRefs(coverRef, accentImage)
-
-const volumeIcon = computed(() => (muted.value ? 'volume-mute' : 'volume-up'))
-
-const volumeScaled = customRef(() => ({
-  get: () => volume.value ** 0.5,
-  set: value => (volume.value = value ** 2),
-}))
-
-const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 
 interface TimeSplit {
   h: string
@@ -157,48 +144,9 @@ function handleChangeRepeat() {
 
     <div class="player">
       <div class="controls">
-        <div class="sound">
-          <button class="button" @click="muted = !muted">
-            <Transition mode="out-in">
-              <BIcon :key="volumeIcon" :name="volumeIcon" class="icon" />
-            </Transition>
-          </button>
+        <ThePlayerSoundPanel />
 
-          <SliderRange
-            v-model:value="volumeScaled"
-            :class="{ _collapsed: muted }" class="range"
-          />
-        </div>
-
-        <div class="main">
-          <button
-            class="button backward" :class="{ _disabled: !hasPrev }"
-            @click="prev"
-          >
-            <BIcon name="skip-start-fill" class="icon" />
-          </button>
-
-          <button
-            class="button play"
-            :class="{ _disabled: !currentTrackId }"
-            @click="playing = !playing"
-          >
-            <Transition mode="out-in">
-              <MoonLoader
-                v-if="caching" size="30px" color="white"
-                class="icon"
-              />
-              <BIcon v-else :key="playBtnIcon" :name="playBtnIcon" class="icon" />
-            </Transition>
-          </button>
-
-          <button
-            class="button forward" :class="{ _disabled: !hasNext }"
-            @click="next"
-          >
-            <BIcon name="skip-end-fill" class="icon" />
-          </button>
-        </div>
+        <ThePlayerControlPanel class="control-panel" />
 
         <div class="settings">
           <button
@@ -350,151 +298,8 @@ function handleChangeRepeat() {
       align-items: flex-start;
       gap: 20px;
 
-      .sound {
-        width: 100px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .button {
-          padding: 2px 3px;
-          border-radius: 7px;
-          transition: constants.$trn-normal-out;
-          cursor: pointer;
-
-          .icon {
-            @include transitions.fade();
-            color: rgb(constants.$clr-text-inactive);
-            font-size: 20px;
-            transform: translateY(2px);
-            transition: constants.$trn-normal-out;
-          }
-
-          @mixin hovered {
-            background: rgb(constants.$clr-secondary);
-            box-shadow: constants.$cmn-shadow-element;
-            transform: scale(1.1);
-            transition: constants.$trn-fast-out;
-
-            .icon {
-              color: rgb(constants.$clr-primary);
-              transition: constants.$trn-fast-out;
-            }
-          }
-
-          @media (hover: hover) {
-            &:hover {
-              @include hovered;
-            }
-
-            &:active {
-              transform: scale(1);
-              box-shadow: none;
-            }
-          }
-
-          @media (hover: none) {
-            &:active {
-              @include hovered;
-            }
-          }
-        }
-
-        .range {
-          width: 100%;
-          transition: constants.$trn-normal-out;
-
-          &._collapsed {
-            width: 0;
-            opacity: 0;
-            pointer-events: none;
-          }
-        }
-      }
-
-      .main {
-        --color: rgb(constants.$clr-primary);
-        padding-top: 10px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .button {
-          cursor: pointer;
-          transition: constants.$trn-normal-out;
-
-          &._disabled {
-            pointer-events: none;
-            opacity: 0;
-          }
-
-          &.backward,
-          &.forward {
-            @mixin hovered {
-              transform: scale(1.1);
-              transition: constants.$trn-fast-out;
-            }
-
-            @media (hover: hover) {
-              &:hover {
-                @include hovered;
-              }
-            }
-
-            .icon {
-              color: rgb(constants.$clr-accent);
-              font-size: 30px;
-              transition: constants.$trn-fast-out;
-            }
-          }
-
-          &.backward:active {
-            .icon {
-              transform: translateX(-5px);
-            }
-          }
-
-          &.forward:active {
-            .icon {
-              transform: translateX(5px);
-            }
-          }
-
-          &.play {
-            @include mixins.size(40px);
-            display: flex;
-            background: rgb(constants.$clr-accent);
-            border-radius: 100%;
-
-            @mixin hovered {
-              transform: scale(1.07);
-            }
-
-            @media (hover: hover) {
-              &:hover {
-                @include hovered;
-              }
-
-              &:active {
-                transform: scale(1);
-                box-shadow: none;
-              }
-            }
-
-            @media (hover: none) {
-              &:active {
-                @include hovered;
-              }
-            }
-
-            .icon {
-              @include transitions.fade(constants.$trn-fast-out);
-              margin: auto;
-              font-size: 26px;
-              color: rgb(constants.$clr-background);
-            }
-          }
-        }
+      .control-panel {
+        margin-top: 10px;
       }
 
       .settings {
