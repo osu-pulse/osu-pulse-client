@@ -115,10 +115,12 @@ function handleMaximize() {
     justify-content: space-between;
 
     .control {
+      z-index: 2;
       margin: 10px auto;
     }
 
     .main {
+      z-index: 1;
       position: absolute;
       width: calc(100% - 20px);
       display: flex;
