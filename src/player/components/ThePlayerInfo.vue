@@ -129,6 +129,7 @@ syncRefs(coverRef, accentImage)
       white-space: nowrap;
       text-overflow: ellipsis;
       user-select: text;
+      -webkit-user-select: text;
     }
 
     .title {
