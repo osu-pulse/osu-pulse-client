@@ -74,6 +74,7 @@ syncRefs(coverRef, accentImage)
   width: 450px;
   display: flex;
   transition: constants.$trn-normal-out;
+  transition-property: width;
 
   .cover {
     position: absolute;
@@ -85,7 +86,7 @@ syncRefs(coverRef, accentImage)
 
     .image {
       @include mixins.size(fill);
-      @include transitions.fade($transition: constants.$trn-normal-out);
+      @include transitions.fade();
       z-index: 0;
       position: relative;
       object-fit: cover;
@@ -189,7 +190,7 @@ syncRefs(coverRef, accentImage)
 
 @media (max-width: constants.$bpt-2xl) and (min-width: constants.$bpt-lg) {
   .player-info-component {
-    width: 300px;
+    width: 260px;
 
     .cover {
       width: 70%;

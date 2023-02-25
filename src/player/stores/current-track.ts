@@ -1,21 +1,22 @@
 import {
   createGlobalState,
   createSharedComposable,
-  useArrayMap,
+  useArrayMap, useLocalStorage,
   useRefHistory,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useQueue } from '@/core/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
 import type { Track } from '@/shared/dto/track'
 import { RepeatMode } from '@/player/constants/repeat-mode'
 import { switchAssign } from '@/shared/utils/switch'
+import { serializer } from '@/shared/utils/serializer'
 
 const useCurrentTrackState = createGlobalState(() => ({
-  currentTrackId: ref<string>(),
-  repeating: ref<RepeatMode | false>(false),
-  shuffling: ref(false),
+  currentTrackId: useLocalStorage<string | undefined>('current-track_track-id', undefined, { serializer, writeDefaults: true }),
+  repeating: useLocalStorage<false | RepeatMode>('current-track_repeating', false, { serializer, writeDefaults: true }),
+  shuffling: useLocalStorage<boolean>('current-track_shuffling', false, { serializer, writeDefaults: true }),
 }))
 
 export const useCurrentTrack = createSharedComposable(() => {

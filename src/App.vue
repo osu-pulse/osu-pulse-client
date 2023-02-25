@@ -32,15 +32,13 @@ const { authenticated } = useAuthentication()
 const { loading } = useOffline()
 
 const { queue } = useQueue()
-const { currentTrackId } = useCurrentTrack()
+const { currentTrackId, currentTrack } = useCurrentTrack()
 watchOnce(queue, () => (currentTrackId.value = queue.value[0]?.id))
 
 const menuShowed = ref(false)
+whenever(greaterSm, () => menuShowed.value = false)
+
 const playerMaximized = ref(false)
-whenever(greaterSm, () => {
-  menuShowed.value = false
-  playerMaximized.value = false
-})
 
 tryOnMounted(() => {
   // eslint-disable-next-line no-console
@@ -71,7 +69,9 @@ tryOnMounted(() => {
                 </Transition>
               </div>
 
-              <ThePlayer class="player" />
+              <Transition>
+                <ThePlayer v-if="currentTrack" class="player" />
+              </Transition>
             </main>
 
             <TheQueue class="queue" />
@@ -93,7 +93,9 @@ tryOnMounted(() => {
                 </div>
               </Transition>
 
-              <ThePlayer v-model:maximized="playerMaximized" class="player" />
+              <Transition>
+                <ThePlayer v-if="currentTrack" v-model:maximized="playerMaximized" class="player" />
+              </Transition>
             </main>
 
             <TheBottomMenu v-model:menu-showed="menuShowed" class="bottom-menu" />
@@ -171,6 +173,7 @@ tryOnMounted(() => {
         }
 
         .player {
+          @include transitions.move($y: -10px);
           margin-bottom: 10px;
         }
       }
