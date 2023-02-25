@@ -5,17 +5,13 @@
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
+  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  color: rgb(constants.$clr-text);
-  user-select: none;
-}
-
-body,
-p {
+body {
   margin: 0;
+  color: rgb(constants.$clr-text);
 }
 
 a {
