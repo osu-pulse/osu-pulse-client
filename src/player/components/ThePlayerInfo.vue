@@ -2,18 +2,18 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 import { breakpointsTailwind, syncRefs, useBreakpoints } from '@vueuse/core'
 import { useColors } from '@/core/stores/colors'
-import { useCurrentTrack } from '@/player/stores/current-track'
+import { usePlayer } from '@/player/stores/player'
 
 const props = defineProps<{
   center?: boolean
 }>()
 
-const { currentTrack } = useCurrentTrack()
+const { track } = usePlayer()
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
 const coverSrc = computed(() =>
-  greaterLg.value ? currentTrack.value?.cover?.normal : currentTrack.value?.cover?.wide,
+  greaterLg.value ? track.value?.cover?.normal : track.value?.cover?.wide,
 )
 
 const coverLoaded = ref(false)
@@ -50,14 +50,14 @@ syncRefs(coverRef, accentImage)
 
     <div class="meta">
       <Transition mode="out-in">
-        <span :key="currentTrack?.title" class="title">{{
-          currentTrack?.title
+        <span :key="track?.title" class="title">{{
+          track?.title
         }}</span>
       </Transition>
 
       <Transition mode="out-in">
-        <span :key="currentTrack?.artist" class="artist">{{
-          currentTrack?.artist
+        <span :key="track?.artist" class="artist">{{
+          track?.artist
         }}</span>
       </Transition>
     </div>

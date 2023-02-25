@@ -7,10 +7,12 @@ import {
 } from '@vueuse/core'
 import { calcBuffer } from '@/player/utils/audio'
 import { useTracksService } from '@/shared/services/tracks'
-import { useCurrentTrack } from '@/player/stores/current-track'
 import { serializer } from '@/shared/utils/serializer'
+import type { Track } from '@/shared/dto/track'
 
 const usePlayerState = createGlobalState(() => ({
+  track: useLocalStorage<Track | undefined>('player_track', undefined, { serializer, writeDefaults: true, shallow: true }),
+
   audio: shallowRef(new Audio()),
   caching: ref(false),
 
@@ -25,6 +27,7 @@ const usePlayerState = createGlobalState(() => ({
 
 export const usePlayer = createSharedComposable(() => {
   const {
+    track,
     audio,
     playing,
     caching,
@@ -36,20 +39,18 @@ export const usePlayer = createSharedComposable(() => {
     ended,
   } = usePlayerState()
 
-  const { currentTrack } = useCurrentTrack()
-
   // TODO: Вынести в хук с кэшами
   const tracksService = useTracksService()
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack()
   async function cacheTrack(trackId: string) {
-    if (currentTrack.value && !currentTrack.value.url.audio) {
+    if (track.value && !track.value.url.audio) {
       caching.value = true
 
       try {
         const result = await mutateCacheTrack({ trackId })
         const cachedTrack = result?.data?.cacheTrack
 
-        if (cachedTrack && (!currentTrack || trackId === currentTrack.value?.id))
+        if (cachedTrack && (!track || trackId === track.value?.id))
           caching.value = false
       }
       catch {}
@@ -64,16 +65,16 @@ export const usePlayer = createSharedComposable(() => {
   const { ignoreUpdates: ignorePlayingUpdates } = watchIgnorable(
     playing,
     (value) => {
-      if (currentTrack.value) {
+      if (track.value) {
         if (!value) {
           audio.value.pause()
-          if (caching.value && currentTrack.value?.id)
-            cancelCacheTrack(currentTrack.value.id)
+          if (caching.value && track.value?.id)
+            cancelCacheTrack(track.value.id)
         }
         else {
-          if (currentTrack.value?.url?.audio)
+          if (track.value?.url?.audio)
             audio.value.play().catch(() => {})
-          else void cacheTrack(currentTrack.value.id)
+          else void cacheTrack(track.value.id)
         }
       }
     },
@@ -102,7 +103,7 @@ export const usePlayer = createSharedComposable(() => {
   useEventListener(audio, 'ended', () => (ended.value = true))
   useEventListener(audio, 'playing', () => (ended.value = false))
 
-  watch(currentTrack, (value, oldValue) => {
+  watch(track, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
 
     if (caching.value && oldValue)
@@ -115,6 +116,8 @@ export const usePlayer = createSharedComposable(() => {
   })
 
   return {
+    track,
+
     audio: readonly(audio),
     caching: readonly(caching),
 

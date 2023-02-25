@@ -5,14 +5,13 @@ import {
   useVModel,
   whenever,
 } from '@vueuse/core'
-import { usePlayer } from '@/player/stores/player'
-import { useCurrentTrack } from '@/player/stores/current-track'
-import { RepeatMode } from '@/player/constants/repeat-mode'
 import ThePlayerSound from '@/player/components/ThePlayerSound.vue'
 import ThePlayerControl from '@/player/components/ThePlayerControl.vue'
 import ThePlayerTimeline from '@/player/components/ThePlayerTimeline.vue'
 import ThePlayerSettings from '@/player/components/ThePlayerSettings.vue'
 import ThePlayerInfo from '@/player/components/ThePlayerInfo.vue'
+import { usePlayerHotkeys } from '@/player/hooks/player-hotkeys'
+import { usePlayerMedia } from '@/player/hooks/player-media'
 
 const props = defineProps<{
   maximized?: boolean
@@ -22,20 +21,10 @@ const emits = defineEmits<{
   (e: 'update:maximized', value: boolean): void
 }>()
 
-const maximized = useVModel(props, 'maximized', emits)
+usePlayerMedia()
+usePlayerHotkeys()
 
-const { playing, progress, ended } = usePlayer()
-const { repeating, hasNext, next } = useCurrentTrack()
-whenever(
-  () => ended.value && playing.value,
-  () => {
-    if (repeating.value === RepeatMode.SINGLE)
-      progress.value = 0
-    else if (hasNext.value)
-      next()
-    else playing.value = false
-  },
-)
+const maximized = useVModel(props, 'maximized', emits)
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
