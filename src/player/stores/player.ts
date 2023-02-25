@@ -17,7 +17,7 @@ const usePlayerState = createGlobalState(() => ({
   playing: ref(false),
   progress: useLocalStorage<number>('player_progress', 0, { serializer, writeDefaults: true }),
   buffer: ref(0),
-  duration: ref(0),
+  duration: useLocalStorage<number>('player_duration', 0, { serializer, writeDefaults: true }),
   volume: useLocalStorage('player_volume', 1, { serializer, writeDefaults: true }),
   muted: useLocalStorage('player_muted', false, { serializer, writeDefaults: true }),
   ended: ref(false),
