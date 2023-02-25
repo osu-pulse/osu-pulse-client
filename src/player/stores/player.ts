@@ -2,23 +2,24 @@ import { readonly, ref, shallowRef, watch } from 'vue'
 import {
   createGlobalState,
   createSharedComposable,
-  useEventListener,
+  useEventListener, useLocalStorage,
   watchIgnorable,
 } from '@vueuse/core'
 import { calcBuffer } from '@/player/utils/audio'
 import { useTracksService } from '@/shared/services/tracks'
 import { useCurrentTrack } from '@/player/stores/current-track'
+import { serializer } from '@/shared/utils/serializer'
 
 const usePlayerState = createGlobalState(() => ({
   audio: shallowRef(new Audio()),
   caching: ref(false),
 
   playing: ref(false),
-  progress: ref(0),
+  progress: useLocalStorage<number>('player_progress', 0, { serializer, writeDefaults: true }),
   buffer: ref(0),
   duration: ref(0),
-  volume: ref(1),
-  muted: ref(false),
+  volume: useLocalStorage('player_volume', 1, { serializer, writeDefaults: true }),
+  muted: useLocalStorage('player_muted', false, { serializer, writeDefaults: true }),
   ended: ref(false),
 }))
 

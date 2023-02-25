@@ -73,7 +73,6 @@ syncRefs(coverRef, accentImage)
   position: relative;
   width: 450px;
   display: flex;
-  transition: constants.$trn-normal-out;
 
   .cover {
     position: absolute;

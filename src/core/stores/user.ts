@@ -11,11 +11,7 @@ import { useAuthentication } from '@/auth/stores/authentication'
 import { serializer } from '@/shared/utils/serializer'
 
 const useUserState = createGlobalState(() => ({
-  user: useLocalStorage<User | undefined>('user', undefined, {
-    serializer,
-    shallow: true,
-    writeDefaults: true,
-  }),
+  user: useLocalStorage<User | undefined>('user', undefined, { serializer, shallow: true, writeDefaults: true }),
 }))
 
 export const useUser = createSharedComposable(() => {

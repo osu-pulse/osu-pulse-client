@@ -116,6 +116,7 @@ const greaterSm = greater('sm')
       top: -30px;
       display: flex;
       justify-content: space-between;
+      pointer-events: none;
     }
   }
 }

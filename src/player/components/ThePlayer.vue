@@ -40,6 +40,8 @@ whenever(
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
 const greaterSm = greater('sm')
+whenever(greaterSm, () => maximized.value = false)
+
 function handleMaximize() {
   if (!greaterSm.value)
     maximized.value = !maximized.value
@@ -49,37 +51,37 @@ function handleMaximize() {
 <template>
   <div class="player-component" :class="{ _minimized: !maximized }">
     <ThePlayerInfo
-      :key="maximized"
       class="info"
       :center="(!greaterLg && greaterSm) || (!greaterSm && maximized)"
       @click="handleMaximize"
     />
+    <Transition mode="out-in">
+      <div v-if="greaterSm" class="player">
+        <div class="main">
+          <ThePlayerSound class="sound" />
+          <ThePlayerSettings class="settings" />
+        </div>
 
-    <div v-if="greaterSm" class="player">
-      <div class="main">
-        <ThePlayerSound class="sound" />
-        <ThePlayerSettings class="settings" />
+        <ThePlayerControl class="control" />
+
+        <ThePlayerTimeline class="timeline" />
       </div>
 
-      <ThePlayerControl class="control" />
+      <div v-else-if="maximized" class="player">
+        <ThePlayerControl class="control" />
 
-      <ThePlayerTimeline class="timeline" />
-    </div>
+        <ThePlayerTimeline class="timeline" />
 
-    <div v-else-if="maximized" class="player">
-      <ThePlayerControl class="control" />
-
-      <ThePlayerTimeline class="timeline" />
-
-      <div class="main">
-        <ThePlayerSound class="sound" />
-        <ThePlayerSettings class="settings" />
+        <div class="main">
+          <ThePlayerSound class="sound" />
+          <ThePlayerSettings class="settings" />
+        </div>
       </div>
-    </div>
 
-    <div v-else class="player">
-      <ThePlayerControl class="control" />
-    </div>
+      <div v-else class="player">
+        <ThePlayerControl class="control" />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -99,14 +101,14 @@ function handleMaximize() {
   transition: constants.$trn-normal-out;
 
   .info {
+    overflow: hidden;
     margin-right: 20px;
   }
 
   .player {
-    @include transitions.fade();
     position: relative;
-    padding: 10px;
     flex: auto;
+    padding: 10px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -131,8 +133,8 @@ function handleMaximize() {
     flex-direction: column;
 
     .info {
-      margin: 0;
       flex: auto;
+      margin: 0;
     }
 
     .player {
@@ -149,18 +151,31 @@ function handleMaximize() {
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
+    .info {
+      flex: 1 0;
+    }
+
+    .player {
+      @include transitions.fade($leave: false);
+      flex: none;
+
+      &.v-leave-from {
+        .timeline, .main {
+          display: none;
+        }
+      }
+    }
+
     &:not(._minimized) {
       height: 240px;
       flex-direction: column;
 
       .info {
         margin-right: 0;
-        flex: auto;
       }
 
       .player {
         padding: 10px 20px;
-        flex: none;
         height: 130px;
 
         .control {
@@ -183,21 +198,17 @@ function handleMaximize() {
     }
 
     &._minimized {
-      height: unset;
+      height: 60px;
       flex-direction: row;
 
       .info {
         margin-right: 5px;
-        flex: auto;
         width: unset;
       }
 
       .player {
-        padding: 10px 10px 10px 5px;
-        flex: none;
-
         .control {
-          margin: 0;
+          margin: auto 0;
         }
       }
     }
