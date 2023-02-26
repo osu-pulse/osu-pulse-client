@@ -16,7 +16,7 @@ import { omit } from '@/shared/utils/object'
 const useAuthenticationState = createGlobalState(() => ({
   accessToken: ref<string>(),
   refreshToken: useLocalStorage<string | undefined>(
-    'refresh-token',
+    'authentication_refresh-token',
     undefined,
     { serializer },
   ),
