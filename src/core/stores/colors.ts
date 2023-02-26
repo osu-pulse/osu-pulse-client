@@ -34,7 +34,10 @@ export const useColors = createSharedComposable(() => {
   tryOnMounted(() => image.crossOrigin = 'Anonymous')
 
   const { track } = usePlayer()
-  watch(track, track => image.src = track?.cover?.small ?? '')
+  watch(track, (track) => {
+    accent.value = primary.value
+    image.src = track?.cover?.small ?? ''
+  })
   const contrast = computed(() => Color(`rgb(${background.value})`))
   const CONTRAST_LIMIT = 0.3
   const colorThief = new ColorThief()
