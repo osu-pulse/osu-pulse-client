@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, shallowRef, watch } from 'vue'
-import { breakpointsTailwind, syncRefs, useBreakpoints } from '@vueuse/core'
-import { useColors } from '@/core/stores/colors'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { usePlayer } from '@/player/stores/player'
 
 const props = defineProps<{
@@ -25,9 +24,6 @@ function handleLoad(event: Event) {
   if (target.src === coverRef.value?.src)
     coverLoaded.value = true
 }
-
-const { accentImage } = useColors()
-syncRefs(coverRef, accentImage)
 </script>
 
 <template>
@@ -231,7 +227,7 @@ syncRefs(coverRef, accentImage)
           background: linear-gradient(
               to right,
               rgba(constants.$clr-background, 0.2) 0%,
-              rgba(constants.$clr-background, 0.7) 40%,
+              rgba(constants.$clr-background, 0.6) 40%,
               rgb(constants.$clr-background) 100%
           );
         }

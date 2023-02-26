@@ -28,7 +28,7 @@ export const usePlayerMedia = createSharedComposable(() => {
     if (duration > 0) {
       navigator.mediaSession.setPositionState({
         position: progress,
-        playbackRate: audio.value.playbackRate,
+        playbackRate: audio.playbackRate,
         duration,
       })
     }

@@ -20,11 +20,13 @@ import { useMetrika } from '@/core/hooks/metrika'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
 import { usePlayer } from '@/player/stores/player'
+import { useColors } from '@/core/stores/colors'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
 
 useMetrika()
+useColors()
 
 const { check } = useOffline()
 tryOnMounted(check)
