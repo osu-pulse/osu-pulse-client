@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import {
-  SwipeDirection,
   breakpointsTailwind,
   useBreakpoints,
   useSwipe,
@@ -17,7 +16,6 @@ import ThePlayerInfo from '@/player/components/ThePlayerInfo.vue'
 import { usePlayerHotkeys } from '@/player/hooks/player-hotkeys'
 import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
-import { switchExec } from '@/shared/utils/switch'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
 const props = defineProps<{
@@ -45,37 +43,32 @@ function handleMaximize() {
 
 const { hasPrev, hasNext, prev, next } = useCurrentTrack()
 const playerInfoRef = shallowRef<ComponentPublicInstance>()
-const { lengthX, isSwiping, direction } = useSwipe(
-  () => (!greaterSm.value && maximized.value) && playerInfoRef.value?.$el,
+const { lengthX, isSwiping } = useSwipe(
+  () => !greaterSm.value && playerInfoRef.value?.$el,
   { threshold: 0 },
 )
 
 const swipeThreshold = 20
 const thresholded = computed(() => Math.abs(lengthX.value) > swipeThreshold)
+const available = computed(() => (lengthX.value > 0 && hasNext.value) || (lengthX.value < 0 && hasPrev.value),
+)
+
+const { swipeStart, swipeEnd } = usePlayerFeedback()
+whenever(thresholded, () => available.value && swipeStart())
+
 whenever(() => !isSwiping.value, () => {
-  if (thresholded.value) {
-    switchExec(direction.value, {
-      [SwipeDirection.LEFT]: next,
-      [SwipeDirection.RIGHT]: prev,
-    })
+  if (available.value && thresholded.value) {
+    lengthX.value > 0 ? next() : prev()
+    swipeEnd()
   }
 })
 
 const maxOffset = 40
-const playerOffset = computed(() => {
-  if (
-    !isSwiping.value
-    || (lengthX.value > 0 && !hasNext.value)
-    || (lengthX.value < 0 && !hasPrev.value)
-  )
-    return 0
-  else
-    return Math.max(-maxOffset, Math.min(maxOffset, -lengthX.value))
-})
-
-const { swipeStart, swipeEnd } = usePlayerFeedback()
-whenever(thresholded, swipeStart)
-whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
+const playerOffset = computed(() =>
+  (isSwiping.value && available.value)
+    ? Math.max(-maxOffset, Math.min(maxOffset, -lengthX.value))
+    : 0,
+)
 </script>
 
 <template>
@@ -115,7 +108,7 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
         </div>
 
         <div v-else class="player">
-          <ThePlayerControl class="control" />
+          <ThePlayerControl class="control" mini />
         </div>
       </Transition>
     </div>
@@ -130,6 +123,7 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
 .player-component {
   border-radius: constants.$cmn-border-radius;
   overflow: hidden;
+  filter: drop-shadow(constants.$cmn-shadow-block);
 
   .container {
     min-width: max-content;
@@ -138,7 +132,6 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
     overflow: hidden;
     border-radius: constants.$cmn-border-radius;
     background-color: rgb(constants.$clr-background);
-    box-shadow: constants.$cmn-shadow-block;
     transition: constants.$trn-normal-out;
 
     .info {
@@ -198,6 +191,14 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
 @media (max-width: constants.$bpt-sm) {
   .player-component {
     .container {
+      --offset: 0px;
+      transform: translateX(var(--offset));
+      transition: constants.$trn-normal-out;
+
+      &._swiping {
+        transition: 0.05s;
+      }
+
       .info {
         flex: 1 0;
       }
@@ -214,15 +215,8 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
       }
 
       &:not(._minimized) {
-        --offset: 0px;
         height: 240px;
         flex-direction: column;
-        transform: translateX(var(--offset));
-        transition: constants.$trn-normal-out;
-
-        &._swiping {
-          transition: 0.05s;
-        }
 
         .info {
           margin-right: 0;
@@ -262,6 +256,7 @@ whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
 
         .player {
           .control {
+            padding: 0;
             margin: auto 0;
           }
         }

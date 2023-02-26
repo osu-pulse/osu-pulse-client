@@ -20,6 +20,6 @@ export const usePlayerFeedback = createSharedComposable(() => {
     changeVolume: createVibration(13),
     boundVolume: createVibration(100),
     changeProgress: createVibration(13),
-    boundProgress: createVibration(80),
+    boundProgress: createVibration(100),
   }
 })

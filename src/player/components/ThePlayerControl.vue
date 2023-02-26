@@ -6,6 +6,10 @@ import BIcon from '@/shared/components/BIcon.vue'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
+const props = defineProps<{
+  mini?: boolean
+}>()
+
 const { track, playing, caching } = usePlayer()
 
 const { hasPrev, hasNext, prev, next } = useCurrentTrack()
@@ -32,7 +36,9 @@ function handleNext() {
 <template>
   <div class="player-control-panel">
     <button
-      class="button backward" :class="{ _disabled: !hasPrev }"
+      v-show="!props.mini"
+      class="button backward"
+      :class="{ _disabled: !hasPrev }"
       @click="handlePrev"
     >
       <BIcon name="skip-start-fill" class="icon" />
@@ -40,7 +46,7 @@ function handleNext() {
 
     <button
       class="button play"
-      :class="{ _disabled: !track }"
+      :class="{ _disabled: !track, _mini: props.mini }"
       @click="handleChangePlaying"
     >
       <Transition mode="out-in">
@@ -53,7 +59,9 @@ function handleNext() {
     </button>
 
     <button
-      class="button forward" :class="{ _disabled: !hasNext }"
+      v-show="!props.mini"
+      class="button forward"
+      :class="{ _disabled: !hasNext }"
       @click="handleNext"
     >
       <BIcon name="skip-end-fill" class="icon" />
@@ -117,6 +125,16 @@ function handleNext() {
       display: flex;
       background: rgb(constants.$clr-accent);
       border-radius: 100%;
+
+      &._mini {
+        background: none;
+        padding: 0;
+
+        .icon {
+          font-size: 40px;
+          color: rgb(constants.$clr-accent);
+        }
+      }
 
       @mixin hovered {
         transform: scale(1.07);

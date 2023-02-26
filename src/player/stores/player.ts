@@ -105,6 +105,7 @@ export const usePlayer = createSharedComposable(() => {
 
   watch(track, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
+    duration.value = 0
 
     if (caching.value && oldValue)
       cancelCacheTrack(oldValue.id)
