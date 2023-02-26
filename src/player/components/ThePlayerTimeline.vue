@@ -4,7 +4,7 @@ import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
-const { playing, progress, duration, buffer } = usePlayer()
+const { track, playing, progress, duration, buffer } = usePlayer()
 
 interface TimeSplit {
   h: string
@@ -59,9 +59,12 @@ watch(progress, (progress) => {
 <template>
   <div class="player-timeline-component">
     <div class="time-panel">
-      <div class="time left">
-        {{ progressSplit.h }}:{{ progressSplit.m }}
-      </div>
+      <Transition mode="out-in">
+        <div :key="track?.id" class="time left">
+          {{ progressSplit.h }}:{{ progressSplit.m }}
+        </div>
+      </Transition>
+
       <Transition mode="out-in">
         <div :key="duration === 0" class="time right">
           {{ durationSplit.h }}:{{ durationSplit.m }}
@@ -101,6 +104,7 @@ watch(progress, (progress) => {
   }
 
   .time {
+    @include transitions.fade();
     width: 40px;
     font-size: 15px;
 
