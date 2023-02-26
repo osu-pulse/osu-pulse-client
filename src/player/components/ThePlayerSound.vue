@@ -1,25 +1,41 @@
 <script lang="ts" setup>
-import { computed, customRef } from 'vue'
+import { computed, ref, watch } from 'vue'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
 import SecondaryButton from '@/shared/components/SecondaryButton.vue'
+import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
 const { muted, volume } = usePlayer()
 
 const volumeIcon = computed(() => (muted.value ? 'volume-mute' : 'volume-up'))
 
-const volumeScaled = customRef(() => ({
-  get: () => volume.value ** 0.5,
-  set: value => (volume.value = value ** 2),
-}))
+const { changeVolume, boundVolume, mute, unmute } = usePlayerFeedback()
+
+const prevVolume = ref(volume.value)
+const step = 0.2
+watch(volume, (volume) => {
+  if (volume === 0 || volume === 1) {
+    prevVolume.value = volume
+    boundVolume()
+  }
+  else if (Math.abs(volume - prevVolume.value) >= step) {
+    prevVolume.value = Math.round(volume / step) * step
+    changeVolume()
+  }
+})
+
+function handleChangeMuted() {
+  muted.value = !muted.value
+  muted.value ? mute() : unmute()
+}
 </script>
 
 <template>
   <div class="player-sound-component">
-    <SecondaryButton :icon="volumeIcon" @click="muted = !muted" />
+    <SecondaryButton :icon="volumeIcon" @click="handleChangeMuted" />
 
     <SliderRange
-      v-model:value="volumeScaled"
+      v-model:value="volume"
       :class="{ _collapsed: muted }" class="range"
     />
   </div>

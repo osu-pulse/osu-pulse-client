@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { computed, customRef, ref } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { computed, customRef, ref, watch } from 'vue'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
+import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
 const { playing, progress, duration, buffer } = usePlayer()
 
@@ -41,24 +41,34 @@ function handleProgressChangeEnd() {
   progressChanging.value = false
 }
 
-const { greater } = useBreakpoints(breakpointsTailwind)
-const greaterSm = greater('sm')
+const { changeProgress, boundProgress } = usePlayerFeedback()
+const prevProgress = ref(progress.value)
+const step = 10
+watch(progress, (progress) => {
+  if (progress === 0 || progress === duration.value) {
+    prevProgress.value = progress
+    boundProgress()
+  }
+  else if (Math.abs(progress - prevProgress.value) >= step) {
+    prevProgress.value = Math.round(progress / step) * step
+    changeProgress()
+  }
+})
 </script>
 
 <template>
   <div class="player-timeline-component">
-    <div v-if="!greaterSm" class="time-panel">
+    <div class="time-panel">
       <div class="time left">
         {{ progressSplit.h }}:{{ progressSplit.m }}
       </div>
-      <div class="time right">
-        {{ durationSplit.h }}:{{ durationSplit.m }}
-      </div>
+      <Transition mode="out-in">
+        <div :key="duration === 0" class="time right">
+          {{ durationSplit.h }}:{{ durationSplit.m }}
+        </div>
+      </Transition>
     </div>
 
-    <div v-if="greaterSm" class="time left">
-      {{ progressSplit.h }}:{{ progressSplit.m }}
-    </div>
     <SliderRange
       v-model:value="progressScaled"
       :buffer="bufferScaled"
@@ -67,9 +77,6 @@ const greaterSm = greater('sm')
       @change-start="handleProgressChangeStart"
       @change-end="handleProgressChangeEnd"
     />
-    <div v-if="greaterSm" class="time right">
-      {{ durationSplit.h }}:{{ durationSplit.m }}
-    </div>
   </div>
 </template>
 
@@ -79,10 +86,19 @@ const greaterSm = greater('sm')
 @use '../../shared/styles/transitions';
 
 .player-timeline-component {
+  position: relative;
   display: flex;
-  gap: 10px;
-  justify-content: space-between;
-  align-items: center;
+  height: 20px;
+
+  .time-panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+  }
 
   .time {
     width: 40px;
@@ -98,25 +114,19 @@ const greaterSm = greater('sm')
   }
 
   .range {
+    margin: auto 40px;
     flex: auto;
   }
 }
 
 @media (max-width: constants.$bpt-sm) {
   .player-timeline-component {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-
     .time-panel {
-      position: absolute;
-      width: 100%;
-      top: -30px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
+      bottom: 20px;
+    }
+
+    .range {
+      margin: auto 0;
     }
   }
 }

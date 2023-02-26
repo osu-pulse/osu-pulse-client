@@ -14,7 +14,10 @@ export const usePlayerHotkeys = createSharedComposable(() => {
 
   const keys = useMagicKeys({
     passive: false,
-    onEventFired: e => e.preventDefault(),
+    onEventFired: (event) => {
+      if (event.code === 'Space')
+        event.preventDefault()
+    },
   })
 
   whenever(keys.KeyM, () => muted.value = !muted.value)
