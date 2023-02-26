@@ -6,7 +6,8 @@ import {
   watchOnce,
   whenever,
 } from '@vueuse/core'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
@@ -44,6 +45,9 @@ const menuShowed = ref(false)
 whenever(greaterSm, () => menuShowed.value = false)
 
 const playerMaximized = ref(false)
+whenever(playerMaximized, () => menuShowed.value = false)
+const route = useRoute()
+watch([route, menuShowed], () => playerMaximized.value = false)
 
 tryOnMounted(() => {
   // eslint-disable-next-line no-console
@@ -89,7 +93,9 @@ tryOnMounted(() => {
           <div v-else class="body">
             <main class="main-section">
               <Transition mode="out-in">
-                <TheSideMenu v-if="menuShowed" class="side-menu" />
+                <TheQueue v-if="playerMaximized" class="queue" />
+
+                <TheSideMenu v-else-if="menuShowed" class="side-menu" />
 
                 <div v-else class="page-container">
                   <Transition mode="out-in">
@@ -200,7 +206,7 @@ tryOnMounted(() => {
           gap: 0;
           overflow: auto;
 
-          .side-menu, .page-container {
+          .queue, .side-menu, .page-container {
             @include transitions.fade();
 
             &.v-leave-active {
@@ -208,7 +214,7 @@ tryOnMounted(() => {
             }
           }
 
-          .side-menu {
+          .queue, .side-menu {
             margin: 10px;
             flex: auto;
             border-radius: constants.$cmn-border-radius;
