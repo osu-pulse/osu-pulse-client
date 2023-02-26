@@ -18,6 +18,7 @@ import { usePlayerHotkeys } from '@/player/hooks/player-hotkeys'
 import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { switchExec } from '@/shared/utils/switch'
+import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
 const props = defineProps<{
   maximized?: boolean
@@ -50,8 +51,9 @@ const { lengthX, isSwiping, direction } = useSwipe(
 )
 
 const swipeThreshold = 20
+const thresholded = computed(() => Math.abs(lengthX.value) > swipeThreshold)
 whenever(() => !isSwiping.value, () => {
-  if (Math.abs(lengthX.value) > swipeThreshold) {
+  if (thresholded.value) {
     switchExec(direction.value, {
       [SwipeDirection.LEFT]: next,
       [SwipeDirection.RIGHT]: prev,
@@ -70,6 +72,10 @@ const playerOffset = computed(() => {
   else
     return Math.max(-maxOffset, Math.min(maxOffset, -lengthX.value))
 })
+
+const { swipeStart, swipeEnd } = usePlayerFeedback()
+whenever(thresholded, swipeStart)
+whenever(() => !isSwiping.value && thresholded.value, swipeEnd)
 </script>
 
 <template>

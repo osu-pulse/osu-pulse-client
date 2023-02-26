@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, customRef, ref } from 'vue'
+import { computed, customRef, ref, watch } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
+import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 
 const { playing, progress, duration, buffer } = usePlayer()
 
@@ -43,6 +44,20 @@ function handleProgressChangeEnd() {
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
+
+const { changeProgress, boundProgress } = usePlayerFeedback()
+const prevProgress = ref(progress.value)
+const step = 10
+watch(progress, (progress) => {
+  if (progress === 0 || progress === duration.value) {
+    prevProgress.value = progress
+    boundProgress()
+  }
+  else if (Math.abs(progress - prevProgress.value) >= step) {
+    prevProgress.value = Math.round(progress / step) * step
+    changeProgress()
+  }
+})
 </script>
 
 <template>
