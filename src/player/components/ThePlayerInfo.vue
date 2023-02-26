@@ -87,6 +87,7 @@ function handleLoad(event: Event) {
       position: relative;
       object-fit: cover;
       object-position: center;
+      pointer-events: none;
 
       &.v-enter-from {
         transform: scale(1.1);
