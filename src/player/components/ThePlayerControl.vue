@@ -5,9 +5,9 @@ import { usePlayer } from '@/player/stores/player'
 import BIcon from '@/shared/components/BIcon.vue'
 import { useCurrentTrack } from '@/player/stores/current-track'
 
-const { playing, caching } = usePlayer()
+const { track, playing, caching } = usePlayer()
 
-const { currentTrackId, hasPrev, hasNext, prev, next } = useCurrentTrack()
+const { hasPrev, hasNext, prev, next } = useCurrentTrack()
 
 const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 </script>
@@ -23,7 +23,7 @@ const playBtnIcon = computed(() => (playing.value ? 'pause-fill' : 'play-fill'))
 
     <button
       class="button play"
-      :class="{ _disabled: !currentTrackId }"
+      :class="{ _disabled: !track }"
       @click="playing = !playing"
     >
       <Transition mode="out-in">

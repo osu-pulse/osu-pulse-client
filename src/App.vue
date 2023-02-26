@@ -19,11 +19,14 @@ import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
+import { usePlayer } from '@/player/stores/player'
+import { useColors } from '@/core/stores/colors'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
 
 useMetrika()
+useColors()
 
 const { check } = useOffline()
 tryOnMounted(check)
@@ -32,8 +35,10 @@ const { authenticated } = useAuthentication()
 const { loading } = useOffline()
 
 const { queue } = useQueue()
-const { currentTrackId, currentTrack } = useCurrentTrack()
-watchOnce(queue, () => (currentTrackId.value = queue.value[0]?.id))
+const { trackId } = useCurrentTrack()
+watchOnce(queue, () => (trackId.value = queue.value[0]?.id))
+
+const { track } = usePlayer()
 
 const menuShowed = ref(false)
 whenever(greaterSm, () => menuShowed.value = false)
@@ -70,7 +75,7 @@ tryOnMounted(() => {
               </div>
 
               <Transition>
-                <ThePlayer v-if="currentTrack" class="player" />
+                <ThePlayer v-if="track" class="player" />
               </Transition>
             </main>
 
@@ -94,7 +99,7 @@ tryOnMounted(() => {
               </Transition>
 
               <Transition>
-                <ThePlayer v-if="currentTrack" v-model:maximized="playerMaximized" class="player" />
+                <ThePlayer v-if="track" v-model:maximized="playerMaximized" class="player" />
               </Transition>
             </main>
 

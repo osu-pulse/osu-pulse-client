@@ -1,8 +1,8 @@
 import {
   createGlobalState,
-  createSharedComposable,
+  createSharedComposable, syncRefs,
   useArrayMap, useLocalStorage,
-  useRefHistory,
+  useRefHistory, whenever,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
@@ -12,25 +12,26 @@ import type { Track } from '@/shared/dto/track'
 import { RepeatMode } from '@/player/constants/repeat-mode'
 import { switchAssign } from '@/shared/utils/switch'
 import { serializer } from '@/shared/utils/serializer'
+import { usePlayer } from '@/player/stores/player'
 
 const useCurrentTrackState = createGlobalState(() => ({
-  currentTrackId: useLocalStorage<string | undefined>('current-track_track-id', undefined, { serializer, writeDefaults: true }),
+  trackId: useLocalStorage<string | undefined>('current-track_track-id', undefined, { serializer, writeDefaults: true }),
   repeating: useLocalStorage<false | RepeatMode>('current-track_repeating', false, { serializer, writeDefaults: true }),
   shuffling: useLocalStorage<boolean>('current-track_shuffling', false, { serializer, writeDefaults: true }),
 }))
 
 export const useCurrentTrack = createSharedComposable(() => {
-  const { currentTrackId, repeating, shuffling } = useCurrentTrackState()
+  const { trackId, repeating, shuffling } = useCurrentTrackState()
 
   const { queue } = useQueue()
   const queueIds = useArrayMap(queue as ComputedRef<Track[]>, ({ id }) => id)
-  const currentTrack = computed(() => queue.value.find(({ id }) => id === currentTrackId.value))
+  const currentTrack = computed(() => queue.value.find(({ id }) => id === trackId.value))
 
-  const { undo, canUndo, clear } = useRefHistory(currentTrackId)
+  const { undo, canUndo, clear } = useRefHistory(trackId)
   watch(shuffling, clear)
 
   const hasPrev = computed(() => {
-    if (!currentTrackId.value)
+    if (!trackId.value)
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
@@ -42,11 +43,11 @@ export const useCurrentTrack = createSharedComposable(() => {
       return canUndo.value
 
     return queueIds.value.some(
-      (id, index) => queueIds.value[index + 1] === currentTrackId.value,
+      (id, index) => queueIds.value[index + 1] === trackId.value,
     )
   })
   const hasNext = computed(() => {
-    if (!currentTrackId.value)
+    if (!trackId.value)
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
@@ -58,18 +59,18 @@ export const useCurrentTrack = createSharedComposable(() => {
       return queueIds.value.length > 1
 
     return queueIds.value.some(
-      (id, index) => queueIds.value[index - 1] === currentTrackId.value,
+      (id, index) => queueIds.value[index - 1] === trackId.value,
     )
   })
 
   function next() {
     if (hasNext.value) {
       if (shuffling.value)
-        currentTrackId.value = randomArrayElement(queueIds.value)
+        trackId.value = randomArrayElement(queueIds.value)
       else if (repeating.value === RepeatMode.LIST)
-        currentTrackId.value = queueIds.value.find((id, index) => queueIds.value[index - 1] === currentTrackId.value) ?? queueIds.value[0]
+        trackId.value = queueIds.value.find((id, index) => queueIds.value[index - 1] === trackId.value) ?? queueIds.value[0]
       else if (!repeating.value)
-        currentTrackId.value = queueIds.value.find((id, index) => queueIds.value[index - 1] === currentTrackId.value)
+        trackId.value = queueIds.value.find((id, index) => queueIds.value[index - 1] === trackId.value)
     }
   }
 
@@ -78,15 +79,27 @@ export const useCurrentTrack = createSharedComposable(() => {
       if (shuffling.value)
         undo()
       else if (repeating.value === RepeatMode.LIST)
-        currentTrackId.value = queueIds.value.find((id, index) => queueIds.value[index + 1] === currentTrackId.value) ?? queueIds.value.at(-1)
+        trackId.value = queueIds.value.find((id, index) => queueIds.value[index + 1] === trackId.value) ?? queueIds.value.at(-1)
       else if (!repeating.value)
-        currentTrackId.value = queueIds.value.find((id, index) => queueIds.value[index + 1] === currentTrackId.value)
+        trackId.value = queueIds.value.find((id, index) => queueIds.value[index + 1] === trackId.value)
     }
   }
 
+  const { track, playing, progress, ended } = usePlayer()
+  syncRefs(currentTrack, track)
+  whenever(
+    () => ended.value && playing.value,
+    () => {
+      if (repeating.value === RepeatMode.SINGLE)
+        progress.value = 0
+      else if (hasNext.value)
+        next()
+      else playing.value = false
+    },
+  )
+
   return {
-    currentTrackId,
-    currentTrack,
+    trackId,
     repeating,
     shuffling,
     hasPrev,

@@ -1,4 +1,4 @@
-import { readonly, ref, shallowRef, watch } from 'vue'
+import { readonly, ref, watch } from 'vue'
 import {
   createGlobalState,
   createSharedComposable,
@@ -7,11 +7,13 @@ import {
 } from '@vueuse/core'
 import { calcBuffer } from '@/player/utils/audio'
 import { useTracksService } from '@/shared/services/tracks'
-import { useCurrentTrack } from '@/player/stores/current-track'
 import { serializer } from '@/shared/utils/serializer'
+import type { Track } from '@/shared/dto/track'
 
 const usePlayerState = createGlobalState(() => ({
-  audio: shallowRef(new Audio()),
+  track: useLocalStorage<Track | undefined>('player_track', undefined, { serializer, writeDefaults: true, shallow: true }),
+
+  audio: new Audio(),
   caching: ref(false),
 
   playing: ref(false),
@@ -25,6 +27,7 @@ const usePlayerState = createGlobalState(() => ({
 
 export const usePlayer = createSharedComposable(() => {
   const {
+    track,
     audio,
     playing,
     caching,
@@ -36,20 +39,18 @@ export const usePlayer = createSharedComposable(() => {
     ended,
   } = usePlayerState()
 
-  const { currentTrack } = useCurrentTrack()
-
   // TODO: Вынести в хук с кэшами
   const tracksService = useTracksService()
   const { mutate: mutateCacheTrack } = tracksService.cacheTrack()
   async function cacheTrack(trackId: string) {
-    if (currentTrack.value && !currentTrack.value.url.audio) {
+    if (track.value && !track.value.url.audio) {
       caching.value = true
 
       try {
         const result = await mutateCacheTrack({ trackId })
         const cachedTrack = result?.data?.cacheTrack
 
-        if (cachedTrack && (!currentTrack || trackId === currentTrack.value?.id))
+        if (cachedTrack && (!track || trackId === track.value?.id))
           caching.value = false
       }
       catch {}
@@ -64,57 +65,59 @@ export const usePlayer = createSharedComposable(() => {
   const { ignoreUpdates: ignorePlayingUpdates } = watchIgnorable(
     playing,
     (value) => {
-      if (currentTrack.value) {
+      if (track.value) {
         if (!value) {
-          audio.value.pause()
-          if (caching.value && currentTrack.value?.id)
-            cancelCacheTrack(currentTrack.value.id)
+          audio.pause()
+          if (caching.value && track.value?.id)
+            cancelCacheTrack(track.value.id)
         }
         else {
-          if (currentTrack.value?.url?.audio)
-            audio.value.play().catch(() => {})
-          else void cacheTrack(currentTrack.value.id)
+          if (track.value?.url?.audio)
+            audio.play().catch(() => {})
+          else void cacheTrack(track.value.id)
         }
       }
     },
     { immediate: true },
   )
-  const { ignoreUpdates: ignoreProgressUpdates } = watchIgnorable(progress, value => (audio.value.currentTime = value), { immediate: true })
-  const { ignoreUpdates: ignoreVolumeUpdates } = watchIgnorable(volume, value => (audio.value.volume = value), { immediate: true })
-  const { ignoreUpdates: ignoreMuteUpdates } = watchIgnorable(muted, value => (audio.value.muted = value), { immediate: true })
+  const { ignoreUpdates: ignoreProgressUpdates } = watchIgnorable(progress, value => (audio.currentTime = value), { immediate: true })
+  const { ignoreUpdates: ignoreVolumeUpdates } = watchIgnorable(volume, value => (audio.volume = value), { immediate: true })
+  const { ignoreUpdates: ignoreMuteUpdates } = watchIgnorable(muted, value => (audio.muted = value), { immediate: true })
 
   useEventListener(audio, 'canplay', () => {
     if (playing.value)
-      audio.value.play().catch(() => {})
+      audio.play().catch(() => {})
   })
   useEventListener(audio, 'play', () => ignorePlayingUpdates(() => (playing.value = true)))
   useEventListener(audio, 'pause', () => {
-    if (audio.value.currentTime !== audio.value.duration)
+    if (audio.currentTime !== audio.duration)
       ignorePlayingUpdates(() => (playing.value = false))
   })
-  useEventListener(audio, 'timeupdate', () => ignoreProgressUpdates(() => (progress.value = audio.value.currentTime)))
-  useEventListener(audio, 'durationchange', () => (duration.value = audio.value.duration))
-  useEventListener(audio, 'progress', () => (buffer.value = calcBuffer(audio.value.buffered, progress.value)))
+  useEventListener(audio, 'timeupdate', () => ignoreProgressUpdates(() => (progress.value = audio.currentTime)))
+  useEventListener(audio, 'durationchange', () => (duration.value = audio.duration))
+  useEventListener(audio, 'progress', () => (buffer.value = calcBuffer(audio.buffered, progress.value)))
   useEventListener(audio, 'volumechange', () => ignoreVolumeUpdates(() => ignoreMuteUpdates(() => {
-    volume.value = audio.value.volume
-    muted.value = audio.value.muted
+    volume.value = audio.volume
+    muted.value = audio.muted
   })))
   useEventListener(audio, 'ended', () => (ended.value = true))
   useEventListener(audio, 'playing', () => (ended.value = false))
 
-  watch(currentTrack, (value, oldValue) => {
+  watch(track, (value, oldValue) => {
     ignoreProgressUpdates(() => (progress.value = 0))
 
     if (caching.value && oldValue)
       cancelCacheTrack(oldValue.id)
 
-    audio.value.src = value?.url?.audio ?? ''
-    audio.value.load()
+    audio.src = value?.url?.audio ?? ''
+    audio.load()
     if (value && !value.url.audio && playing.value)
       void cacheTrack(value.id)
   })
 
   return {
+    track,
+
     audio: readonly(audio),
     caching: readonly(caching),
 

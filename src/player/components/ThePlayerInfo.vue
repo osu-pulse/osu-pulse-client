@@ -1,19 +1,18 @@
 <script lang="ts" setup>
 import { computed, ref, shallowRef, watch } from 'vue'
-import { breakpointsTailwind, syncRefs, useBreakpoints } from '@vueuse/core'
-import { useColors } from '@/core/stores/colors'
-import { useCurrentTrack } from '@/player/stores/current-track'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { usePlayer } from '@/player/stores/player'
 
 const props = defineProps<{
   center?: boolean
 }>()
 
-const { currentTrack } = useCurrentTrack()
+const { track } = usePlayer()
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
 const coverSrc = computed(() =>
-  greaterLg.value ? currentTrack.value?.cover?.normal : currentTrack.value?.cover?.wide,
+  greaterLg.value ? track.value?.cover?.normal : track.value?.cover?.wide,
 )
 
 const coverLoaded = ref(false)
@@ -25,9 +24,6 @@ function handleLoad(event: Event) {
   if (target.src === coverRef.value?.src)
     coverLoaded.value = true
 }
-
-const { accentImage } = useColors()
-syncRefs(coverRef, accentImage)
 </script>
 
 <template>
@@ -50,14 +46,14 @@ syncRefs(coverRef, accentImage)
 
     <div class="meta">
       <Transition mode="out-in">
-        <span :key="currentTrack?.title" class="title">{{
-          currentTrack?.title
+        <span :key="track?.title" class="title">{{
+          track?.title
         }}</span>
       </Transition>
 
       <Transition mode="out-in">
-        <span :key="currentTrack?.artist" class="artist">{{
-          currentTrack?.artist
+        <span :key="track?.artist" class="artist">{{
+          track?.artist
         }}</span>
       </Transition>
     </div>
@@ -231,7 +227,7 @@ syncRefs(coverRef, accentImage)
           background: linear-gradient(
               to right,
               rgba(constants.$clr-background, 0.2) 0%,
-              rgba(constants.$clr-background, 0.7) 40%,
+              rgba(constants.$clr-background, 0.6) 40%,
               rgb(constants.$clr-background) 100%
           );
         }

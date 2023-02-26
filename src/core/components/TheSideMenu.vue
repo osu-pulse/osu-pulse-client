@@ -8,7 +8,6 @@ import { useUser } from '@/core/stores/user'
 import { useOffline } from '@/core/stores/offline'
 import { RouteName } from '@/shared/constants/route-name'
 import { usePlayer } from '@/player/stores/player'
-import { useCurrentTrack } from '@/player/stores/current-track'
 import BIcon from '@/shared/components/BIcon.vue'
 import SecondaryPanel from '@/shared/components/SecondaryPanel.vue'
 
@@ -56,10 +55,9 @@ const { offline } = useOffline()
 const avatar = computed(() => user.value?.url?.avatar ?? EmptyAvatarUrl)
 const username = computed(() => user.value?.username ?? 'UNKNOWN')
 
-const { playing } = usePlayer()
-const { currentTrack } = useCurrentTrack()
+const { playing, track } = usePlayer()
 const listening = computed(
-  () => currentTrack.value && `${currentTrack.value.title} - ${currentTrack.value.artist}`,
+  () => track.value && `${track.value.title} - ${track.value.artist}`,
 )
 
 function goProfile() {

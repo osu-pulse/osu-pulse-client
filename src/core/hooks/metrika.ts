@@ -1,8 +1,12 @@
-import { createGlobalState, useEventListener, whenever } from '@vueuse/core'
+import {
+  createSharedComposable,
+  useEventListener,
+  whenever,
+} from '@vueuse/core'
 import { useYandexMetrika } from 'yandex-metrika-vue3'
 import { useUser } from '@/core/stores/user'
 
-export const useMetrika = createGlobalState(() => {
+export const useMetrika = createSharedComposable(() => {
   const { user } = useUser()
 
   useEventListener(document.querySelector(

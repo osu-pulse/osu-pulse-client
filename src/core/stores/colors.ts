@@ -1,56 +1,54 @@
 import {
   createGlobalState,
-  createSharedComposable,
+  createSharedComposable, tryOnMounted,
   useCssVar,
   useEventListener,
 } from '@vueuse/core'
-import { computed, shallowRef, watch } from 'vue'
+import { computed, watch } from 'vue'
 import Color from 'color'
 import ColorThief from 'color-thief-ts'
+import { usePlayer } from '@/player/stores/player'
 
 const useColorsState = createGlobalState(() => ({
+  image: new Image(100, 100),
+
   primary: useCssVar('--color-primary'),
   secondary: useCssVar('--color-secondary'),
   background: useCssVar('--color-background'),
   text: useCssVar('--color-text'),
   textInactive: useCssVar('--color-text-inactive'),
   accent: useCssVar('--color-accent'),
-  accentImage: shallowRef<HTMLImageElement>(),
 }))
 
 export const useColors = createSharedComposable(() => {
   const {
+    image,
     primary,
     secondary,
     background,
     text,
     textInactive,
     accent,
-    accentImage,
   } = useColorsState()
 
-  watch(accentImage, () => (accent.value = primary.value))
-  const contrast = computed(() => Color(`rgb(${background.value})`))
+  tryOnMounted(() => image.crossOrigin = 'Anonymous')
 
+  const { track } = usePlayer()
+  watch(track, track => image.src = track?.cover?.small ?? '')
+  const contrast = computed(() => Color(`rgb(${background.value})`))
   const CONTRAST_LIMIT = 0.3
   const colorThief = new ColorThief()
-  useEventListener(accentImage, 'load', (event: Event) => {
+  useEventListener(image, 'load', (event: Event) => {
     const target = event.target as HTMLImageElement
 
-    if (target.src === accentImage.value?.src) {
-      const raw = Color(
-        colorThief.getColor(accentImage.value, { colorType: 'hex' }),
-      )
+    if (target.src === image.src) {
+      const raw = Color(colorThief.getColor(image, { colorType: 'hex' }))
       const delta = raw.contrast(contrast.value) / 21
 
-      let normalized: Color
-      if (delta > CONTRAST_LIMIT) {
-        normalized = raw
-      }
-      else {
-        const weight = CONTRAST_LIMIT - delta
-        normalized = raw.negate().mix(contrast.value, weight).negate()
-      }
+      const normalized = delta < CONTRAST_LIMIT
+        ? raw.negate().mix(contrast.value, CONTRAST_LIMIT - delta).negate()
+        : raw
+
       accent.value = normalized.rgb().array().join(', ')
     }
   })
@@ -61,6 +59,5 @@ export const useColors = createSharedComposable(() => {
     background,
     text,
     textInactive,
-    accentImage,
   }
 })
