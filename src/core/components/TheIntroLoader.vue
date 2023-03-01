@@ -1,6 +1,6 @@
 <template>
   <div class="intro-loader-component">
-    <img class="icon" alt="logo" src="../../shared/assets/logo.svg">
+    <img class="icon" alt="logo" src="@/shared/assets/logo.svg?url">
   </div>
 </template>
 

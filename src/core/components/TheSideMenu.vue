@@ -71,7 +71,7 @@ const route = useRoute()
 <template>
   <div class="side-menu-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
-      <img class="icon" alt="logo" src="../../shared/assets/logo.svg">
+      <img class="icon" alt="logo" src="@/shared/assets/logo.svg?url">
       <span class="label">Pulse</span>
     </RouterLink>
 
