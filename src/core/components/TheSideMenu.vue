@@ -71,7 +71,7 @@ const route = useRoute()
 <template>
   <div class="side-menu-component">
     <RouterLink :to="{ name: RouteName.HOME }" class="logo">
-      <img class="icon" alt="logo" src="../../shared/assets/logo.webp">
+      <img class="icon" alt="logo" src="../../shared/assets/logo.svg">
       <span class="label">Pulse</span>
     </RouterLink>
 
@@ -200,7 +200,7 @@ const route = useRoute()
     gap: 10px;
 
     .icon {
-      width: 50px;
+      @include mixins.size(50px);
       animation: heartbeat 1.5s;
     }
 
