@@ -46,8 +46,9 @@ whenever(greaterSm, () => menuShowed.value = false)
 
 const playerMaximized = ref(false)
 whenever(playerMaximized, () => menuShowed.value = false)
+whenever(menuShowed, () => playerMaximized.value = false)
 const route = useRoute()
-watch([route, menuShowed], () => playerMaximized.value = false)
+watch(route, () => playerMaximized.value = false)
 
 tryOnMounted(() => {
   // eslint-disable-next-line no-console
@@ -104,9 +105,7 @@ tryOnMounted(() => {
                 </div>
               </Transition>
 
-              <Transition>
-                <ThePlayer v-if="track" v-model:maximized="playerMaximized" class="player" />
-              </Transition>
+              <ThePlayer v-if="track" v-model:maximized="playerMaximized" class="player" />
             </main>
 
             <TheBottomMenu v-model:menu-showed="menuShowed" class="bottom-menu" />
@@ -166,6 +165,7 @@ tryOnMounted(() => {
         flex: auto;
         flex-direction: column;
         gap: 10px;
+        overflow: hidden;
 
         .page-container {
           padding: 0 20px;
@@ -174,8 +174,6 @@ tryOnMounted(() => {
 
           .page {
             @include transitions.fade();
-            position: relative;
-            display: flex;
 
             &.v-leave-active {
               transition: constants.$trn-fast-out;
@@ -184,7 +182,6 @@ tryOnMounted(() => {
         }
 
         .player {
-          @include transitions.move($y: -10px);
           margin-bottom: 10px;
         }
       }
@@ -204,7 +201,6 @@ tryOnMounted(() => {
 
         .main-section {
           gap: 0;
-          overflow: auto;
 
           .queue, .side-menu, .page-container {
             @include transitions.fade();

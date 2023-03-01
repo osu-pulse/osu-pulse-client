@@ -34,85 +34,69 @@ const maximized = useVModel(props, 'maximized', emits)
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
 const greaterSm = greater('sm')
-whenever(greaterSm, () => maximized.value = false)
-
-function handleMaximize() {
-  if (!greaterSm.value)
-    maximized.value = !maximized.value
-}
 
 const { hasPrev, hasNext, prev, next } = useCurrentTrack()
 const playerInfoRef = shallowRef<ComponentPublicInstance>()
-const { lengthX, isSwiping } = useSwipe(
-  () => !greaterSm.value && playerInfoRef.value?.$el,
-  { threshold: 0 },
-)
+const mobilePlayerInfoRef = computed(() => !greaterSm.value && playerInfoRef.value?.$el)
 
-const swipeThreshold = 20
-const thresholded = computed(() => Math.abs(lengthX.value) > swipeThreshold)
-const available = computed(() => (lengthX.value > 0 && hasNext.value) || (lengthX.value < 0 && hasPrev.value),
-)
+const {
+  lengthX,
+  lengthY,
+  isSwiping,
+} = useSwipe(mobilePlayerInfoRef, { threshold: 0 })
+
+const maximizeReady = computed(() => Math.abs(lengthY.value) > 40)
+const changeTrackReady = computed(() => Math.abs(lengthX.value) > 30)
+const changeTrackAvailable = computed(() => (lengthX.value > 0 && hasNext.value) || (lengthX.value < 0 && hasPrev.value))
 
 const { swipeStart, swipeEnd } = usePlayerFeedback()
-whenever(thresholded, () => available.value && swipeStart())
+whenever(changeTrackReady, () => changeTrackAvailable.value && swipeStart())
 
 whenever(() => !isSwiping.value, () => {
-  if (available.value && thresholded.value) {
+  if (maximizeReady.value) {
+    maximized.value = lengthY.value > 0
+  }
+  else if (changeTrackReady.value && changeTrackAvailable.value) {
     lengthX.value > 0 ? next() : prev()
     swipeEnd()
   }
 })
 
-const maxOffset = 40
+const offsetBound = 50
 const playerOffset = computed(() =>
-  (isSwiping.value && available.value)
-    ? Math.max(-maxOffset, Math.min(maxOffset, -lengthX.value))
+  (!greaterSm.value && isSwiping.value && changeTrackAvailable.value)
+    ? Math.max(-offsetBound, Math.min(offsetBound, -lengthX.value))
     : 0,
 )
 </script>
 
 <template>
-  <div class="player-component">
+  <Transition mode="out-in">
     <div
-      class="container"
-      :class="{ _minimized: !maximized, _swiping: isSwiping }"
-      :style="{ '--offset': `${playerOffset}px` }"
+      :key="greaterSm || maximized"
+      class="player-component"
+      :class="!greaterSm && { _minimized: !maximized, _swiping: isSwiping }"
+      :style="!greaterSm && { '--offset': `${playerOffset}px` }"
     >
       <ThePlayerInfo
         ref="playerInfoRef"
         class="info"
         :center="(!greaterLg && greaterSm) || (!greaterSm && maximized)"
-        @click="handleMaximize"
+        @click="maximized = !maximized"
       />
-      <Transition mode="out-in">
-        <div v-if="greaterSm" class="player">
-          <div class="main">
-            <ThePlayerSound class="sound" />
-            <ThePlayerSettings class="settings" />
-          </div>
 
-          <ThePlayerControl class="control" />
-
-          <ThePlayerTimeline class="timeline" />
+      <div class="player" :class="{ _minimized: !greaterSm && !maximized }">
+        <div v-show="greaterSm || maximized" class="main">
+          <ThePlayerSound class="sound" />
+          <ThePlayerSettings class="settings" />
         </div>
 
-        <div v-else-if="maximized" class="player">
-          <ThePlayerControl class="control" />
+        <ThePlayerControl class="control" :mini="!greaterSm && !maximized" />
 
-          <ThePlayerTimeline class="timeline" />
-
-          <div class="main">
-            <ThePlayerSound class="sound" />
-            <ThePlayerSettings class="settings" />
-          </div>
-        </div>
-
-        <div v-else class="player">
-          <ThePlayerControl class="control" mini />
-        </div>
-      </Transition>
+        <ThePlayerTimeline v-show="greaterSm || maximized" class="timeline" />
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style lang="scss" scoped>
@@ -121,67 +105,98 @@ const playerOffset = computed(() =>
 @use '../../shared/styles/transitions';
 
 .player-component {
-  border-radius: constants.$cmn-border-radius;
+  display: flex;
+  height: 100px;
   overflow: hidden;
-  filter: drop-shadow(constants.$cmn-shadow-block);
+  border-radius: constants.$cmn-border-radius;
+  background-color: rgb(constants.$clr-background);
+  box-shadow: constants.$cmn-shadow-block;
+  transition: constants.$trn-normal-out;
 
-  .container {
-    min-width: max-content;
-    display: flex;
-    height: 100px;
+  .info {
     overflow: hidden;
-    border-radius: constants.$cmn-border-radius;
-    background-color: rgb(constants.$clr-background);
-    transition: constants.$trn-normal-out;
+    margin-right: 20px;
+    touch-action: none;
+  }
+
+  .player {
+    position: relative;
+    flex: auto;
+    padding: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .control {
+      z-index: 2;
+      margin: 10px auto;
+    }
+
+    .main {
+      z-index: 1;
+      position: absolute;
+      width: calc(100% - 20px);
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}
+
+@media (max-width: constants.$bpt-lg) and (min-width: constants.$bpt-md) {
+  .player-component {
+    height: 200px;
+    flex-direction: column;
 
     .info {
-      overflow: hidden;
-      margin-right: 20px;
+      flex: auto;
+      margin: 0;
     }
 
     .player {
-      position: relative;
-      flex: auto;
-      padding: 10px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      .control {
-        z-index: 2;
-        margin: 10px auto;
-      }
+      padding: 10px 20px;
+      flex: none;
+      height: 100px;
 
       .main {
-        z-index: 1;
-        position: absolute;
-        width: calc(100% - 20px);
-        display: flex;
-        justify-content: space-between;
+        width: calc(100% - 40px);
       }
     }
   }
 }
 
-@media (max-width: constants.$bpt-lg) and (min-width: constants.$bpt-sm) {
+@media (max-width: constants.$bpt-md) {
   .player-component {
-    .container {
-      height: 200px;
-      flex-direction: column;
+    height: 240px;
+    flex-direction: column;
 
-      .info {
-        flex: auto;
-        margin: 0;
+    .info {
+      margin-right: 0;
+      flex: 1 0;
+    }
+
+    .player {
+      flex: none;
+      padding: 10px 20px;
+      height: 130px;
+
+      .control {
+        order: 1;
+        margin: 0 auto;
       }
 
-      .player {
-        padding: 10px 20px;
-        flex: none;
-        height: 100px;
+      .timeline {
+        order: 2;
+        margin-bottom: 5px;
+      }
 
-        .main {
-          width: calc(100% - 40px);
+      .main {
+        order: 3;
+        position: unset;
+        width: unset;
+
+        .sound {
+          width: 120px;
         }
       }
     }
@@ -190,75 +205,30 @@ const playerOffset = computed(() =>
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
-    .container {
-      --offset: 0px;
-      transform: translateX(var(--offset));
-      transition: constants.$trn-normal-out;
+    @include transitions.fade($transition: constants.$trn-fast-out);
+    --offset: 0px;
+    transform: translateX(var(--offset));
+    transition: constants.$trn-normal-out;
 
-      &._swiping {
-        transition: 0.05s;
-      }
+    &._swiping {
+      transition: none;
+    }
+
+    &._minimized {
+      height: 60px;
+      flex-direction: row;
 
       .info {
-        flex: 1 0;
+        margin-right: 5px;
+        width: unset;
       }
 
       .player {
-        @include transitions.fade($leave: false);
-        flex: none;
+        height: unset;
 
-        &.v-leave-from {
-          .timeline, .main {
-            display: none;
-          }
-        }
-      }
-
-      &:not(._minimized) {
-        height: 240px;
-        flex-direction: column;
-
-        .info {
-          margin-right: 0;
-        }
-
-        .player {
-          padding: 10px 20px;
-          height: 130px;
-
-          .control {
-            margin: 0 auto;
-          }
-
-          .timeline {
-            margin-bottom: 5px;
-          }
-
-          .main {
-            position: unset;
-            width: unset;
-
-            .sound {
-              width: 120px;
-            }
-          }
-        }
-      }
-
-      &._minimized {
-        height: 60px;
-        flex-direction: row;
-
-        .info {
-          margin-right: 5px;
-          width: unset;
-        }
-
-        .player {
-          .control {
-            padding: 0;
-            margin: auto 0;
-          }
+        .control {
+          padding: 0;
+          margin: auto 0;
         }
       }
     }

@@ -6,6 +6,7 @@ import {
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
+
 import { useQueue } from '@/core/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
 import type { Track } from '@/shared/dto/track'

@@ -1,5 +1,5 @@
 export function switchAssign<
-  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, unknown>,
+  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, any>,
 >(
   value: V,
   map: Partial<M>,
@@ -12,7 +12,7 @@ export function switchAssign<
 }
 
 export function switchExec<
-  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, (value: V) => unknown>,
+  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, (value: V) => any>,
 >(
   value: V,
   map: Partial<M>,
@@ -21,14 +21,14 @@ export function switchExec<
   if (value != null) {
     const handler = map[value as Exclude<V, null | undefined>]
     if (handler)
-      return handler(value) as any
+      return handler(value)
   }
   if (fallback)
-    return fallback(value) as any
+    return fallback(value)
 }
 
 export function switchThrow<
-  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, unknown>,
+  V extends string | number | null | undefined, M extends Record<Exclude<V, null | undefined>, any>,
 >(
   value: V,
   map: Partial<M>,

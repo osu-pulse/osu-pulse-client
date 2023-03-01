@@ -78,6 +78,7 @@ watchEffect(() => {
 @use '../../shared/styles/transitions';
 
 .range-component {
+  touch-action: none;
   position: relative;
   display: flex;
   align-items: center;

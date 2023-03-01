@@ -10,7 +10,6 @@
 @use '../src/shared/styles/constants';
 
 .queue-component {
-  min-width: 250px;
-  max-width: 350px;
+  min-width: 300px;
 }
 </style>
