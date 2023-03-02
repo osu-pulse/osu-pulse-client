@@ -1,5 +1,6 @@
 import type { AxiosResponse } from 'axios'
 import { createGlobalState } from '@vueuse/core'
+
 import type { TokenSetDto } from '@/auth/dto/token-set-dto'
 import type { RotateTokenDto } from '@/auth/dto/rotate-token'
 import { AuthenticationError } from '@/auth/exceptions/authentication-exception'
@@ -15,7 +16,7 @@ export const useAuthenticationService = createGlobalState(() => ({
       >('token', { refresh_token: refreshToken })
       return data
     }
-    catch {
+    catch (e) {
       throw new AuthenticationError()
     }
   },

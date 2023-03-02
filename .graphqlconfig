@@ -4,7 +4,7 @@
   "extensions": {
     "endpoints": {
       "Default GraphQL Endpoint": {
-        "url": "http://127.0.0.1:5000/graphql",
+        "url": "https://osu-pulse.site/graphql",
         "headers": {
           "user-agent": "JS GraphQL"
         },

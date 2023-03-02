@@ -16,7 +16,7 @@ import { omit } from '@/shared/utils/object'
 const useAuthenticationState = createGlobalState(() => ({
   accessToken: ref<string>(),
   refreshToken: useLocalStorage<string | undefined>(
-    'refresh-token',
+    'authentication_refresh-token',
     undefined,
     { serializer },
   ),
@@ -37,6 +37,11 @@ export const useAuthentication = createSharedComposable(() => {
         })
       }
     })
+  }
+
+  function reset() {
+    refreshToken.value = undefined
+    window.location.reload()
   }
 
   function redirect() {
@@ -60,8 +65,12 @@ export const useAuthentication = createSharedComposable(() => {
   const authenticationService = useAuthenticationService()
   async function rotate() {
     if (refreshToken.value) {
+      const timeout = setTimeout(reset, 5000)
+
       const { access_token, refresh_token }
-        = await authenticationService.rotate(refreshToken.value)
+          = await authenticationService.rotate(refreshToken.value)
+
+      clearTimeout(timeout)
 
       accessToken.value = access_token
       refreshToken.value = refresh_token
@@ -116,6 +125,7 @@ export const useAuthentication = createSharedComposable(() => {
     onLogout: readonly(onLogout),
 
     getToken,
+    reset,
     login,
     logout,
   }

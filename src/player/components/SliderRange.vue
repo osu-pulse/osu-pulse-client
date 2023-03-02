@@ -20,14 +20,19 @@ const props = withDefaults(
 
 const emits = defineEmits<{
   (e: 'update:value', value: number): void
-  (e: 'changeStart'): void
-  (e: 'changeEnd'): void
+  (e: 'changeStart', value: number): void
+  (e: 'changeEnd', value: number): void
 }>()
 
 const value = useVModel(props, 'value', emits)
 
 const changing = ref(false)
-watch(changing, value => (value ? emits('changeStart') : emits('changeEnd')))
+watch(changing, (changing) => {
+  if (changing)
+    emits('changeStart', value.value)
+  else
+    emits('changeEnd', value.value)
+})
 const { pressed } = useMousePressed()
 whenever(
   () => !pressed.value,
@@ -52,7 +57,7 @@ watchEffect(() => {
         '--value': `${value * 100}%`,
         '--buffer': `${props.buffer * 100}%`,
       }"
-      @mousedown.prevent="changing = true"
+      @mousedown="changing = true"
       @touchstart="changing = true"
     />
 
@@ -60,7 +65,7 @@ watchEffect(() => {
       class="thumb"
       :class="{ _wide: props.wide }"
       :style="{ '--offset': `${value * 100}%` }"
-      @mousedown.prevent="changing = true"
+      @mousedown="changing = true"
       @touchstart="changing = true"
     />
   </div>
@@ -73,6 +78,7 @@ watchEffect(() => {
 @use '../../shared/styles/transitions';
 
 .range-component {
+  touch-action: none;
   position: relative;
   display: flex;
   align-items: center;

@@ -1,6 +1,13 @@
 <script lang="ts" setup>
-import { breakpointsTailwind, tryOnMounted, useBreakpoints, watchOnce } from '@vueuse/core'
-import { ref } from 'vue'
+import {
+  breakpointsTailwind,
+  tryOnMounted,
+  useBreakpoints,
+  watchOnce,
+  whenever,
+} from '@vueuse/core'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useQueue } from '@/core/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
@@ -13,11 +20,14 @@ import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
+import { usePlayer } from '@/player/stores/player'
+import { useColors } from '@/core/stores/colors'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
 
 useMetrika()
+useColors()
 
 const { check } = useOffline()
 tryOnMounted(check)
@@ -26,16 +36,28 @@ const { authenticated } = useAuthentication()
 const { loading } = useOffline()
 
 const { queue } = useQueue()
-const { currentTrackId } = useCurrentTrack()
-watchOnce(queue, () => (currentTrackId.value = queue.value[0]?.id))
+const { trackId } = useCurrentTrack()
+watchOnce(queue, () => (trackId.value = queue.value[0]?.id))
+
+const { track } = usePlayer()
 
 const menuShowed = ref(false)
+whenever(greaterSm, () => menuShowed.value = false)
 
-// tryOnMounted(() => {
-//   console.clear()
-//   console.log('This app in the development state')
-//   console.log('GitHub organization: https://github.com/osu-pulse')
-// })
+const playerMaximized = ref(false)
+whenever(playerMaximized, () => menuShowed.value = false)
+whenever(menuShowed, () => playerMaximized.value = false)
+const route = useRoute()
+watch(route, () => playerMaximized.value = false)
+
+tryOnMounted(() => {
+  // eslint-disable-next-line no-console
+  console.clear()
+  // eslint-disable-next-line no-console
+  console.log('This app in the development state')
+  // eslint-disable-next-line no-console
+  console.log('GitHub organization: https://github.com/osu-pulse')
+})
 </script>
 
 <template>
@@ -57,7 +79,9 @@ const menuShowed = ref(false)
                 </Transition>
               </div>
 
-              <ThePlayer class="player" />
+              <Transition>
+                <ThePlayer v-if="track" class="player" />
+              </Transition>
             </main>
 
             <TheQueue class="queue" />
@@ -70,7 +94,9 @@ const menuShowed = ref(false)
           <div v-else class="body">
             <main class="main-section">
               <Transition mode="out-in">
-                <TheSideMenu v-if="menuShowed" class="side-menu" />
+                <TheQueue v-if="playerMaximized" class="queue" />
+
+                <TheSideMenu v-else-if="menuShowed" class="side-menu" />
 
                 <div v-else class="page-container">
                   <Transition mode="out-in">
@@ -79,7 +105,7 @@ const menuShowed = ref(false)
                 </div>
               </Transition>
 
-              <ThePlayer class="player" />
+              <ThePlayer v-if="track" v-model:maximized="playerMaximized" class="player" />
             </main>
 
             <TheBottomMenu v-model:menu-showed="menuShowed" class="bottom-menu" />
@@ -139,6 +165,7 @@ const menuShowed = ref(false)
         flex: auto;
         flex-direction: column;
         gap: 10px;
+        overflow: hidden;
 
         .page-container {
           padding: 0 20px;
@@ -147,8 +174,10 @@ const menuShowed = ref(false)
 
           .page {
             @include transitions.fade();
-            position: relative;
-            display: flex;
+
+            &.v-leave-active {
+              transition: constants.$trn-fast-out;
+            }
           }
         }
 
@@ -173,11 +202,15 @@ const menuShowed = ref(false)
         .main-section {
           gap: 0;
 
-          .side-menu, .page-container {
+          .queue, .side-menu, .page-container {
             @include transitions.fade();
+
+            &.v-leave-active {
+              transition: constants.$trn-fast-out;
+            }
           }
 
-          .side-menu {
+          .queue, .side-menu {
             margin: 10px;
             flex: auto;
             border-radius: constants.$cmn-border-radius;
@@ -185,6 +218,7 @@ const menuShowed = ref(false)
           }
 
           .player {
+            flex: none;
             margin: 0 10px 10px;
           }
         }

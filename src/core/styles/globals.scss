@@ -5,16 +5,14 @@
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  color: rgb(constants.$clr-text);
-}
-
-body,
-p {
+body {
   margin: 0;
+  color: rgb(constants.$clr-text);
 }
 
 a {
@@ -51,4 +49,8 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px white inset;
+}
+
+::selection {
+  background: rgba(constants.$clr-text, 0.1);
 }
