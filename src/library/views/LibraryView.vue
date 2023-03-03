@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import TheLibraryTrack from '@/library/components/TheLibraryTrack.vue'
+import Track from '@/shared/components/Track.vue'
+import { useLibrary } from '@/library/stores/library'
+
+const { library } = useLibrary()
 </script>
 
 <template>
@@ -7,7 +10,10 @@ import TheLibraryTrack from '@/library/components/TheLibraryTrack.vue'
     <div class="header">
       Library
     </div>
-    <TheLibraryTrack />
+
+    <div class="list">
+      <Track v-for="track in library" :key="track.id" :track="track" />
+    </div>
   </div>
 </template>
 

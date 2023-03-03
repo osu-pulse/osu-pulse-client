@@ -1,49 +1,41 @@
 <script lang="ts" setup>
-import { computed, shallowRef } from 'vue'
+import { computed } from 'vue'
 import {
   breakpointsTailwind,
-  syncRefs,
   useBreakpoints,
-  useMouseInElement,
 } from '@vueuse/core'
 import BIcon from '@/shared/components/BIcon.vue'
-import { useColors } from '@/core/stores/colors'
+import type { Track } from '@/shared/dto/track'
+import type { TimeSplit } from '@/shared/types/time-split'
 import { usePlayer } from '@/player/stores/player'
-import { useCurrentTrack } from '@/player/stores/current-track'
 
-const { currentTrack } = useCurrentTrack()
-const { duration, playing } = usePlayer()
+const props = defineProps<{
+  track: Track
+}>()
 
-interface TimeSplit {
-  h: string
-  m: string
-}
-const durationSplit = computed<TimeSplit>(() => ({
-  h: Math.floor(duration.value / 60).toString(),
-  m: `0${Math.floor(duration.value % 60)}`.slice(-2),
+const duration = computed<TimeSplit>(() => ({
+  h: Math.floor(props.track.duration / 60).toString(),
+  m: `0${Math.floor(props.track.duration % 60)}`.slice(-2),
 }))
 
-const listItem = shallowRef<HTMLDivElement>()
-const { isOutside } = useMouseInElement(listItem)
+const { track, playing } = usePlayer()
+const active = computed(() => props.track.id === track.value?.id)
 
-const playBtnIcon = computed(() => playing.value ? 'pause-fill' : 'play-fill')
+const hovered = ref(false)
 
-const coverRef = shallowRef<HTMLImageElement>()
-const { accentImage } = useColors()
-syncRefs(coverRef, accentImage)
+const playBtnIcon = computed(() => (active.value && playing.value) ? 'pause-fill' : 'play-fill')
 
 const { greater } = useBreakpoints(breakpointsTailwind)
-const isButtonShowed = computed(() =>
-  greater('md').value,
-)
+const isButtonShowed = computed(() => greater('md').value)
 const isWaveShowed = computed(() => greater('sm').value)
 </script>
 
 <template>
-  <div ref="listItem" class="library-track-component">
+  <div class="library-track-component" :class="{ _active: active }" @mouseenter="hovered = true" @mouseleave="hovered = false">
     <div class="order">
       <Transition mode="out-in">
-        <BIcon v-if="!isOutside" :name="playBtnIcon" class="icon" @click="playing = !playing" />
+        <BIcon v-if="hovered" :name="playBtnIcon" class="icon" @click="playing = !playing" />
+
         <span v-else class="number">1</span>
       </Transition>
     </div>
@@ -79,16 +71,16 @@ const isWaveShowed = computed(() => greater('sm').value)
       </div>
 
       <div v-else class="time">
-        {{ durationSplit.h }}:{{ durationSplit.m }}
+        {{ duration.h }}:{{ duration.m }}
       </div>
     </Transition>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .library-track-component {
   display: flex;

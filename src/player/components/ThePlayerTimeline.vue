@@ -3,13 +3,9 @@ import { computed, customRef, ref, watch } from 'vue'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
+import type { TimeSplit } from '@/shared/types/time-split'
 
 const { track, playing, progress, duration, buffer } = usePlayer()
-
-interface TimeSplit {
-  h: string
-  m: string
-}
 
 const progressSplit = computed<TimeSplit>(() => ({
   h: Math.floor(progress.value / 60).toString(),
