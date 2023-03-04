@@ -116,10 +116,10 @@ watchEffect(() => {
   .thumb {
     $size: 7px;
     @include mixins.size($size * 2);
-    --offset: 0%;
+    --offset-x: 0%;
     position: absolute;
     display: flex;
-    left: calc(var(--offset) - #{$size});
+    left: calc(var(--offset-x) - #{$size});
     background: rgb(constants.$clr-primary);
     border-radius: $size;
     transform: scale(0);
@@ -128,7 +128,7 @@ watchEffect(() => {
 
     &._wide {
       width: $size * 3;
-      left: calc(var(--offset) - #{$size * 1.5});
+      left: calc(var(--offset-x) - #{$size * 1.5});
     }
 
     &::after {

@@ -45,29 +45,65 @@ const {
   isSwiping,
 } = useSwipe(mobilePlayerInfoRef, { threshold: 0 })
 
-const maximizeReady = computed(() => Math.abs(lengthY.value) > 40)
-const changeTrackReady = computed(() => Math.abs(lengthX.value) > 30)
+const changeMaximizedReady = computed(() => Math.abs(lengthY.value) >= 40)
+const changeTrackReady = computed(() => Math.abs(lengthX.value) >= 30)
+
 const changeTrackAvailable = computed(() => (lengthX.value > 0 && hasNext.value) || (lengthX.value < 0 && hasPrev.value))
+const changeMaximizedAvailable = computed(() => (lengthY.value > 0 && !maximized.value) || (lengthY.value < 0 && maximized.value))
 
 const { swipeStart, swipeEnd } = usePlayerFeedback()
-whenever(changeTrackReady, () => changeTrackAvailable.value && swipeStart())
+whenever(changeTrackReady, () => {
+  if (!changeMaximizedReady.value && changeTrackAvailable.value)
+    swipeStart()
+})
+whenever(changeMaximizedReady, () => {
+  if (!changeTrackReady.value && changeMaximizedAvailable.value)
+    swipeStart()
+})
+
+const playerOffsetX = computed(() => {
+  if (
+    !greaterSm.value
+    && isSwiping.value
+    && !changeMaximizedReady.value
+    && changeTrackReady.value
+    && changeTrackAvailable.value
+  )
+    return lengthX.value > 0 ? -30 : 30
+  else
+    return 0
+})
+const playerOffsetY = computed(() => {
+  if (
+    !greaterSm.value
+    && isSwiping.value
+    && !changeTrackReady.value
+    && changeMaximizedReady.value
+    && changeMaximizedAvailable.value
+  )
+    return lengthY.value > 0 ? -20 : 20
+  else
+    return 0
+})
 
 whenever(() => !isSwiping.value, () => {
-  if (maximizeReady.value) {
+  if (
+    !changeTrackReady.value
+    && changeMaximizedReady.value
+    && changeMaximizedAvailable.value
+  ) {
     maximized.value = lengthY.value > 0
+    swipeEnd()
   }
-  else if (changeTrackReady.value && changeTrackAvailable.value) {
+  if (
+    !changeMaximizedReady.value
+    && changeTrackReady.value
+    && changeTrackAvailable.value
+  ) {
     lengthX.value > 0 ? next() : prev()
     swipeEnd()
   }
 })
-
-const offsetBound = 50
-const playerOffset = computed(() =>
-  (!greaterSm.value && isSwiping.value && changeTrackAvailable.value)
-    ? Math.max(-offsetBound, Math.min(offsetBound, -lengthX.value))
-    : 0,
-)
 </script>
 
 <template>
@@ -75,8 +111,8 @@ const playerOffset = computed(() =>
     <div
       :key="greaterSm || maximized"
       class="player-component"
-      :class="!greaterSm && { _minimized: !maximized, _swiping: isSwiping }"
-      :style="!greaterSm && { '--offset': `${playerOffset}px` }"
+      :class="!greaterSm && { _minimized: !maximized }"
+      :style="!greaterSm && { '--offset-x': `${playerOffsetX}px`, '--offset-y': `${playerOffsetY}px` }"
     >
       <ThePlayerInfo
         ref="playerInfoRef"
@@ -206,13 +242,10 @@ const playerOffset = computed(() =>
 @media (max-width: constants.$bpt-sm) {
   .player-component {
     @include transitions.fade($transition: constants.$trn-fast-out);
-    --offset: 0px;
-    transform: translateX(var(--offset));
-    transition: constants.$trn-normal-out;
-
-    &._swiping {
-      transition: none;
-    }
+    --offset-x: 0px;
+    --offset-y: 0px;
+    transform: translateX(var(--offset-x)) translateY(var(--offset-y));
+    transition: constants.$trn-fast-out;
 
     &._minimized {
       height: 60px;
