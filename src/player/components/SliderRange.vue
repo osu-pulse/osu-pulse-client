@@ -78,20 +78,22 @@ watchEffect(() => {
 @use '../../shared/styles/transitions';
 
 .range-component {
-  touch-action: none;
+  $size: 8px;
   position: relative;
+  height: $size * 2;
   display: flex;
   align-items: center;
+  touch-action: none;
 
   .track {
     @include mixins.size(fill);
     --value: 0%;
     --buffer: 0%;
     position: relative;
-    height: 6px;
+    height: $size;
     overflow: hidden;
     background: rgb(constants.$clr-text-inactive);
-    border-radius: 10px;
+    border-radius: $size;
     transform: scaleY(0.5);
     transition: constants.$trn-normal-out;
     cursor: pointer;
@@ -114,12 +116,11 @@ watchEffect(() => {
   }
 
   .thumb {
-    $size: 7px;
     @include mixins.size($size * 2);
-    --offset-x: 0%;
+    --offset: 0%;
     position: absolute;
     display: flex;
-    left: calc(var(--offset-x) - #{$size});
+    left: calc(var(--offset) - #{$size});
     background: rgb(constants.$clr-primary);
     border-radius: $size;
     transform: scale(0);
@@ -128,7 +129,7 @@ watchEffect(() => {
 
     &._wide {
       width: $size * 3;
-      left: calc(var(--offset-x) - #{$size * 1.5});
+      left: calc(var(--offset) - #{$size * 1.5});
     }
 
     &::after {
@@ -168,11 +169,11 @@ watchEffect(() => {
     @include hovered;
 
     .track::after {
-      transition: width 0s;
+      transition-property: none;
     }
 
     .thumb {
-      transition: left 0s;
+      transition-property: transform, opacity;
     }
 
     .thumb::after {
