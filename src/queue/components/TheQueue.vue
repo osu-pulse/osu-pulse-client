@@ -7,7 +7,7 @@
 </template>
 
 <style lang="scss" scoped>
-@use '../src/shared/styles/constants';
+@use '../../shared/styles/constants';
 
 .queue-component {
   min-width: 300px;

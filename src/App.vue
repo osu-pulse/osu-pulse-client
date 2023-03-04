@@ -8,20 +8,20 @@ import {
 } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQueue } from '@/core/stores/queue'
+import { useQueue } from '@/queue/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
 import TheSideMenu from '@/core/components/TheSideMenu.vue'
 import ThePlayer from '@/player/components/ThePlayer.vue'
 import TheIntroLoader from '@/core/components/TheIntroLoader.vue'
-import TheQueue from '@/core/components/TheQueue.vue'
+import TheQueue from '@/queue/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
 import { usePlayer } from '@/player/stores/player'
-import { useColors } from '@/core/stores/colors'
+import { useColors } from '@/themes/stores/colors'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
