@@ -259,6 +259,7 @@ whenever(() => !isSwiping.value, () => {
 
       .player {
         height: unset;
+        padding: 10px 15px;
 
         .control {
           padding: 0;
