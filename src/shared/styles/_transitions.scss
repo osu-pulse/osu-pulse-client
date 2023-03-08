@@ -1,7 +1,8 @@
 @use 'constants';
 
 @mixin fade(
-  $transition: constants.$trn-normal-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true,
   $enter: true,
@@ -14,7 +15,7 @@
       }
 
       &-enter-active {
-        transition: $transition;
+        transition: $transition-enter;
       }
     }
 
@@ -24,7 +25,7 @@
       }
 
       &-leave-active {
-        transition: $transition;
+        transition: $transition-leave;
       }
     }
   }
@@ -33,14 +34,16 @@
 @mixin move(
   $x: 0,
   $y: 0,
-  $transition: constants.$trn-normal-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true,
   $enter: true,
   $leave: true
 ) {
   @include fade(
-    $transition: $transition,
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
     $name: $name,
     $this: $this,
     $enter: $enter,
@@ -67,14 +70,16 @@
   $x: 1,
   $y: 1,
   $origin: center,
-  $transition: constants.$trn-normal-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true,
   $enter: true,
   $leave: true
 ) {
   @include fade(
-    $transition: $transition,
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
     $name: $name,
     $this: $this,
     $enter: $enter,
@@ -102,14 +107,16 @@
   $ratio: 1,
   $width: 1,
   $height: 1,
-  $transition: constants.$trn-normal-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true,
   $enter: true,
   $leave: true
 ) {
   @include fade(
-    $transition: $transition,
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
     $name: $name,
     $this: $this,
     $enter: $enter,
@@ -134,15 +141,21 @@
 }
 
 @mixin group-fade(
-  $transition: constants.$trn-very-slow-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true
 ) {
-  @include fade($transition: $transition, $name: $name);
+  @include fade(
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
+    $name: $name,
+    $this: $this,
+  );
 
   #{if($this, '&', '& > *')}.#{$name} {
     &-move {
-      transition: $transition;
+      transition: $transition-leave;
     }
   }
 }
@@ -150,11 +163,17 @@
 @mixin group-move(
   $x: 0,
   $y: 0,
-  $transition: constants.$trn-very-slow-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true
 ) {
-  @include group-fade($transition: $transition, $name: $name);
+  @include group-fade(
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
+    $name: $name,
+    $this: $this,
+  );
 
   #{if($this, '&', '& > *')}.#{$name} {
     &-enter-from,
@@ -168,11 +187,17 @@
   $ratio: 1,
   $x: 1,
   $y: 1,
-  $transition: constants.$trn-very-slow-out,
+  $transition-enter: constants.$trn-normal-out,
+  $transition-leave: constants.$trn-fast-in,
   $name: v,
   $this: true
 ) {
-  @include group-fade($transition: $transition, $name: $name);
+  @include group-fade(
+    $transition-enter: $transition-enter,
+    $transition-leave: $transition-leave,
+    $name: $name,
+    $this: $this,
+  );
 
   #{if($this, '&', '& > *')}.#{$name} {
     &-enter-from,

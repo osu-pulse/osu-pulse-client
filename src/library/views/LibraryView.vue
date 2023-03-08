@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Track from '@/shared/components/Track.vue'
+import TrackItem from '@/shared/components/TrackItem.vue'
 import { useLibrary } from '@/library/stores/library'
 
 const { library } = useLibrary()
@@ -12,7 +12,7 @@ const { library } = useLibrary()
     </div>
 
     <div class="list">
-      <Track v-for="track in library" :key="track.id" :track="track" />
+      <TrackItem v-for="(track, index) in library" :key="track.id" class="track-item" :track="track" :order="index + 1" />
     </div>
   </div>
 </template>
@@ -24,5 +24,10 @@ const { library } = useLibrary()
   flex-direction: column;
   gap: 30px;
 
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 </style>

@@ -71,10 +71,11 @@ export const usePlayer = createSharedComposable(() => {
           if (caching.value && track.value?.id)
             cancelCacheTrack(track.value.id)
         }
+        else if (track.value?.url?.audio) {
+          audio.play().catch(() => {})
+        }
         else {
-          if (track.value?.url?.audio)
-            audio.play().catch(() => {})
-          else void cacheTrack(track.value.id)
+          void cacheTrack(track.value.id)
         }
       }
     },

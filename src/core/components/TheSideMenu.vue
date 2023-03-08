@@ -76,7 +76,7 @@ const route = useRoute()
     </RouterLink>
 
     <div class="user">
-      <div class="avatar-wrap">
+      <div class="avatar-container">
         <img class="avatar" alt="avatar" :src="avatar">
         <div v-if="user" class="overlay" @click="goProfile">
           <BIcon name="eye" class="icon" />
@@ -183,7 +183,7 @@ const route = useRoute()
 
 .side-menu-component {
   min-width: max-content;
-  width: 350px;
+  width: 320px;
   overflow: auto;
   padding-top: 20px;
   display: flex;
@@ -222,7 +222,7 @@ const route = useRoute()
     display: flex;
     gap: 15px;
 
-    .avatar-wrap {
+    .avatar-container {
       @include mixins.size(70px);
       flex: none;
       position: relative;
@@ -381,7 +381,7 @@ const route = useRoute()
 
 @media (max-width: constants.$bpt-2xl) and (min-width: constants.$bpt-xl - 1px) {
   .side-menu-component {
-    width: 300px;
+    width: 280px;
   }
 }
 
@@ -404,7 +404,7 @@ const route = useRoute()
     .user {
       margin: 0 0 10px;
 
-      .avatar-wrap {
+      .avatar-container {
         @include mixins.size(50px);
         margin: auto;
 

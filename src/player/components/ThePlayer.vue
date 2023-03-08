@@ -205,7 +205,7 @@ const playerOffset = computed(() =>
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
-    @include transitions.fade($transition: constants.$trn-fast-out);
+    @include transitions.fade();
     --offset: 0px;
     transform: translateX(var(--offset));
     transition: constants.$trn-normal-out;

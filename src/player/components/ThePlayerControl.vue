@@ -158,7 +158,7 @@ function handleNext() {
       }
 
       .icon {
-        @include transitions.fade(constants.$trn-fast-out);
+        @include transitions.fade($transition-enter: constants.$trn-fast-out);
         margin: auto;
         font-size: 26px;
         color: rgb(constants.$clr-background);

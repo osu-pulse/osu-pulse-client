@@ -130,7 +130,7 @@ function handleLoad(event: Event) {
     }
 
     .title {
-      @include transitions.fade($transition: constants.$trn-normal-out);
+      @include transitions.fade();
       font-size: 18px;
       font-weight: bold;
 

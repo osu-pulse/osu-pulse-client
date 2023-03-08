@@ -12,7 +12,7 @@ const volumeIcon = computed(() => (muted.value ? 'volume-mute' : 'volume-up'))
 const { changeVolume, boundVolume, mute, unmute } = usePlayerFeedback()
 
 const prevVolume = ref(volume.value)
-const step = 0.2
+const step = 0.1
 watch(volume, (volume) => {
   if (volume === 0 || volume === 1) {
     prevVolume.value = volume

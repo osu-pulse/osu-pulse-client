@@ -22,12 +22,14 @@ import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
 import { usePlayer } from '@/player/stores/player'
 import { useColors } from '@/themes/stores/colors'
+import { useUrlTrack } from '@/player/hooks/url-track'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
 
 useMetrika()
 useColors()
+useUrlTrack()
 
 const { check } = useOffline()
 tryOnMounted(check)
@@ -51,8 +53,6 @@ const route = useRoute()
 watch(route, () => playerMaximized.value = false)
 
 tryOnMounted(() => {
-  // eslint-disable-next-line no-console
-  console.clear()
   // eslint-disable-next-line no-console
   console.log('This app in the development state')
   // eslint-disable-next-line no-console
@@ -161,8 +161,8 @@ tryOnMounted(() => {
       }
 
       .main-section {
-        display: flex;
         flex: auto;
+        display: flex;
         flex-direction: column;
         gap: 10px;
         overflow: hidden;
@@ -174,14 +174,11 @@ tryOnMounted(() => {
 
           .page {
             @include transitions.fade();
-
-            &.v-leave-active {
-              transition: constants.$trn-fast-out;
-            }
           }
         }
 
         .player {
+          flex: none;
           margin-bottom: 10px;
         }
       }
@@ -204,10 +201,6 @@ tryOnMounted(() => {
 
           .queue, .side-menu, .page-container {
             @include transitions.fade();
-
-            &.v-leave-active {
-              transition: constants.$trn-fast-out;
-            }
           }
 
           .queue, .side-menu {
@@ -215,6 +208,10 @@ tryOnMounted(() => {
             flex: auto;
             border-radius: constants.$cmn-border-radius;
             box-shadow: constants.$cmn-shadow-block;
+          }
+
+          .page-container {
+            margin-bottom: 10px;
           }
 
           .player {

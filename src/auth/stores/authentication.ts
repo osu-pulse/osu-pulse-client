@@ -82,27 +82,28 @@ export const useAuthentication = createSharedComposable(() => {
   const route = useRoute()
   const router = useRouter()
 
-  function isUrlClaimable() {
-    const params = new URLSearchParams(window.location.search)
-    return params.has('access_token') && params.has('refresh_token')
+  async function isUrlClaimable() {
+    await router.isReady()
+    return route.query.access_token && route.query.refresh_token
   }
 
   const authenticated = computed(() => refreshToken.value || isUrlClaimable())
 
   async function claimUrl() {
-    const params = new URLSearchParams(window.location.search)
-    accessToken.value = params.get('access_token')!
-    refreshToken.value = params.get('refresh_token')
+    await router.isReady()
+
+    accessToken.value = route.query.access_token as string
+    refreshToken.value = route.query.refresh_token as string
 
     await router.replace({
-      query: omit(route.query, ['access_token', 'refresh_token']),
+      query: omit(route.query, ['access_token', 'refresh_token', 'state']),
     })
 
     schedule()
   }
 
   async function login(): Promise<void> {
-    if (isUrlClaimable())
+    if (await isUrlClaimable())
       await claimUrl()
     else if (refreshToken.value)
       await rotate()

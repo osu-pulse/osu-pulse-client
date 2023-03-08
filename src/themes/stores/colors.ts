@@ -38,7 +38,8 @@ export const useColors = createSharedComposable(() => {
     accent.value = primary.value
     image.src = track?.cover?.small ?? ''
   })
-  const contrast = computed(() => Color(`rgb(${background.value})`))
+  const backgroundColor = computed(() => Color(`rgb(${background.value})`))
+  const primaryColor = computed(() => Color(`rgb(${primary.value})`))
   const CONTRAST_LIMIT = 0.3
   const colorThief = new ColorThief()
   useEventListener(image, 'load', (event: Event) => {
@@ -46,11 +47,17 @@ export const useColors = createSharedComposable(() => {
 
     if (target.src === image.src) {
       const raw = Color(colorThief.getColor(image, { colorType: 'hex' }))
-      const delta = raw.contrast(contrast.value) / 21
+      const backgroundDelta = raw.contrast(backgroundColor.value) / 21
+      const primaryDelta = raw.contrast(primaryColor.value) / 21
 
-      const normalized = delta < CONTRAST_LIMIT
-        ? raw.negate().mix(contrast.value, CONTRAST_LIMIT - delta).negate()
-        : raw
+      let normalized
+
+      if (backgroundDelta < CONTRAST_LIMIT)
+        normalized = raw.negate().mix(backgroundColor.value, CONTRAST_LIMIT - backgroundDelta).negate()
+      else if (primaryDelta < CONTRAST_LIMIT)
+        normalized = raw.negate().mix(primaryColor.value, CONTRAST_LIMIT - primaryDelta).negate()
+      else
+        normalized = raw
 
       accent.value = normalized.rgb().array().join(', ')
     }
