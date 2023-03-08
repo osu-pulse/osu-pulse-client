@@ -2,7 +2,7 @@
 import {
   breakpointsTailwind,
   tryOnMounted,
-  useBreakpoints,
+  useBreakpoints, useLocalStorage,
   watchOnce,
   whenever,
 } from '@vueuse/core'
@@ -22,6 +22,7 @@ import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
 import { usePlayer } from '@/player/stores/player'
 import { useColors } from '@/core/stores/colors'
+import { serializer } from '@/shared/utils/serializer'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
@@ -50,7 +51,17 @@ whenever(menuShowed, () => playerMaximized.value = false)
 const route = useRoute()
 watch(route, () => playerMaximized.value = false)
 
+const devHint = useLocalStorage('app_dev-hint', true, { serializer })
 tryOnMounted(() => {
+  if (import.meta.env.PROD && devHint.value) {
+    // eslint-disable-next-line no-alert
+    alert(
+      'This site is in the developing state. '
+      + 'Contact us: https://github.com/osu-pulse',
+    )
+    devHint.value = false
+  }
+
   // eslint-disable-next-line no-console
   console.clear()
   // eslint-disable-next-line no-console
