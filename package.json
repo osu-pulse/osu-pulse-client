@@ -1,6 +1,6 @@
 {
   "name": "osu-pulse-client",
-  "version": "0.9.0",
+  "version": "0.12.4",
   "packageManager": "yarn@1.22.0",
   "description": "OSU Music player",
   "author": {

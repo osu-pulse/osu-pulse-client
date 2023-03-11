@@ -5,6 +5,7 @@ import { usePlayer } from '@/player/stores/player'
 import BIcon from '@/shared/components/BIcon.vue'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
+import { useColors } from '@/core/stores/colors'
 
 const props = defineProps<{
   mini?: boolean
@@ -31,6 +32,8 @@ function handleNext() {
   next()
   changeTrack()
 }
+
+const { background, primary } = useColors()
 </script>
 
 <template>
@@ -51,7 +54,7 @@ function handleNext() {
     >
       <Transition mode="out-in">
         <MoonLoader
-          v-if="caching" size="30px" color="white"
+          v-if="caching" size="26px" :color="`rgb(${mini ? primary : background})`"
           class="icon"
         />
         <BIcon v-else :key="playBtnIcon" :name="playBtnIcon" class="icon" />

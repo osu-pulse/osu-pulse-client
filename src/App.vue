@@ -2,7 +2,7 @@
 import {
   breakpointsTailwind,
   tryOnMounted,
-  useBreakpoints,
+  useBreakpoints, useLocalStorage,
   watchOnce,
   whenever,
 } from '@vueuse/core'
@@ -52,7 +52,19 @@ whenever(menuShowed, () => playerMaximized.value = false)
 const route = useRoute()
 watch(route, () => playerMaximized.value = false)
 
+const devHint = useLocalStorage('app_dev-hint', true, { serializer })
 tryOnMounted(() => {
+  if (import.meta.env.PROD && devHint.value) {
+    // eslint-disable-next-line no-alert
+    alert(
+      'This site is in the developing state. '
+      + 'Contact us: https://github.com/osu-pulse',
+    )
+    devHint.value = false
+  }
+
+  // eslint-disable-next-line no-console
+  console.clear()
   // eslint-disable-next-line no-console
   console.log('This app in the development state')
   // eslint-disable-next-line no-console

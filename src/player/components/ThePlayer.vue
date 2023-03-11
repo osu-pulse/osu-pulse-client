@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+  SwipeDirection,
   breakpointsTailwind,
   useBreakpoints,
   useSwipe,
@@ -7,7 +8,7 @@ import {
   whenever,
 } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
-import { computed, shallowRef } from 'vue'
+import { computed, shallowRef, watch } from 'vue'
 import ThePlayerSound from '@/player/components/ThePlayerSound.vue'
 import ThePlayerControl from '@/player/components/ThePlayerControl.vue'
 import ThePlayerTimeline from '@/player/components/ThePlayerTimeline.vue'
@@ -17,6 +18,7 @@ import { usePlayerHotkeys } from '@/player/hooks/player-hotkeys'
 import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
+import { switchAssign, switchExec } from '@/shared/utils/switch'
 
 const props = defineProps<{
   maximized?: boolean
@@ -40,34 +42,45 @@ const playerInfoRef = shallowRef<ComponentPublicInstance>()
 const mobilePlayerInfoRef = computed(() => !greaterSm.value && playerInfoRef.value?.$el)
 
 const {
-  lengthX,
-  lengthY,
+  direction,
   isSwiping,
-} = useSwipe(mobilePlayerInfoRef, { threshold: 0 })
+} = useSwipe(mobilePlayerInfoRef, { threshold: 30 })
 
-const maximizeReady = computed(() => Math.abs(lengthY.value) > 40)
-const changeTrackReady = computed(() => Math.abs(lengthX.value) > 30)
-const changeTrackAvailable = computed(() => (lengthX.value > 0 && hasNext.value) || (lengthX.value < 0 && hasPrev.value))
+const changeTrackAvailable = computed(() => switchAssign(direction.value, {
+  [SwipeDirection.LEFT]: hasNext.value,
+  [SwipeDirection.RIGHT]: hasPrev.value,
+}, false))
+const changeMaximizedAvailable = computed(() => switchAssign(direction.value, {
+  [SwipeDirection.UP]: !maximized.value,
+  [SwipeDirection.DOWN]: maximized.value,
+}, false))
 
 const { swipeStart, swipeEnd } = usePlayerFeedback()
-whenever(changeTrackReady, () => changeTrackAvailable.value && swipeStart())
-
-whenever(() => !isSwiping.value, () => {
-  if (maximizeReady.value) {
-    maximized.value = lengthY.value > 0
+watch([isSwiping, direction], () => {
+  if (isSwiping.value) {
+    if (changeMaximizedAvailable.value || changeTrackAvailable.value)
+      swipeStart()
   }
-  else if (changeTrackReady.value && changeTrackAvailable.value) {
-    lengthX.value > 0 ? next() : prev()
-    swipeEnd()
+  else {
+    if (changeMaximizedAvailable.value || changeTrackAvailable.value)
+      swipeEnd()
   }
 })
 
-const offsetBound = 50
-const playerOffset = computed(() =>
-  (!greaterSm.value && isSwiping.value && changeTrackAvailable.value)
-    ? Math.max(-offsetBound, Math.min(offsetBound, -lengthX.value))
-    : 0,
-)
+whenever(() => !isSwiping.value, () => {
+  if (changeTrackAvailable.value) {
+    switchExec(direction.value, {
+      [SwipeDirection.LEFT]: next,
+      [SwipeDirection.RIGHT]: prev,
+    })
+  }
+  if (changeMaximizedAvailable.value) {
+    switchExec(direction.value, {
+      [SwipeDirection.UP]: () => maximized.value = true,
+      [SwipeDirection.DOWN]: () => maximized.value = false,
+    })
+  }
+})
 </script>
 
 <template>
@@ -75,8 +88,19 @@ const playerOffset = computed(() =>
     <div
       :key="greaterSm || maximized"
       class="player-component"
-      :class="!greaterSm && { _minimized: !maximized, _swiping: isSwiping }"
-      :style="!greaterSm && { '--offset': `${playerOffset}px` }"
+      :class="!greaterSm && {
+        _minimized: !maximized,
+        ...(isSwiping && {
+          ...(changeTrackAvailable && {
+            _left: direction === SwipeDirection.LEFT,
+            _right: direction === SwipeDirection.RIGHT,
+          }),
+          ...(changeMaximizedAvailable && {
+            _up: direction === SwipeDirection.UP,
+            _down: direction === SwipeDirection.DOWN,
+          }),
+        }),
+      }"
     >
       <ThePlayerInfo
         ref="playerInfoRef"
@@ -205,13 +229,23 @@ const playerOffset = computed(() =>
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
-    @include transitions.fade();
-    --offset: 0px;
-    transform: translateX(var(--offset));
-    transition: constants.$trn-normal-out;
+    @include transitions.fade($transition: constants.$trn-fast-out);
+    transition: constants.$trn-fast-out;
 
-    &._swiping {
-      transition: none;
+    &._left {
+      transform: translateX(-30px);
+    }
+
+    &._right {
+      transform: translateX(30px);
+    }
+
+    &._up {
+      transform: translateY(-20px);
+    }
+
+    &._down {
+      transform: translateY(20px);
     }
 
     &._minimized {
@@ -225,6 +259,7 @@ const playerOffset = computed(() =>
 
       .player {
         height: unset;
+        padding: 10px 15px;
 
         .control {
           padding: 0;
