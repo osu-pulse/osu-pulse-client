@@ -5,7 +5,7 @@ import { useDebounceRef } from '@/shared/hooks/debounce-ref'
 import BIcon from '@/shared/components/BIcon.vue'
 import SecondaryButton from '@/shared/components/SecondaryButton.vue'
 
-const { search } = useSearchTracks()
+const { search, loading } = useSearchTracks()
 const searchDebounced = useDebounceRef(search, { debounce: 200 })
 function handleInput(event: InputEvent) {
   const target = event.target as HTMLInputElement
@@ -34,7 +34,13 @@ const focused = ref(false)
     </div>
 
     <Transition>
-      <SecondaryButton v-show="searchDebounced" class="clear-btn" icon="x-lg" @click="searchDebounced = ''" />
+      <SecondaryButton
+        v-show="searchDebounced"
+        :loading="loading"
+        class="clear-btn"
+        icon="x-lg"
+        @click="searchDebounced = ''"
+      />
     </Transition>
   </div>
 </template>

@@ -1,4 +1,4 @@
-import { readonly, ref, shallowRef } from 'vue'
+import { computed, readonly, ref, shallowRef } from 'vue'
 import {
   createGlobalState,
   createSharedComposable,
@@ -23,22 +23,25 @@ export const useSearchTracks = createSharedComposable(() => {
   })
 
   const myTracksService = useMyTracksService()
-  const { result: resultMyTracks } = myTracksService.myTracks(search)
+  const { result: resultMyTracks, loading: loadingMyTracks } = myTracksService.myTracks(search)
   whenever(
     () => resultMyTracks.value && search.value !== '',
     () => library.value = resultMyTracks.value?.myTracks.data ?? [],
   )
 
   const tracksService = useTracksService()
-  const { result: resultTracks } = tracksService.tracks(search)
+  const { result: resultTracks, loading: loadingTracks } = tracksService.tracks(search)
   whenever(
     () => resultTracks.value && search.value !== '',
     () => global.value = resultTracks.value?.tracks.data ?? [],
   )
 
+  const loading = computed(() => loadingMyTracks.value || loadingTracks.value)
+
   return {
     search,
     library: readonly(library),
     global: readonly(global),
+    loading,
   }
 })

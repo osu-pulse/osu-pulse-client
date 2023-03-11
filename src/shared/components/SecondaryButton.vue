@@ -1,11 +1,16 @@
 <script lang="ts" setup>
+import MoonLoader from 'vue-spinner/src/MoonLoader.vue'
 import BIcon from '@/shared/components/BIcon.vue'
+import { useColors } from '@/themes/stores/colors'
 
 const props = defineProps<{
   icon: string
   progress?: number
   active?: boolean
+  loading?: boolean
 }>()
+
+const { primary } = useColors()
 </script>
 
 <template>
@@ -18,7 +23,9 @@ const props = defineProps<{
     :style="{ ...(props.progress !== undefined && { '--progress': props.progress }) }"
   >
     <Transition mode="out-in">
-      <BIcon :key="props.icon" :name="props.icon" class="icon" />
+      <MoonLoader v-if="props.loading" class="spinner" size="18px" :color="`rgb(${primary})`" />
+
+      <BIcon v-else :key="props.icon" :name="props.icon" class="icon" />
     </Transition>
   </button>
 </template>
