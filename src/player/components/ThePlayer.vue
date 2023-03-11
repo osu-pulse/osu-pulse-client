@@ -145,7 +145,7 @@ whenever(() => !isSwiping.value, () => {
 
   .player {
     position: relative;
-    flex: auto;
+    flex: 1;
     padding: 10px;
     height: 100%;
     display: flex;
@@ -173,7 +173,7 @@ whenever(() => !isSwiping.value, () => {
     flex-direction: column;
 
     .info {
-      flex: auto;
+      flex: 1;
       margin: 0;
     }
 
@@ -229,7 +229,7 @@ whenever(() => !isSwiping.value, () => {
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
-    @include transitions.fade($transition: constants.$trn-fast-out);
+    @include transitions.fade($transition-enter: constants.$trn-fast-out);
     transition: constants.$trn-fast-out;
 
     &._left {

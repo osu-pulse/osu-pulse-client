@@ -110,7 +110,7 @@ function handleLoad(event: Event) {
   .meta {
     z-index: 1;
     position: relative;
-    flex: auto;
+    flex: 1;
     padding-left: 20px;
     display: flex;
     flex-direction: column;

@@ -36,7 +36,7 @@ export const useCurrentTrack = createSharedComposable(() => {
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
-        [RepeatMode.LIST]: true,
+        [RepeatMode.LIST]: queueIds.value.length > 1,
         [RepeatMode.SINGLE]: false,
       })
     }
@@ -52,7 +52,7 @@ export const useCurrentTrack = createSharedComposable(() => {
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
-        [RepeatMode.LIST]: true,
+        [RepeatMode.LIST]: queueIds.value.length > 1,
         [RepeatMode.SINGLE]: false,
       })
     }
@@ -87,7 +87,7 @@ export const useCurrentTrack = createSharedComposable(() => {
   }
 
   const { track, playing, progress, ended } = usePlayer()
-  syncRefs(currentTrack, track)
+  syncRefs(currentTrack, track, { immediate: false })
   whenever(
     () => ended.value && playing.value,
     () => {

@@ -1,5 +1,8 @@
+@use "src/shared/styles/constants";
+
 @import url('https://fonts.googleapis.com/css2?family=Dosis&family=Michroma&display=swap');
 
-html {
+* {
   font-family: 'Dosis', sans-serif;
+  font-size: 16px;
 }

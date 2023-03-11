@@ -2,13 +2,12 @@
 import {
   breakpointsTailwind,
   tryOnMounted,
-  useBreakpoints, useLocalStorage,
-  watchOnce,
+  useBreakpoints,
+  useLocalStorage,
   whenever,
 } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQueue } from '@/queue/stores/queue'
 import { Platform, platform } from '@/shared/constants/platform'
 import TheTitleBar from '@/core/components/TheTitleBar.vue'
 import TheSideMenu from '@/core/components/TheSideMenu.vue'
@@ -18,11 +17,11 @@ import TheQueue from '@/queue/components/TheQueue.vue'
 import { useAuthentication } from '@/auth/stores/authentication'
 import { useOffline } from '@/core/stores/offline'
 import { useMetrika } from '@/core/hooks/metrika'
-import { useCurrentTrack } from '@/player/stores/current-track'
 import TheBottomMenu from '@/core/components/TheBottomMenu.vue'
 import { usePlayer } from '@/player/stores/player'
 import { useColors } from '@/themes/stores/colors'
 import { useUrlTrack } from '@/player/hooks/url-track'
+import { serializer } from '@/shared/utils/serializer'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
@@ -31,15 +30,8 @@ useMetrika()
 useColors()
 useUrlTrack()
 
-const { check } = useOffline()
-tryOnMounted(check)
-
 const { authenticated } = useAuthentication()
 const { loading } = useOffline()
-
-const { queue } = useQueue()
-const { trackId } = useCurrentTrack()
-watchOnce(queue, () => (trackId.value = queue.value[0]?.id))
 
 const { track } = usePlayer()
 
@@ -135,7 +127,7 @@ tryOnMounted(() => {
 
 .app-component {
   @include mixins.size(fill);
-  flex: auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
 
@@ -144,9 +136,9 @@ tryOnMounted(() => {
   }
 
   .window {
-    flex: auto;
-    overflow: hidden;
+    flex: 1;
     display: flex;
+    overflow: hidden;
 
     .body,
     .loader {
@@ -158,44 +150,35 @@ tryOnMounted(() => {
     }
 
     .loader {
-      flex: auto;
+      flex: 1;
     }
 
     .body {
-      flex: auto;
+      flex: 1;
       display: flex;
-      gap: 10px;
-      overflow: auto;
       background-color: rgb(constants.$clr-secondary);
-
-      .side-menu {
-        flex: none;
-      }
+      overflow: hidden;
 
       .main-section {
-        flex: auto;
+        flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 10px;
         overflow: hidden;
 
         .page-container {
-          padding: 0 20px;
-          overflow: auto;
-          flex: auto;
+          flex: 1;
+          display: flex;
+          overflow: hidden;
 
           .page {
             @include transitions.fade();
+            flex: 1;
           }
         }
 
         .player {
-          flex: none;
-          margin-bottom: 10px;
+          margin: 0 10px 10px 10px;
         }
-      }
-
-      .queue {
       }
     }
   }
@@ -209,31 +192,16 @@ tryOnMounted(() => {
         gap: 0;
 
         .main-section {
-          gap: 0;
-
           .queue, .side-menu, .page-container {
             @include transitions.fade();
           }
 
           .queue, .side-menu {
             margin: 10px;
-            flex: auto;
+            flex: 1;
             border-radius: constants.$cmn-border-radius;
             box-shadow: constants.$cmn-shadow-block;
           }
-
-          .page-container {
-            margin-bottom: 10px;
-          }
-
-          .player {
-            flex: none;
-            margin: 0 10px 10px;
-          }
-        }
-
-        .bottom-menu {
-          flex: none;
         }
       }
     }
@@ -245,7 +213,7 @@ tryOnMounted(() => {
 @use 'shared/styles/mixins';
 
 @import 'core/styles/globals';
-@import 'core/styles/fonts';
+@import 'core/styles/typography';
 
 :root {
   --color-primary: 0, 0, 0;

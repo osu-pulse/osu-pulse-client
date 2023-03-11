@@ -150,9 +150,9 @@ const route = useRoute()
 </template>
 
 <style lang="scss" scoped>
-@use '../src/shared/styles/mixins';
-@use '../src/shared/styles/constants';
-@use '../src/shared/styles/transitions';
+@use '../../shared/styles/mixins';
+@use '../../shared/styles/constants';
+@use '../../shared/styles/transitions';
 
 @keyframes heartbeat {
   0% {
@@ -277,7 +277,7 @@ const route = useRoute()
 
     .info {
       padding-top: 5px;
-      flex: auto;
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -318,7 +318,7 @@ const route = useRoute()
 
         .text {
           @include transitions.fade();
-          flex: auto;
+          flex: 1;
           width: 110px;
           overflow: hidden;
           white-space: nowrap;
@@ -353,7 +353,7 @@ const route = useRoute()
       gap: 30px;
 
       .panel {
-        flex: auto;
+        flex: 1;
       }
 
       &::after {

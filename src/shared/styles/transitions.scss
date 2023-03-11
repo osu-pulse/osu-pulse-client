@@ -2,7 +2,7 @@
 
 @mixin fade(
   $transition-enter: constants.$trn-normal-out,
-  $transition-leave: constants.$trn-fast-in,
+  $transition-leave: constants.$trn-fast-out,
   $name: v,
   $this: true,
   $enter: true,

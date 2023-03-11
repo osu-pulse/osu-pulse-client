@@ -5,7 +5,7 @@
 </template>
 
 <style scoped lang="scss">
-@use 'src/shared/styles/mixins';
+@use '../../shared/styles/mixins';
 
 .intro-loader-component {
   --color-osu: #fa94b2;

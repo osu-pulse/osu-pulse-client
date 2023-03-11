@@ -14,7 +14,7 @@ export const useTracksService = createGlobalState(() => ({
   ) =>
     useQuery<
       { tracks: TracksWithCursor },
-      { search: string | undefined; cursor: string | undefined }
+      { search?: string; cursor?: string }
     >(
       gql`
         query tracks($search: String, $cursor: String) {
@@ -31,7 +31,7 @@ export const useTracksService = createGlobalState(() => ({
     ),
 
   track: (trackId: Ref<string | undefined>) =>
-    useQuery<{ track: Track }, { trackId: string | undefined }>(
+    useQuery<{ track: Track }, { trackId?: string }>(
       gql`
         query track($trackId: String!) {
           track(trackId: $trackId) {

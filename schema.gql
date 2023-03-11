@@ -56,8 +56,8 @@ type Query {
     me: UserObject!
     myPlaylist(playlistId: String!): PlaylistObject!
     myPlaylists(search: String): [PlaylistObject!]!
-    myTracks(cursor: String, limit: Float = 50.0): TracksWithCursorObject!
-    playlistTracks(cursor: String, limit: Float = 50.0, playlistId: String!): TracksWithCursorObject!
+    myTracks(cursor: String, limit: Float, search: String): TracksWithCursorObject!
+    playlistTracks(cursor: String, limit: Float, playlistId: String!): TracksWithCursorObject!
     publicPlaylist(playlistId: String!): PlaylistObject!
     publicPlaylists(search: String): [PlaylistObject!]!
     track(trackId: String!): TrackObject!

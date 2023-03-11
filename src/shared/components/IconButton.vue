@@ -15,13 +15,11 @@ const props = defineProps<{
 </template>
 
 <style lang="scss" scoped>
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .icon-button-component {
-  padding: 2px 3px;
-  border-radius: 7px;
   transition: constants.$trn-normal-out;
   cursor: pointer;
 

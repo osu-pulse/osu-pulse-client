@@ -1,5 +1,9 @@
 import { readonly, ref } from 'vue'
-import { createGlobalState, createSharedComposable } from '@vueuse/core'
+import {
+  createGlobalState,
+  createSharedComposable,
+  syncRefs, whenever,
+} from '@vueuse/core'
 import { useHealthService } from '@/shared/services/health'
 
 const useOfflineState = createGlobalState(() => ({
@@ -11,23 +15,13 @@ export const useOffline = createSharedComposable(() => {
   const { loading, offline } = useOfflineState()
 
   const healthService = useHealthService()
-  async function check() {
-    try {
-      await healthService.health()
-      offline.value = false
-    }
-    catch {
-      offline.value = true
-    }
-    finally {
-      loading.value = false
-    }
-  }
+  const { error, response, isLoading } = healthService.health()
+  syncRefs(isLoading, loading)
+  whenever(response, () => offline.value = false)
+  whenever(error, () => offline.value = true)
 
   return {
     offline: readonly(offline),
     loading: readonly(loading),
-
-    check,
   }
 })

@@ -50,8 +50,10 @@ export const usePlayer = createSharedComposable(() => {
         const result = await mutateCacheTrack({ trackId })
         const cachedTrack = result?.data?.cacheTrack
 
-        if (cachedTrack && (!track || trackId === track.value?.id))
+        if (cachedTrack && (!track || trackId === track.value?.id)) {
+          track.value = cachedTrack
           caching.value = false
+        }
       }
       catch {}
     }
@@ -116,7 +118,7 @@ export const usePlayer = createSharedComposable(() => {
     audio.load()
     if (value && !value.url.audio && playing.value)
       void cacheTrack(value.id)
-  })
+  }, { immediate: true })
 
   return {
     track,

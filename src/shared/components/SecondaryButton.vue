@@ -3,12 +3,20 @@ import BIcon from '@/shared/components/BIcon.vue'
 
 const props = defineProps<{
   icon: string
+  progress?: number
   active?: boolean
 }>()
 </script>
 
 <template>
-  <button class="secondary-button-component" :class="{ _active: props.active }">
+  <button
+    class="secondary-button-component"
+    :class="{
+      _active: props.active,
+      _progress: props.progress !== undefined,
+    }"
+    :style="{ ...(props.progress !== undefined && { '--progress': props.progress }) }"
+  >
     <Transition mode="out-in">
       <BIcon :key="props.icon" :name="props.icon" class="icon" />
     </Transition>
@@ -16,18 +24,33 @@ const props = defineProps<{
 </template>
 
 <style lang="scss" scoped>
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .secondary-button-component {
+  position: relative;
   padding: 2px 3px;
   border-radius: 7px;
+  overflow: hidden;
   transition: constants.$trn-normal-out;
   cursor: pointer;
 
+  &::before {
+    @include mixins.pseudo();
+    top: -2px;
+    left: -3px;
+    width: 0;
+    height: calc(100% + 4px);
+    background: constants.$clr-success;
+    opacity: 0;
+    transition: constants.$trn-normal-out;
+  }
+
   .icon {
     @include transitions.fade();
+    z-index: 2;
+    position: relative;
     color: rgb(constants.$clr-text-inactive);
     font-size: 20px;
     transform: translateY(2px);
@@ -68,6 +91,15 @@ const props = defineProps<{
 
     .icon {
       color: rgb(constants.$clr-background);
+    }
+  }
+
+  &._progress {
+    --progress: 0;
+
+    &::before {
+      width: calc(var(--progress) * 100% + var(--progress) * 6px);
+      opacity: 0.5;
     }
   }
 }
