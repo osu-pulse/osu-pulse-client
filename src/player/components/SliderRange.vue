@@ -55,21 +55,21 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="range-component" :class="{ _changing: changing }">
+  <div
+    class="range-component" :class="{ _changing: changing }"
+    @mousedown="changing = true"
+    @touchstart="changing = true"
+  >
     <div
       ref="trackRef"
       class="track"
       :style="{ '--value': value, '--buffer': props.buffer }"
-      @mousedown="changing = true"
-      @touchstart="changing = true"
     />
 
     <div
       class="thumb"
       :class="{ _wide: props.wide }"
       :style="{ '--offset': value }"
-      @mousedown="changing = true"
-      @touchstart="changing = true"
     />
   </div>
 </template>
@@ -87,6 +87,7 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   touch-action: none;
+  cursor: pointer;
 
   .track {
     @include mixins.size(fill);
@@ -99,7 +100,6 @@ watchEffect(() => {
     border-radius: $size;
     transform: scaleY(0.5);
     transition: constants.$trn-normal-out;
-    cursor: pointer;
 
     &::before,
     &::after {

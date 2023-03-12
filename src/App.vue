@@ -22,12 +22,14 @@ import { usePlayer } from '@/player/stores/player'
 import { useColors } from '@/themes/stores/colors'
 import { useUrlTrack } from '@/player/hooks/url-track'
 import { serializer } from '@/shared/utils/serializer'
+import { useCurrentTrack } from '@/player/stores/current-track'
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterSm = greater('sm')
 
 useMetrika()
 useColors()
+useCurrentTrack()
 useUrlTrack()
 
 const { authenticated } = useAuthentication()

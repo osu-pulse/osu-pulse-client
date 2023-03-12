@@ -37,7 +37,7 @@ export const useColors = createSharedComposable(() => {
   watch(track, (track) => {
     accent.value = primary.value
     image.src = track?.cover?.small ?? ''
-  })
+  }, { immediate: true })
   const backgroundColor = computed(() => Color(`rgb(${background.value})`))
   const primaryColor = computed(() => Color(`rgb(${primary.value})`))
   const CONTRAST_LIMIT = 0.3
