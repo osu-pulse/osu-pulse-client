@@ -2,6 +2,7 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { usePlayer } from '@/player/stores/player'
+import { useVisualization } from '@/shared/stores/visualization'
 
 const props = defineProps<{
   center?: boolean
@@ -24,6 +25,13 @@ function handleLoad(event: Event) {
   if (target.src === coverRef.value?.src)
     coverLoaded.value = true
 }
+
+const { bins } = useVisualization()
+const effect = computed(() => {
+  const [from, to] = [0.3, 0.31].map(bound => Math.floor(bound * bins.value.length))
+  const slice = bins.value.slice(from, to)
+  return 1 + 0.1 * (slice.reduce((s, el) => s + el, 0) / slice.length)
+})
 </script>
 
 <template>
@@ -39,6 +47,7 @@ function handleLoad(event: Event) {
           crossorigin="anonymous"
           :src="coverSrc"
           alt="cover"
+          :style="{ '--effect': effect }"
           @load="handleLoad"
         >
       </Transition>
@@ -83,11 +92,15 @@ function handleLoad(event: Event) {
     .image {
       @include mixins.size(fill);
       @include transitions.fade();
+      --effect: 0;
       z-index: 0;
       position: relative;
       object-fit: cover;
       object-position: center;
       pointer-events: none;
+      transform: scale(var(--effect));
+      filter: brightness(var(--effect));
+      transition: 0.03s;
 
       &.v-enter-from {
         transform: scale(1.1);

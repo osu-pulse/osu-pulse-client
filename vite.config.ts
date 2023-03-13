@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import Vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 import SvgLoader from 'vite-svg-loader'
