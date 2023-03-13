@@ -5,7 +5,7 @@ import { usePlayer } from '@/player/stores/player'
 import BIcon from '@/shared/components/BIcon.vue'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
-import { useColors } from '@/core/stores/colors'
+import { useColors } from '@/themes/stores/colors'
 
 const props = defineProps<{
   mini?: boolean
@@ -161,7 +161,7 @@ const { background, primary } = useColors()
       }
 
       .icon {
-        @include transitions.fade(constants.$trn-fast-out);
+        @include transitions.fade($transition-enter: constants.$trn-fast-out);
         margin: auto;
         font-size: 26px;
         color: rgb(constants.$clr-background);

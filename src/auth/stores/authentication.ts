@@ -39,11 +39,6 @@ export const useAuthentication = createSharedComposable(() => {
     })
   }
 
-  function reset() {
-    refreshToken.value = undefined
-    window.location.reload()
-  }
-
   function redirect() {
     const query = new URLSearchParams({
       redirect_url: location.origin,
@@ -65,12 +60,8 @@ export const useAuthentication = createSharedComposable(() => {
   const authenticationService = useAuthenticationService()
   async function rotate() {
     if (refreshToken.value) {
-      const timeout = setTimeout(reset, 5000)
-
       const { access_token, refresh_token }
           = await authenticationService.rotate(refreshToken.value)
-
-      clearTimeout(timeout)
 
       accessToken.value = access_token
       refreshToken.value = refresh_token
@@ -82,27 +73,28 @@ export const useAuthentication = createSharedComposable(() => {
   const route = useRoute()
   const router = useRouter()
 
-  function isUrlClaimable() {
-    const params = new URLSearchParams(window.location.search)
-    return params.has('access_token') && params.has('refresh_token')
+  async function isUrlClaimable() {
+    await router.isReady()
+    return route.query.access_token && route.query.refresh_token
   }
 
   const authenticated = computed(() => refreshToken.value || isUrlClaimable())
 
   async function claimUrl() {
-    const params = new URLSearchParams(window.location.search)
-    accessToken.value = params.get('access_token')!
-    refreshToken.value = params.get('refresh_token')
+    await router.isReady()
+
+    accessToken.value = route.query.access_token as string
+    refreshToken.value = route.query.refresh_token as string
 
     await router.replace({
-      query: omit(route.query, ['access_token', 'refresh_token']),
+      query: omit(route.query, ['access_token', 'refresh_token', 'state']),
     })
 
     schedule()
   }
 
   async function login(): Promise<void> {
-    if (isUrlClaimable())
+    if (await isUrlClaimable())
       await claimUrl()
     else if (refreshToken.value)
       await rotate()
@@ -125,7 +117,6 @@ export const useAuthentication = createSharedComposable(() => {
     onLogout: readonly(onLogout),
 
     getToken,
-    reset,
     login,
     logout,
   }

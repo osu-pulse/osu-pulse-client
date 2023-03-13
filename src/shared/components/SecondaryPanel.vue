@@ -26,9 +26,9 @@ const props = defineProps<{
 </template>
 
 <style lang="scss" scoped>
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .secondary-panel-component {
   padding: 20px;

@@ -56,9 +56,9 @@ const items: BottomMenuItem[] = [
 </template>
 
 <style lang="scss" scoped>
-@use '../src/shared/styles/mixins';
-@use '../src/shared/styles/constants';
-@use '../src/shared/styles/transitions';
+@use '../../shared/styles/mixins';
+@use '../../shared/styles/constants';
+@use '../../shared/styles/transitions';
 
 .bottom-menu-component {
   min-width: max-content;

@@ -20,6 +20,7 @@ const props = withDefaults(
 
 const emits = defineEmits<{
   (e: 'update:value', value: number): void
+  (e: 'change', value: number): void
   (e: 'changeStart', value: number): void
   (e: 'changeEnd', value: number): void
 }>()
@@ -43,30 +44,32 @@ const trackRef = shallowRef<HTMLDivElement>()
 const { elementX, elementWidth } = useMouseInElement(trackRef)
 watchEffect(() => {
   const rel = elementX.value / elementWidth.value
-  if (changing.value)
-    value.value = Math.max(0, Math.min(1, rel))
+  if (changing.value) {
+    const newValue = Math.max(0, Math.min(1, rel))
+    if (newValue !== value.value) {
+      value.value = newValue
+      emits('change', newValue)
+    }
+  }
 })
 </script>
 
 <template>
-  <div class="range-component" :class="{ _changing: changing }">
+  <div
+    class="range-component" :class="{ _changing: changing }"
+    @mousedown="changing = true"
+    @touchstart="changing = true"
+  >
     <div
       ref="trackRef"
       class="track"
-      :style="{
-        '--value': `${value * 100}%`,
-        '--buffer': `${props.buffer * 100}%`,
-      }"
-      @mousedown="changing = true"
-      @touchstart="changing = true"
+      :style="{ '--value': value, '--buffer': props.buffer }"
     />
 
     <div
       class="thumb"
       :class="{ _wide: props.wide }"
-      :style="{ '--offset': `${value * 100}%` }"
-      @mousedown="changing = true"
-      @touchstart="changing = true"
+      :style="{ '--offset': value }"
     />
   </div>
 </template>
@@ -84,11 +87,12 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   touch-action: none;
+  cursor: pointer;
 
   .track {
     @include mixins.size(fill);
-    --value: 0%;
-    --buffer: 0%;
+    --value: 0;
+    --buffer: 0;
     position: relative;
     height: $size;
     overflow: hidden;
@@ -96,7 +100,6 @@ watchEffect(() => {
     border-radius: $size;
     transform: scaleY(0.5);
     transition: constants.$trn-normal-out;
-    cursor: pointer;
 
     &::before,
     &::after {
@@ -106,21 +109,21 @@ watchEffect(() => {
     }
 
     &::before {
-      width: var(--buffer);
+      width: calc(var(--buffer) * 100%);
       opacity: 0.2;
     }
 
     &::after {
-      width: var(--value);
+      width: calc(var(--value) * 100%);
     }
   }
 
   .thumb {
     @include mixins.size($size * 2);
-    --offset: 0%;
+    --offset: 0;
     position: absolute;
     display: flex;
-    left: calc(var(--offset) - #{$size});
+    left: calc(var(--offset) * 100% - #{$size});
     background: rgb(constants.$clr-primary);
     border-radius: $size;
     transform: scale(0);
@@ -129,7 +132,7 @@ watchEffect(() => {
 
     &._wide {
       width: $size * 3;
-      left: calc(var(--offset) - #{$size * 1.5});
+      left: calc(var(--offset) * 100% - #{$size * 1.5});
     }
 
     &::after {

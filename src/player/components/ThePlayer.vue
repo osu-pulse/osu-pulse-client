@@ -19,6 +19,7 @@ import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 import { switchAssign, switchExec } from '@/shared/utils/switch'
+import AudioVisualizer from '@/player/components/AudioVisualizer.vue'
 
 const props = defineProps<{
   maximized?: boolean
@@ -102,6 +103,8 @@ whenever(() => !isSwiping.value, () => {
         }),
       }"
     >
+      <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical />
+
       <ThePlayerInfo
         ref="playerInfoRef"
         class="info"
@@ -118,6 +121,8 @@ whenever(() => !isSwiping.value, () => {
         <ThePlayerControl class="control" :mini="!greaterSm && !maximized" />
 
         <ThePlayerTimeline v-show="greaterSm || maximized" class="timeline" />
+
+        <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="60" />
       </div>
     </div>
   </Transition>
@@ -130,7 +135,6 @@ whenever(() => !isSwiping.value, () => {
 
 .player-component {
   display: flex;
-  height: 100px;
   overflow: hidden;
   border-radius: constants.$cmn-border-radius;
   background-color: rgb(constants.$clr-background);
@@ -138,16 +142,14 @@ whenever(() => !isSwiping.value, () => {
   transition: constants.$trn-normal-out;
 
   .info {
-    overflow: hidden;
     margin-right: 20px;
     touch-action: none;
   }
 
   .player {
     position: relative;
-    flex: auto;
-    padding: 10px;
-    height: 100%;
+    flex: 1;
+    padding: 10px 10px 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -164,23 +166,37 @@ whenever(() => !isSwiping.value, () => {
       display: flex;
       justify-content: space-between;
     }
+
+    .timeline {
+      z-index: 1;
+    }
+
+    .visualizer {
+      z-index: 0;
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      height: 25px;
+      width: calc(100% - 100px);
+      pointer-events: none;
+    }
   }
 }
 
 @media (max-width: constants.$bpt-lg) and (min-width: constants.$bpt-md) {
   .player-component {
-    height: 200px;
     flex-direction: column;
 
     .info {
-      flex: auto;
+      height: 120px;
+      flex: none;
       margin: 0;
     }
 
     .player {
-      padding: 10px 20px;
+      padding: 10px 20px 20px;
       flex: none;
-      height: 100px;
+      height: unset;
 
       .main {
         width: calc(100% - 40px);
@@ -191,18 +207,17 @@ whenever(() => !isSwiping.value, () => {
 
 @media (max-width: constants.$bpt-md) {
   .player-component {
-    height: 240px;
     flex-direction: column;
 
     .info {
       margin-right: 0;
-      flex: 1 0;
+      height: 100px;
     }
 
     .player {
+      padding: 10px 20px 20px;
       flex: none;
-      padding: 10px 20px;
-      height: 130px;
+      height: 140px;
 
       .control {
         order: 1;
@@ -223,13 +238,18 @@ whenever(() => !isSwiping.value, () => {
           width: 120px;
         }
       }
+
+      .visualizer {
+        left: 20px;
+        width: calc(100% - 40px);
+      }
     }
   }
 }
 
 @media (max-width: constants.$bpt-sm) {
   .player-component {
-    @include transitions.fade($transition: constants.$trn-fast-out);
+    @include transitions.fade($transition-enter: constants.$trn-fast-out);
     transition: constants.$trn-fast-out;
 
     &._left {
@@ -249,17 +269,29 @@ whenever(() => !isSwiping.value, () => {
     }
 
     &._minimized {
+      position: relative;
       height: 60px;
       flex-direction: row;
 
+      .visualizer {
+        z-index: 2;
+        position: absolute;
+        right: 0;
+        top: 5px;
+        width: 30px;
+        transform: rotate(180deg);
+        height: calc(100% - 10px);
+      }
+
       .info {
         margin-right: 5px;
-        width: unset;
+        height: unset;
       }
 
       .player {
+        flex: 0;
         height: unset;
-        padding: 10px 15px;
+        padding: 10px 20px 10px 10px;
 
         .control {
           padding: 0;

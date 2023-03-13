@@ -1,6 +1,7 @@
 import { createGlobalState } from '@vueuse/core'
+import { useAxios } from '@vueuse/integrations/useAxios'
 import { axiosBase } from '@/core/utils/axios'
 
 export const useHealthService = createGlobalState(() => ({
-  health: () => axiosBase.get<void>('health'),
+  health: () => useAxios<void>('health', axiosBase),
 }))

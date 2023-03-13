@@ -2,12 +2,12 @@ import {
   createGlobalState,
   createSharedComposable, syncRefs,
   useArrayMap, useLocalStorage,
-  useRefHistory, whenever,
+  useRefHistory, watchOnce, whenever,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 
-import { useQueue } from '@/core/stores/queue'
+import { useQueue } from '@/queue/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
 import type { Track } from '@/shared/dto/track'
 import { RepeatMode } from '@/player/constants/repeat-mode'
@@ -36,7 +36,7 @@ export const useCurrentTrack = createSharedComposable(() => {
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
-        [RepeatMode.LIST]: true,
+        [RepeatMode.LIST]: queueIds.value.length > 1,
         [RepeatMode.SINGLE]: false,
       })
     }
@@ -52,7 +52,7 @@ export const useCurrentTrack = createSharedComposable(() => {
       return false
     if (repeating.value) {
       return switchAssign(repeating.value, {
-        [RepeatMode.LIST]: true,
+        [RepeatMode.LIST]: queueIds.value.length > 1,
         [RepeatMode.SINGLE]: false,
       })
     }
@@ -86,18 +86,24 @@ export const useCurrentTrack = createSharedComposable(() => {
     }
   }
 
+  // TODO: Удалить
+  watchOnce(queueIds, () => trackId.value = queueIds.value[0])
+
   const { track, playing, progress, ended } = usePlayer()
-  syncRefs(currentTrack, track)
-  whenever(
-    () => ended.value && playing.value,
-    () => {
-      if (repeating.value === RepeatMode.SINGLE)
-        progress.value = 0
-      else if (hasNext.value)
-        next()
-      else playing.value = false
-    },
-  )
+  syncRefs(currentTrack, track, { immediate: false })
+  whenever(ended, () => {
+    if (repeating.value === RepeatMode.SINGLE) {
+      progress.value = 0
+      playing.value = true
+    }
+    else if (hasNext.value) {
+      next()
+      playing.value = true
+    }
+    else {
+      playing.value = false
+    }
+  })
 
   return {
     trackId,

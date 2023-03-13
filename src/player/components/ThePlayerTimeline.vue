@@ -1,15 +1,11 @@
 <script lang="ts" setup>
-import { computed, customRef, ref, watch } from 'vue'
+import { computed, customRef, ref } from 'vue'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
+import type { TimeSplit } from '@/shared/types/time-split'
 
 const { track, playing, progress, duration, buffer } = usePlayer()
-
-interface TimeSplit {
-  h: string
-  m: string
-}
 
 const progressSplit = computed<TimeSplit>(() => ({
   h: Math.floor(progress.value / 60).toString(),
@@ -42,18 +38,19 @@ function handleProgressChangeEnd() {
 }
 
 const { changeProgress, boundProgress } = usePlayerFeedback()
-const prevProgress = ref(progress.value)
+const prevValue = ref(progress.value)
 const step = 10
-watch(progress, (progress) => {
-  if (progress === 0 || progress === duration.value) {
-    prevProgress.value = progress
+function handleChange(value: number) {
+  const newProgress = value * duration.value
+  if (newProgress === 0 || newProgress === duration.value) {
+    prevValue.value = newProgress
     boundProgress()
   }
-  else if (Math.abs(progress - prevProgress.value) >= step) {
-    prevProgress.value = Math.round(progress / step) * step
+  else if (Math.abs(newProgress - prevValue.value) >= step) {
+    prevValue.value = Math.round(newProgress / step) * step
     changeProgress()
   }
-})
+}
 </script>
 
 <template>
@@ -77,6 +74,7 @@ watch(progress, (progress) => {
       :buffer="bufferScaled"
       class="range"
       wide
+      @change="handleChange"
       @change-start="handleProgressChangeStart"
       @change-end="handleProgressChangeEnd"
     />
@@ -119,7 +117,7 @@ watch(progress, (progress) => {
 
   .range {
     margin: auto 40px;
-    flex: auto;
+    flex: 1;
   }
 }
 

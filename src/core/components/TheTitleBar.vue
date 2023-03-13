@@ -48,8 +48,8 @@ function handleClose() {
 </template>
 
 <style lang="scss" scoped>
-@use '../src/shared/styles/constants';
-@use '../src/shared/styles/mixins';
+@use '../../shared/styles/constants';
+@use '../../shared/styles/mixins';
 
 .title-bar-component {
   min-width: max-content;
