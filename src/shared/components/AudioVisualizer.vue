@@ -18,12 +18,12 @@ const bars = computed(() => {
   const [from, to] = props.bounds!.map(bound => bound * bins.value.length)
   const step = (to - from) / (props.length - 1)
   return Array
-    .from({ length: props.length })
-    .map((value, index) => bins.value[Math.floor(from + index * step)] ?? 0)
-    .map((value, index, array) => {
-      const x = index / (array.length - 1)
-      return Math.min(1, value * (1 + x * 0.6 - 0.2))
-    })
+    .from(new Array(props.length).keys(),
+      (i) => {
+        const v = bins.value[Math.floor(from + i * step)] ?? 0
+        return Math.min(1, v * (1 + (i / (props.length - 1)) * 0.6 - 0.2))
+      },
+    )
 })
 </script>
 
@@ -37,9 +37,9 @@ const bars = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-@use '../../shared/styles/mixins';
-@use '../../shared/styles/constants';
-@use '../../shared/styles/transitions';
+@use '../styles/mixins';
+@use '../styles/constants';
+@use '../styles/transitions';
 
 .audio-visualizer-component {
   display: flex;
@@ -49,7 +49,6 @@ const bars = computed(() => {
     --value: 0;
     width: 2px;
     background: rgb(constants.$clr-accent);
-    border-radius: 3px 3px 0 0;
     transform: scaleY(var(--value));
     transform-origin: bottom;
     transition: 0.04s;

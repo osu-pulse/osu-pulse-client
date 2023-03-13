@@ -19,7 +19,7 @@ import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 import { switchAssign, switchExec } from '@/shared/utils/switch'
-import AudioVisualizer from '@/player/components/AudioVisualizer.vue'
+import AudioVisualizer from '@/shared/components/AudioVisualizer.vue'
 
 const props = defineProps<{
   maximized?: boolean
@@ -103,8 +103,6 @@ whenever(() => !isSwiping.value, () => {
         }),
       }"
     >
-      <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical />
-
       <ThePlayerInfo
         ref="playerInfoRef"
         class="info"
@@ -124,6 +122,8 @@ whenever(() => !isSwiping.value, () => {
 
         <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="60" />
       </div>
+
+      <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical />
     </div>
   </Transition>
 </template>
@@ -278,14 +278,16 @@ whenever(() => !isSwiping.value, () => {
         position: absolute;
         right: 0;
         top: 5px;
-        width: 30px;
+        width: 25px;
         transform: rotate(180deg);
         height: calc(100% - 10px);
       }
 
       .info {
         margin-right: 5px;
+        flex: 1;
         height: unset;
+        width: unset;
       }
 
       .player {

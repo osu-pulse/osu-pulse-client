@@ -24,7 +24,7 @@ import {
   createSharedComposable, useEventListener,
   useRafFn,
 } from '@vueuse/core'
-import { readonly, ref, shallowRef, watch } from 'vue'
+import { ref, shallowReadonly, shallowRef, watch } from 'vue'
 import { usePlayer } from '@/player/stores/player'
 
 export interface VisualizeConfig {
@@ -39,9 +39,9 @@ const useVisualizationState = createGlobalState(() => ({
   analyzer: shallowRef<AnalyserNode>(),
   bins: shallowRef<number[]>([]),
   config: ref<VisualizeConfig>({
-    min: -80,
+    min: -90,
     max: -20,
-    length: 512,
+    length: 256,
   }),
 }))
 
@@ -85,6 +85,6 @@ export const useVisualization = createSharedComposable(() => {
 
   return {
     config,
-    bins: readonly(bins),
+    bins: shallowReadonly(bins),
   }
 })

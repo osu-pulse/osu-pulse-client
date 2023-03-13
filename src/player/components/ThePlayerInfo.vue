@@ -3,6 +3,7 @@ import { computed, ref, shallowRef, watch } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { usePlayer } from '@/player/stores/player'
 import { useVisualization } from '@/shared/stores/visualization'
+import { avg, max } from '@/shared/utils/array'
 
 const props = defineProps<{
   center?: boolean
@@ -28,9 +29,7 @@ function handleLoad(event: Event) {
 
 const { bins } = useVisualization()
 const effect = computed(() => {
-  const [from, to] = [0.3, 0.31].map(bound => Math.floor(bound * bins.value.length))
-  const slice = bins.value.slice(from, to)
-  return 1 + 0.1 * (slice.reduce((s, el) => s + el, 0) / slice.length)
+  return ((max(bins.value) ** 2 + avg(bins.value) ** 0.5) / 2) ** 2
 })
 </script>
 
@@ -98,9 +97,9 @@ const effect = computed(() => {
       object-fit: cover;
       object-position: center;
       pointer-events: none;
-      transform: scale(var(--effect));
-      filter: brightness(var(--effect));
-      transition: 0.03s;
+      transform: scale(calc(1 + 0.1 * var(--effect)));
+      filter: brightness(calc(1 + 0.1 * var(--effect)));
+      transition: 0.05s;
 
       &.v-enter-from {
         transform: scale(1.1);
@@ -258,10 +257,10 @@ const effect = computed(() => {
           left: 0;
           background: linear-gradient(
               to right,
-              rgba(constants.$clr-background, 0.2) 0%,
-              rgba(constants.$clr-background, 0.8) 20%,
-              rgba(constants.$clr-background, 0.8) 80%,
-              rgba(constants.$clr-background, 0.2) 100%
+              rgba(constants.$clr-background, 0.1) 0%,
+              rgba(constants.$clr-background, 0.7) 20%,
+              rgba(constants.$clr-background, 0.7) 80%,
+              rgba(constants.$clr-background, 0.1) 100%
           );
         }
       }
