@@ -21,11 +21,13 @@
 // }
 import {
   createGlobalState,
-  createSharedComposable, useEventListener,
+  createSharedComposable,
+  useEventListener,
   useRafFn,
 } from '@vueuse/core'
-import { ref, shallowReadonly, shallowRef, watch } from 'vue'
+import { computed, readonly, ref, shallowReadonly, shallowRef, watch } from 'vue'
 import { usePlayer } from '@/player/stores/player'
+import { avg, max } from '@/shared/utils/array'
 
 export interface VisualizeConfig {
   min: number
@@ -39,7 +41,7 @@ const useVisualizationState = createGlobalState(() => ({
   analyzer: shallowRef<AnalyserNode>(),
   bins: shallowRef<number[]>([]),
   config: ref<VisualizeConfig>({
-    min: -90,
+    min: -70,
     max: -20,
     length: 256,
   }),
@@ -52,14 +54,8 @@ export const useVisualization = createSharedComposable(() => {
   useEventListener(['mousedown', 'keydown'], () => {
     if (!context.value) {
       context.value = new AudioContext()
-      source.value = new MediaElementAudioSourceNode(context.value,
-        { mediaElement: audio.value },
-      )
-      analyzer.value = new AnalyserNode(context.value, {
-        minDecibels: config.value.min,
-        maxDecibels: config.value.max,
-        fftSize: config.value.length * 2,
-      })
+      source.value = new MediaElementAudioSourceNode(context.value, { mediaElement: audio.value })
+      analyzer.value = new AnalyserNode(context.value)
       source.value.connect(analyzer.value)
       analyzer.value.connect(context.value.destination)
     }
@@ -71,20 +67,30 @@ export const useVisualization = createSharedComposable(() => {
       analyzer.value.maxDecibels = max
       analyzer.value.fftSize = length * 2
     }
-  }, { deep: true })
+  }, { deep: true, immediate: true })
 
   let array = new Uint8Array(config.value.length).map(() => 0)
-  watch(() => config.value.length, length => array = new Uint8Array(length).map(() => 0))
+  watch(() => config.value.length, (length) => {
+    array = new Uint8Array(length).map(() => 0)
+    bins.value = Array.from(array, el => el / 255)
+  })
 
   useRafFn(() => {
-    if (analyzer.value) {
+    if (analyzer.value)
       analyzer.value.getByteFrequencyData(array)
-      bins.value = Array.from(array, el => el / 255)
-    }
-  })
+
+    bins.value = Array.from(array, el => el / 255)
+  }, { immediate: true })
+
+  const effect = computed(() => {
+    const bass = bins.value.slice(Math.round(bins.value.length * 0.3), Math.round(bins.value.length * 0.35))
+    return ((avg(bass) ** 2 + max(bins.value) ** 2 + 0.5 * avg(bins.value) ** 0.7) / 2.5) ** 2
+  },
+  )
 
   return {
     config,
     bins: shallowReadonly(bins),
+    effect: readonly(effect),
   }
 })

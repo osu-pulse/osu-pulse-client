@@ -5,20 +5,20 @@ import BIcon from '@/shared/components/BIcon.vue'
 const isMaximized = ref(false)
 
 function handleMinimize() {
-  window.electron.minimize()
+  window.ipc.minimize()
 }
 
 function handleMaximize() {
-  window.electron.maximize()
+  window.ipc.maximize()
   isMaximized.value = true
 }
 function handleUnmaximize() {
-  window.electron.unmaximize()
+  window.ipc.unmaximize()
   isMaximized.value = false
 }
 
 function handleClose() {
-  window.electron.close()
+  window.ipc.close()
 }
 </script>
 

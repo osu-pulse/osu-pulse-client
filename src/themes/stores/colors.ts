@@ -36,7 +36,7 @@ export const useColors = createSharedComposable(() => {
   const { track } = usePlayer()
   watch(track, (track) => {
     accent.value = primary.value
-    image.src = track?.cover?.small ?? ''
+    image.src = track?.cover?.list ?? ''
   }, { immediate: true })
   const backgroundColor = computed(() => Color(`rgb(${background.value})`))
   const primaryColor = computed(() => Color(`rgb(${primary.value})`))

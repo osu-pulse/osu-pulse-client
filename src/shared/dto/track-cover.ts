@@ -1,15 +1,17 @@
 import gql from 'graphql-tag'
 
 export interface TrackCover {
-  small: string
-  normal: string
+  list: string
+  list2x: string
   wide: string
+  wide2x: string
 }
 
 export const TRACK_COVER = gql`
   fragment TrackCover on TrackCoverObject {
-    small
-    normal
+    list
+    list2x
     wide
+    wide2x
   }
 `

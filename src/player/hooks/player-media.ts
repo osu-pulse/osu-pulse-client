@@ -14,7 +14,7 @@ export const usePlayerMedia = createSharedComposable(() => {
         title: track.value.title,
         artist: track.value.artist,
         artwork: [96, 128, 192, 256, 384, 512].map(size => ({
-          src: track.value!.cover.normal,
+          src: track.value!.cover.list2x,
           sizes: `${size}x${size}`,
           type: 'image/jpeg',
         })),

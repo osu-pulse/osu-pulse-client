@@ -8,7 +8,7 @@ import {
   whenever,
 } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
-import { computed, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import ThePlayerSound from '@/player/components/ThePlayerSound.vue'
 import ThePlayerControl from '@/player/components/ThePlayerControl.vue'
 import ThePlayerTimeline from '@/player/components/ThePlayerTimeline.vue'
@@ -20,6 +20,7 @@ import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
 import { switchAssign, switchExec } from '@/shared/utils/switch'
 import AudioVisualizer from '@/shared/components/AudioVisualizer.vue'
+import { bound } from '@/shared/utils/bound'
 
 const props = defineProps<{
   maximized?: boolean
@@ -43,9 +44,11 @@ const playerInfoRef = shallowRef<ComponentPublicInstance>()
 const mobilePlayerInfoRef = computed(() => !greaterSm.value && playerInfoRef.value?.$el)
 
 const {
+  lengthX,
+  lengthY,
   direction,
   isSwiping,
-} = useSwipe(mobilePlayerInfoRef, { threshold: 30 })
+} = useSwipe(mobilePlayerInfoRef, { threshold: 10 })
 
 const changeTrackAvailable = computed(() => switchAssign(direction.value, {
   [SwipeDirection.LEFT]: hasNext.value,
@@ -56,32 +59,55 @@ const changeMaximizedAvailable = computed(() => switchAssign(direction.value, {
   [SwipeDirection.DOWN]: maximized.value,
 }, false))
 
+const isSwipingX = computed(() =>
+  isSwiping.value
+  && (direction.value === SwipeDirection.RIGHT || direction.value === SwipeDirection.LEFT),
+)
+const isSwipingY = computed(() =>
+  isSwiping.value
+  && (direction.value === SwipeDirection.UP || direction.value === SwipeDirection.DOWN),
+)
+
+const swipedX = ref(false)
+const swipedY = ref(false)
+whenever(isSwipingX, () => swipedX.value = true)
+whenever(isSwipingY, () => swipedY.value = true)
+whenever(() => !isSwiping.value, () => {
+  swipedX.value = false
+  swipedY.value = false
+})
+
 const { swipeStart, swipeEnd } = usePlayerFeedback()
 watch([isSwiping, direction], () => {
-  if (isSwiping.value) {
-    if (changeMaximizedAvailable.value || changeTrackAvailable.value)
-      swipeStart()
-  }
-  else {
-    if (changeMaximizedAvailable.value || changeTrackAvailable.value)
-      swipeEnd()
-  }
+  if (changeMaximizedAvailable.value || changeTrackAvailable.value)
+    isSwiping.value ? swipeStart() : swipeEnd()
 })
 
 whenever(() => !isSwiping.value, () => {
-  if (changeTrackAvailable.value) {
+  if (changeTrackAvailable.value && !swipedY.value) {
     switchExec(direction.value, {
       [SwipeDirection.LEFT]: next,
       [SwipeDirection.RIGHT]: prev,
     })
   }
-  if (changeMaximizedAvailable.value) {
+  if (changeMaximizedAvailable.value && !swipedX.value) {
     switchExec(direction.value, {
       [SwipeDirection.UP]: () => maximized.value = true,
       [SwipeDirection.DOWN]: () => maximized.value = false,
     })
   }
 })
+
+const offsetX = computed(() =>
+  (isSwipingX.value && !swipedY.value && changeTrackAvailable.value)
+    ? bound(-lengthX.value, -50, 50)
+    : 0,
+)
+const offsetY = computed(() =>
+  (isSwipingY.value && !swipedX.value && changeMaximizedAvailable.value)
+    ? bound(-lengthY.value, -10, 10)
+    : 0,
+)
 </script>
 
 <template>
@@ -89,25 +115,13 @@ whenever(() => !isSwiping.value, () => {
     <div
       :key="greaterSm || maximized"
       class="player-component"
-      :class="!greaterSm && {
-        _minimized: !maximized,
-        ...(isSwiping && {
-          ...(changeTrackAvailable && {
-            _left: direction === SwipeDirection.LEFT,
-            _right: direction === SwipeDirection.RIGHT,
-          }),
-          ...(changeMaximizedAvailable && {
-            _up: direction === SwipeDirection.UP,
-            _down: direction === SwipeDirection.DOWN,
-          }),
-        }),
-      }"
+      :class="!greaterSm && { _minimized: !maximized }"
+      :style="!greaterSm && { '--x': offsetX, '--y': offsetY }"
     >
       <ThePlayerInfo
         ref="playerInfoRef"
         class="info"
         :center="(!greaterLg && greaterSm) || (!greaterSm && maximized)"
-        @click="maximized = !maximized"
       />
 
       <div class="player" :class="{ _minimized: !greaterSm && !maximized }">
@@ -120,10 +134,10 @@ whenever(() => !isSwiping.value, () => {
 
         <ThePlayerTimeline v-show="greaterSm || maximized" class="timeline" />
 
-        <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="60" />
+        <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="greaterSm ? 100 : 60" />
       </div>
 
-      <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical />
+      <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical inverted />
     </div>
   </Transition>
 </template>
@@ -176,7 +190,7 @@ whenever(() => !isSwiping.value, () => {
       position: absolute;
       bottom: 0;
       left: 50px;
-      height: 25px;
+      height: 20px;
       width: calc(100% - 100px);
       pointer-events: none;
     }
@@ -250,23 +264,10 @@ whenever(() => !isSwiping.value, () => {
 @media (max-width: constants.$bpt-sm) {
   .player-component {
     @include transitions.fade($transition-enter: constants.$trn-fast-out);
+    --x: 0;
+    --y: 0;
+    transform: translateX(calc(1px * var(--x))) translateY(calc(1px * var(--y)));
     transition: constants.$trn-fast-out;
-
-    &._left {
-      transform: translateX(-30px);
-    }
-
-    &._right {
-      transform: translateX(30px);
-    }
-
-    &._up {
-      transform: translateY(-20px);
-    }
-
-    &._down {
-      transform: translateY(20px);
-    }
 
     &._minimized {
       position: relative;
@@ -279,7 +280,6 @@ whenever(() => !isSwiping.value, () => {
         right: 0;
         top: 5px;
         width: 25px;
-        transform: rotate(180deg);
         height: calc(100% - 10px);
       }
 

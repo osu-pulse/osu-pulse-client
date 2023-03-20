@@ -11,12 +11,17 @@ import SecondaryButton from '@/shared/components/SecondaryButton.vue'
 import IconButton from '@/shared/components/IconButton.vue'
 import { useDownload } from '@/shared/hooks/download'
 import { useMyTracks } from '@/library/stores/my-tracks'
+import { useImageLoading } from '@/shared/hooks/image-loading'
+import AudioVisualizer from '@/shared/components/AudioVisualizer.vue'
 
 const props = defineProps<{
   order: number
   track: Track
   inset?: boolean
 }>()
+
+const coverSrc = computed(() => props.track.cover.list)
+const coverLoading = useImageLoading(coverSrc)
 
 const hoverable = useMediaQuery('(hover: hover)')
 const hovered = ref(false)
@@ -68,32 +73,33 @@ const greaterLg = greater('lg')
 
 <template>
   <div
-    class="library-track-component"
+    class="track-item-component"
     :class="{ _active: active, _inset: props.inset }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
     @click="handleClick"
   >
-    <div v-if="greaterLg" class="left-container">
+    <div v-if="greaterLg" class="order-container">
       <Transition mode="out-in">
-        <IconButton
-          v-if="hoverable && hovered" class="play-btn" :icon="playBtnIcon"
-          @click="handleClickPlay"
-        />
+        <IconButton v-if="hoverable && hovered" class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
+
         <span v-else class="order">{{ props.order }}</span>
       </Transition>
     </div>
 
     <div class="info">
       <div class="cover-container">
-        <img
-          ref="coverRef" alt="cover" class="cover"
-          :src="props.track.cover.small"
-        >
+        <Transition>
+          <img v-if="!coverLoading" alt="cover" class="cover" :class="{ _blurred: active || (!greaterLg && hoverable && hovered) }" :src="coverSrc">
+        </Transition>
 
         <Transition>
-          <div v-if="!greaterLg" v-show="hoverable && hovered" class="overlay">
-            <IconButton class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
+          <div v-if="active || (!greaterLg && hoverable && hovered)" class="overlay">
+            <Transition mode="out-in">
+              <IconButton v-if="!greaterLg && hoverable && hovered" class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
+
+              <AudioVisualizer v-else alizer class="visualizer" :length="6" origin="center" />
+            </Transition>
           </div>
         </Transition>
       </div>
@@ -127,7 +133,7 @@ const greaterLg = greater('lg')
 @use '../../shared/styles/constants';
 @use '../../shared/styles/transitions';
 
-.library-track-component {
+.track-item-component {
   padding-right: 15px;
   display: flex;
   align-items: center;
@@ -135,7 +141,7 @@ const greaterLg = greater('lg')
   transition: constants.$trn-normal-out;
   border-radius: constants.$cmn-border-radius;
 
-  .left-container {
+  .order-container {
     width: 60px;
     display: flex;
 
@@ -147,6 +153,10 @@ const greaterLg = greater('lg')
     .play-btn {
       ::v-deep(.icon) {
         font-size: 34px;
+      }
+
+      @media (hover: none) {
+        pointer-events: none;
       }
     }
   }
@@ -163,10 +173,42 @@ const greaterLg = greater('lg')
       transition: constants.$trn-normal-out;
 
       .cover {
+        @include transitions.fade();
         @include mixins.size(fill);
         object-fit: cover;
         object-position: center;
         pointer-events: none;
+
+        &._blurred {
+          filter: blur(3px);
+          transition: constants.$trn-fast-out;
+        }
+      }
+
+      .overlay {
+        @include transitions.fade();
+        @include mixins.size(fill);
+        top: 0;
+        left: 0;
+        position: absolute;
+        display: flex;
+        background: rgb(constants.$clr-background, 0.5);
+
+        .play-btn, .visualizer {
+          @include transitions.fade();
+          margin: auto;
+          filter: drop-shadow(0 0 8px rgb(constants.$clr-background));
+        }
+
+        .play-btn {
+          @media (hover: none) {
+            pointer-events: none;
+          }
+        }
+
+        .visualizer {
+          @include mixins.size(30px);
+        }
       }
     }
 
@@ -219,10 +261,20 @@ const greaterLg = greater('lg')
   }
 
   &._active {
-    .left-container {
+    .order-container {
       .play-btn {
         ::v-deep(.icon) {
           color: rgb(constants.$clr-accent);
+        }
+      }
+    }
+
+    .cover-container {
+      .overlay {
+        .play-btn {
+          ::v-deep(.icon) {
+            color: rgb(constants.$clr-accent);
+          }
         }
       }
     }
@@ -231,7 +283,7 @@ const greaterLg = greater('lg')
   &._inset {
     border-radius: 0;
 
-    .left-container {
+    .order-container {
       .play-btn {
         ::v-deep(.icon) {
           font-size: 28px;
@@ -281,7 +333,7 @@ const greaterLg = greater('lg')
 }
 
 @media (max-width: constants.$bpt-2xl) {
-  .library-track-component {
+  .track-item-component {
     .info {
       .cover-container {
         margin-right: 15px;
@@ -310,40 +362,13 @@ const greaterLg = greater('lg')
 }
 
 @media (max-width: constants.$bpt-lg) {
-  .library-track-component {
+  .track-item-component {
     .info {
       .cover-container {
         position: relative;
 
         .cover {
           transition: constants.$trn-normal-out
-        }
-
-        .overlay {
-          @include transitions.fade();
-          @include mixins.size(fill);
-          top: 0;
-          left: 0;
-          position: absolute;
-          display: flex;
-          background: rgba(constants.$clr-background, 0.7);
-
-          .play-btn {
-            margin: auto;
-          }
-        }
-      }
-    }
-
-    &._active {
-      .cover-container {
-        .overlay {
-          .play-btn {
-            ::v-deep(.icon) {
-              color: rgb(constants.$clr-accent);
-              filter: drop-shadow(0 0 4px rgba(constants.$clr-background, 0.8));
-            }
-          }
         }
       }
     }
@@ -354,20 +379,6 @@ const greaterLg = greater('lg')
           .play-btn {
             ::v-deep(.icon) {
               font-size: 26px;
-            }
-          }
-        }
-      ;
-      }
-    }
-
-    @media (hover: hover) {
-      &:hover {
-        .info {
-          .cover-container {
-            .cover {
-              filter: blur(5px);
-              transition: constants.$trn-fast-out
             }
           }
         }
