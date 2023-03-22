@@ -41,7 +41,7 @@ const useVisualizationState = createGlobalState(() => ({
   analyzer: shallowRef<AnalyserNode>(),
   bins: shallowRef<number[]>([]),
   config: ref<VisualizeConfig>({
-    min: -70,
+    min: -110,
     max: -20,
     length: 256,
   }),
@@ -55,11 +55,11 @@ export const useVisualization = createSharedComposable(() => {
     if (!context.value) {
       context.value = new AudioContext()
       source.value = new MediaElementAudioSourceNode(context.value, { mediaElement: audio.value })
-      analyzer.value = new AnalyserNode(context.value)
+      analyzer.value = new AnalyserNode(context.value, { minDecibels: config.value.min, maxDecibels: config.value.max, fftSize: config.value.length * 2 })
       source.value.connect(analyzer.value)
       analyzer.value.connect(context.value.destination)
     }
-  })
+  }, { once: true })
 
   watch(config, ({ min, max, length }) => {
     if (analyzer.value) {
@@ -67,7 +67,7 @@ export const useVisualization = createSharedComposable(() => {
       analyzer.value.maxDecibels = max
       analyzer.value.fftSize = length * 2
     }
-  }, { deep: true, immediate: true })
+  }, { deep: true })
 
   let array = new Uint8Array(config.value.length).map(() => 0)
   watch(() => config.value.length, (length) => {

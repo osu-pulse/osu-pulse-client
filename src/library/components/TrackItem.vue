@@ -69,6 +69,8 @@ const { share } = useShare(() => ({
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
+
+const overlayShowed = computed(() => active.value || (!greaterLg.value && hoverable.value && hovered.value))
 </script>
 
 <template>
@@ -90,15 +92,15 @@ const greaterLg = greater('lg')
     <div class="info">
       <div class="cover-container">
         <Transition>
-          <img v-if="!coverLoading" alt="cover" class="cover" :class="{ _blurred: active || (!greaterLg && hoverable && hovered) }" :src="coverSrc">
+          <img v-if="!coverLoading" alt="cover" class="cover" :class="{ _blurred: overlayShowed }" :src="coverSrc">
         </Transition>
 
         <Transition>
-          <div v-if="active || (!greaterLg && hoverable && hovered)" class="overlay">
+          <div v-show="overlayShowed" class="overlay">
             <Transition mode="out-in">
-              <IconButton v-if="!greaterLg && hoverable && hovered" class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
+              <AudioVisualizer v-if="active" class="visualizer" :length="6" origin="center" />
 
-              <AudioVisualizer v-else alizer class="visualizer" :length="6" origin="center" />
+              <IconButton v-else class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
             </Transition>
           </div>
         </Transition>
@@ -167,6 +169,7 @@ const greaterLg = greater('lg')
 
     .cover-container {
       @include mixins.size(55px);
+      position: relative;
       margin-right: 40px;
       overflow: hidden;
       border-radius: constants.$cmn-border-radius;
@@ -295,6 +298,14 @@ const greaterLg = greater('lg')
       .cover-container {
         @include mixins.size(40px);
         border-radius: 50%;
+      }
+
+      .cover-container {
+        .overlay {
+          .visualizer {
+            @include mixins.size(25px);
+          }
+        }
       }
 
       .track {

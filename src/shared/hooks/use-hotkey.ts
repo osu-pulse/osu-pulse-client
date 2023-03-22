@@ -6,16 +6,24 @@ import {
 import { computed } from 'vue'
 
 export const useHotkey = createSharedComposable(() => {
-  const keys = useMagicKeys()
-
   const activeElement = useActiveElement()
   const activeTag = computed(() => activeElement.value?.tagName)
-  const hotkeyDisabled = computed(() => activeTag.value === 'INPUT' || activeTag.value === 'TEXTAREA')
+  const inputActive = computed(() => activeTag.value === 'INPUT' || activeTag.value === 'TEXTAREA')
+
+  whenever(
+    () => !inputActive.value && activeTag.value !== 'BODY',
+    () => activeElement.value?.blur(),
+  )
+
+  const keys = useMagicKeys({
+    passive: false,
+    onEventFired: event => !inputActive.value && event.preventDefault(),
+  })
 
   function handle(hotkey: string | string[], fn: () => any, repeatable = false) {
     const watchable = () => (Array.isArray(hotkey) ? hotkey : [hotkey]).some(hotkey => keys[hotkey].value)
     const callback = () => {
-      if (hotkey === 'Escape' || !hotkeyDisabled.value)
+      if (hotkey === 'Escape' || !inputActive.value)
         fn()
     }
 

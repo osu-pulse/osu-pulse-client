@@ -8,11 +8,13 @@ const props = withDefaults(defineProps<{
   vertical?: boolean
   origin?: 'start' | 'center' | 'end'
   inverted?: boolean
+  stoppable?: boolean
 }>(), {
   length: 5,
   vertical: false,
   origin: 'end',
   inverted: false,
+  stoppable: false,
 })
 
 const { bins } = useVisualization()
@@ -21,7 +23,7 @@ const bars = computed(() => {
   const step = (to - from) / (props.length - 1)
   return Array.from(
     { length: props.length },
-    (_, i) => bins.value[Math.floor(i * step)],
+    (_, i) => bins.value[Math.floor(from + i * step)],
   )
 })
 
@@ -31,7 +33,11 @@ const { playing } = usePlayer()
 <template>
   <div
     class="audio-visualizer-component"
-    :class="[{ _vertical: props.vertical, _inverted: props.inverted, _stopped: !playing }, `_${props.origin}`]"
+    :class="[`_${props.origin}`, {
+      _vertical: props.vertical,
+      _inverted: props.inverted,
+      _stopped: props.stoppable && !playing,
+    }]"
   >
     <div
       v-for="(value, index) in bars"
@@ -80,6 +86,14 @@ const { playing } = usePlayer()
 
       &::after {
         transform: scaleY(calc(100% * var(--value)));
+      }
+    }
+
+    &._stopped {
+      .bar {
+        &::before {
+          height: 0;
+        }
       }
     }
 
@@ -139,6 +153,14 @@ const { playing } = usePlayer()
 
       &::after {
         transform: scaleX(calc(100% * var(--value)));
+      }
+    }
+
+    &._stopped {
+      .bar {
+        &::before {
+          width: 0;
+        }
       }
     }
 
