@@ -56,8 +56,8 @@ type Query {
     me: UserObject!
     myPlaylist(playlistId: String!): PlaylistObject!
     myPlaylists(search: String): [PlaylistObject!]!
-    myTracks(cursor: String, limit: Float, search: String): TracksWithCursorObject!
-    playlistTracks(cursor: String, limit: Float, playlistId: String!): TracksWithCursorObject!
+    myTracks(cursor: String, limit: Int, search: String): TracksWithCursorObject!
+    playlistTracks(cursor: String, limit: Int, playlistId: String!): TracksWithCursorObject!
     publicPlaylist(playlistId: String!): PlaylistObject!
     publicPlaylists(search: String): [PlaylistObject!]!
     track(trackId: String!): TrackObject!
@@ -69,9 +69,10 @@ type Subscription {
 }
 
 type TrackCoverObject {
-    normal: String!
-    small: String!
+    list: String!
+    list2x: String!
     wide: String!
+    wide2x: String!
 }
 
 type TrackObject {
@@ -88,6 +89,7 @@ type TrackObject {
 type TrackUrlObject {
     audio: String
     file: String!
+    map: String!
     page: String!
 }
 

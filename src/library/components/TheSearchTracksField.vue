@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { useSearchTracks } from '@/library/stores/search-tracks'
 import { useDebounceRef } from '@/shared/hooks/debounce-ref'
 import BIcon from '@/shared/components/BIcon.vue'
 import SecondaryButton from '@/shared/components/SecondaryButton.vue'
+import { useHotkey } from '@/shared/hooks/use-hotkey'
 
 const { search, loading } = useSearchTracks()
 const searchDebounced = useDebounceRef(search, { debounce: 200 })
@@ -13,6 +14,16 @@ function handleInput(event: InputEvent) {
 }
 
 const focused = ref(false)
+
+const inputRef = shallowRef<HTMLInputElement>()
+const { handle } = useHotkey()
+handle('/', () => {
+  setTimeout(() => inputRef.value?.focus(), 0)
+})
+handle('Escape', () => {
+  searchDebounced.value = ''
+  inputRef.value?.blur()
+})
 </script>
 
 <template>
@@ -25,6 +36,7 @@ const focused = ref(false)
       </Transition>
 
       <input
+        ref="inputRef"
         v-model="searchDebounced"
         class="input"
         @focus="focused = true"

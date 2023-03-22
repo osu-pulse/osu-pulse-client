@@ -18,7 +18,7 @@ export const useMyTracksService = createGlobalState(() => ({
       { search?: string; cursor?: string; limit?: number }
     >(
       gql`
-        query myTracks($search: String, $cursor: String, $limit: Float) {
+        query myTracks($search: String, $cursor: String, $limit: Int) {
           myTracks(search: $search, cursor: $cursor, limit: $limit) {
             ...TracksWithCursor
           }

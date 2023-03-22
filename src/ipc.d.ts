@@ -1,5 +1,5 @@
 declare interface Window {
-  electron: {
+  ipc: {
     minimize(): void
     maximize(): void
     unmaximize(): void

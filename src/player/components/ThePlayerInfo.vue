@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { usePlayer } from '@/player/stores/player'
 import { useVisualization } from '@/shared/stores/visualization'
+import { useImageLoading } from '@/shared/hooks/image-loading'
 
 const props = defineProps<{
   center?: boolean
@@ -13,42 +14,40 @@ const { track } = usePlayer()
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
 const coverSrc = computed(() =>
-  greaterLg.value ? track.value?.cover?.normal : track.value?.cover?.wide,
+  greaterLg.value ? track.value?.cover?.list2x : track.value?.cover?.wide2x,
+)
+const coverSmallSrc = computed(() =>
+  greaterLg.value ? track.value?.cover?.list : track.value?.cover?.wide,
 )
 
-const coverLoaded = ref(false)
-watch(coverSrc, () => (coverLoaded.value = false))
-const coverRef = shallowRef<HTMLImageElement>()
+const coverLoading = useImageLoading(coverSrc)
+const coverSmallLoading = useImageLoading(coverSmallSrc)
 
-function handleLoad(event: Event) {
-  const target = event.target as HTMLImageElement
-  if (target.src === coverRef.value?.src)
-    coverLoaded.value = true
-}
-
-const { bins } = useVisualization()
-const effect = computed(() => {
-  const [from, to] = [0.3, 0.31].map(bound => Math.floor(bound * bins.value.length))
-  const slice = bins.value.slice(from, to)
-  return 1 + 0.1 * (slice.reduce((s, el) => s + el, 0) / slice.length)
-})
+const { effect } = useVisualization()
 </script>
 
 <template>
   <div class="player-info-component" :class="{ _center: props.center }">
-    <div class="cover">
+    <div v-if="track" class="cover">
       <Transition mode="out-in">
         <img
-          v-if="coverSrc"
-          v-show="coverLoaded"
-          ref="coverRef"
+          v-if="!coverLoading"
           :key="coverSrc"
-          class="image"
-          crossorigin="anonymous"
           :src="coverSrc"
-          alt="cover"
           :style="{ '--effect': effect }"
-          @load="handleLoad"
+          class="image"
+          alt="cover"
+        >
+      </Transition>
+
+      <Transition mode="out-in">
+        <img
+          v-if="!coverSmallLoading"
+          :key="coverSmallSrc"
+          :src="coverSmallSrc"
+          :style="{ '--effect': effect }"
+          class="image-preload"
+          alt="cover preload"
         >
       </Transition>
     </div>
@@ -89,27 +88,34 @@ const effect = computed(() => {
     height: 100%;
     overflow: hidden;
 
-    .image {
-      @include mixins.size(fill);
+    .image, .image-preload {
       @include transitions.fade();
+      @include mixins.size(fill);
       --effect: 0;
-      z-index: 0;
       position: relative;
       object-fit: cover;
       object-position: center;
       pointer-events: none;
-      transform: scale(var(--effect));
-      filter: brightness(var(--effect));
-      transition: 0.03s;
+      transform: scale(calc(1 + 0.2 * var(--effect)));
+      filter: brightness(calc(1 + 0.1 * var(--effect)));
+      transition: 0.05s;
+    }
 
-      &.v-enter-from {
-        transform: scale(1.1);
-      }
+    .image {
+      z-index: 1;
+    }
+
+    .image-preload {
+      z-index: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      filter: blur(5px);
     }
 
     &::after {
       @include mixins.pseudo();
-      z-index: 1;
+      z-index: 2;
       left: 0;
       background: linear-gradient(
           to right,
@@ -121,7 +127,7 @@ const effect = computed(() => {
   }
 
   .meta {
-    z-index: 1;
+    z-index: 2;
     position: relative;
     flex: 1;
     padding-left: 20px;
@@ -182,7 +188,7 @@ const effect = computed(() => {
 
       &::before {
         @include mixins.pseudo();
-        z-index: 1;
+        z-index: 2;
         background: linear-gradient(to top, rgb(constants.$clr-background) 0%, transparent 50%);
       }
     }
@@ -258,10 +264,10 @@ const effect = computed(() => {
           left: 0;
           background: linear-gradient(
               to right,
-              rgba(constants.$clr-background, 0.2) 0%,
-              rgba(constants.$clr-background, 0.8) 20%,
-              rgba(constants.$clr-background, 0.8) 80%,
-              rgba(constants.$clr-background, 0.2) 100%
+              rgba(constants.$clr-background, 0.1) 0%,
+              rgba(constants.$clr-background, 0.7) 20%,
+              rgba(constants.$clr-background, 0.7) 80%,
+              rgba(constants.$clr-background, 0.1) 100%
           );
         }
       }

@@ -1,11 +1,14 @@
 import {
   createGlobalState,
-  createSharedComposable, syncRefs,
-  useArrayMap, useLocalStorage,
-  useRefHistory, watchOnce, whenever,
+  createSharedComposable,
+  syncRefs,
+  useArrayMap,
+  useLocalStorage,
+  useRefHistory,
+  whenever,
 } from '@vueuse/core'
 import type { ComputedRef } from 'vue'
-import { computed, watch } from 'vue'
+import { computed, readonly, watch } from 'vue'
 
 import { useQueue } from '@/queue/stores/queue'
 import { randomArrayElement } from '@/shared/utils/random'
@@ -23,6 +26,18 @@ const useCurrentTrackState = createGlobalState(() => ({
 
 export const useCurrentTrack = createSharedComposable(() => {
   const { trackId, repeating, shuffling } = useCurrentTrackState()
+
+  function toggleShuffling() {
+    shuffling.value = !shuffling.value
+  }
+  function toggleRepeating() {
+    if (!repeating.value)
+      repeating.value = RepeatMode.LIST
+    else if (repeating.value === RepeatMode.LIST)
+      repeating.value = RepeatMode.SINGLE
+    else if (repeating.value === RepeatMode.SINGLE)
+      repeating.value = false
+  }
 
   const { queue } = useQueue()
   const queueIds = useArrayMap(queue as ComputedRef<Track[]>, ({ id }) => id)
@@ -86,9 +101,6 @@ export const useCurrentTrack = createSharedComposable(() => {
     }
   }
 
-  // TODO: Удалить
-  watchOnce(queueIds, () => trackId.value = queueIds.value[0])
-
   const { track, playing, progress, ended } = usePlayer()
   syncRefs(currentTrack, track, { immediate: false })
   whenever(ended, () => {
@@ -107,11 +119,13 @@ export const useCurrentTrack = createSharedComposable(() => {
 
   return {
     trackId,
-    repeating,
-    shuffling,
+    repeating: readonly(repeating),
+    shuffling: readonly(shuffling),
     hasPrev,
     hasNext,
 
+    toggleRepeating,
+    toggleShuffling,
     next,
     prev,
   }

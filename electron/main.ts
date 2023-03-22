@@ -1,5 +1,8 @@
-import * as path from 'path'
+import * as path from 'node:path'
+import * as process from 'node:process'
 import { BrowserWindow, Tray, app, ipcMain, nativeTheme } from 'electron'
+
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 let window: BrowserWindow
 let tray: Tray
@@ -45,7 +48,8 @@ async function createWindow() {
 
   if (app.isPackaged)
     await window.loadFile(indexPath)
-  else await window.loadURL(indexUrl)
+  else
+    await window.loadURL(indexUrl)
 
   window.webContents.on('will-redirect', (event, url) => {
     if (url.includes('access_token')) {
