@@ -98,9 +98,9 @@ const overlayShowed = computed(() => active.value || (!greaterLg.value && hovera
         <Transition>
           <div v-show="overlayShowed" class="overlay">
             <Transition mode="out-in">
-              <AudioVisualizer v-if="active && !(hoverable && hovered)" class="visualizer" :length="6" origin="center" />
+              <IconButton v-if="!greaterLg && hoverable && hovered" class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
 
-              <IconButton v-else class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
+              <AudioVisualizer v-else class="visualizer" :length="6" origin="center" />
             </Transition>
           </div>
         </Transition>
@@ -184,6 +184,7 @@ const overlayShowed = computed(() => active.value || (!greaterLg.value && hovera
 
         &._blurred {
           filter: blur(3px);
+          transform: scale(1.07);
           transition: constants.$trn-fast-out;
         }
       }

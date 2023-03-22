@@ -134,7 +134,7 @@ const offsetY = computed(() =>
 
         <ThePlayerTimeline v-show="greaterSm || maximized" class="timeline" />
 
-        <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="greaterSm ? 100 : 60" stoppable />
+        <AudioVisualizer v-if="greaterSm || maximized" class="visualizer" :length="60" stoppable />
       </div>
 
       <AudioVisualizer v-if="!greaterSm && !maximized" class="visualizer" :length="12" vertical inverted stoppable />
