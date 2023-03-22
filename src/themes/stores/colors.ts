@@ -38,27 +38,41 @@ export const useColors = createSharedComposable(() => {
     accent.value = primary.value
     image.src = track?.cover?.list ?? ''
   }, { immediate: true })
+
   const backgroundColor = computed(() => Color(`rgb(${background.value})`))
   const primaryColor = computed(() => Color(`rgb(${primary.value})`))
-  const CONTRAST_LIMIT = 0.3
+  const CONTRAST_LIMIT = 0.2
+  function normalizeContrast(color: Color): Color {
+    const backgroundContrast = (color.contrast(backgroundColor.value) - 1) / 20
+    const primaryContrast = (color.contrast(primaryColor.value) - 1) / 20
+
+    if (backgroundContrast < CONTRAST_LIMIT)
+      return color.negate().mix(backgroundColor.value, CONTRAST_LIMIT - backgroundContrast).negate()
+    else if (primaryContrast < CONTRAST_LIMIT)
+      return color.negate().mix(primaryColor.value, CONTRAST_LIMIT - primaryContrast).negate()
+    else
+      return color
+  }
+
+  const SATURATION_LIMIT = 0.3
+  function normalizeSaturation(color: Color): Color {
+    const saturation = color.saturationl() / 100
+
+    if (saturation < SATURATION_LIMIT)
+      return color.saturate(SATURATION_LIMIT - saturation)
+    else if (1 - saturation < SATURATION_LIMIT)
+      return color.desaturate(SATURATION_LIMIT - (1 - saturation))
+    else
+      return color
+  }
+
   const colorThief = new ColorThief()
   useEventListener(image, 'load', (event: Event) => {
     const target = event.target as HTMLImageElement
 
     if (target.src === image.src) {
-      const raw = Color(colorThief.getColor(image, { colorType: 'hex' }))
-      const backgroundDelta = raw.contrast(backgroundColor.value) / 21
-      const primaryDelta = raw.contrast(primaryColor.value) / 21
-
-      let normalized
-
-      if (backgroundDelta < CONTRAST_LIMIT)
-        normalized = raw.negate().mix(backgroundColor.value, CONTRAST_LIMIT - backgroundDelta).negate()
-      else if (primaryDelta < CONTRAST_LIMIT)
-        normalized = raw.negate().mix(primaryColor.value, CONTRAST_LIMIT - primaryDelta).negate()
-      else
-        normalized = raw
-
+      const color = Color(colorThief.getColor(image, { colorType: 'hex' }))
+      const normalized = normalizeContrast(normalizeSaturation(color))
       accent.value = normalized.rgb().array().join(', ')
     }
   })

@@ -98,7 +98,7 @@ const overlayShowed = computed(() => active.value || (!greaterLg.value && hovera
         <Transition>
           <div v-show="overlayShowed" class="overlay">
             <Transition mode="out-in">
-              <AudioVisualizer v-if="active" class="visualizer" :length="6" origin="center" />
+              <AudioVisualizer v-if="active && !(hoverable && hovered)" class="visualizer" :length="6" origin="center" />
 
               <IconButton v-else class="play-btn" :icon="playBtnIcon" @click="handleClickPlay" />
             </Transition>

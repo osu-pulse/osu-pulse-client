@@ -17,7 +17,11 @@ export const useHotkey = createSharedComposable(() => {
 
   const keys = useMagicKeys({
     passive: false,
-    onEventFired: event => !inputActive.value && event.preventDefault(),
+    onEventFired: event => (
+      event.code === 'Space'
+      && !inputActive.value
+      && event.preventDefault()
+    ),
   })
 
   function handle(hotkey: string | string[], fn: () => any, repeatable = false) {
