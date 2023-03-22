@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { computed, ref } from 'vue'
+import { breakpointsTailwind, useBreakpoints, whenever } from '@vueuse/core'
 import { usePlayer } from '@/player/stores/player'
 import { useVisualization } from '@/shared/stores/visualization'
 import { useImageLoading } from '@/shared/hooks/image-loading'
@@ -13,15 +13,21 @@ const { track } = usePlayer()
 
 const { greater } = useBreakpoints(breakpointsTailwind)
 const greaterLg = greater('lg')
-const coverSrc = computed(() =>
-  greaterLg.value ? track.value?.cover?.list2x : track.value?.cover?.wide2x,
-)
 const coverSmallSrc = computed(() =>
   greaterLg.value ? track.value?.cover?.list : track.value?.cover?.wide,
 )
+const coverSrc = computed(() =>
+  greaterLg.value ? track.value?.cover?.list2x : track.value?.cover?.wide2x,
+)
 
-const coverLoading = useImageLoading(coverSrc)
 const coverSmallLoading = useImageLoading(coverSmallSrc)
+
+const coverSrcLoad = ref<string>()
+whenever(() => !coverSmallLoading.value, () => coverSrcLoad.value = coverSrc.value)
+const coverHiddenLoading = useImageLoading(coverSrcLoad)
+const coverLoading = ref(false)
+whenever(coverSmallLoading, () => coverLoading.value = true)
+whenever(coverHiddenLoading, () => coverLoading.value = false)
 
 const { effect } = useVisualization()
 </script>
