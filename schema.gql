@@ -1,4 +1,4 @@
-# This file was generated based on ".graphqlconfig". Do not edit manually.
+# This file was generated. Do not edit manually.
 
 schema {
     query: Query
@@ -29,8 +29,6 @@ type DeviceStatusObject {
 type Mutation {
     addMyTrack(trackId: String!): TrackObject!
     addPlaylistTrack(playlistId: String!, trackId: String!): TrackObject!
-    cacheTrack(trackId: String!): TrackObject!
-    cancelCacheTrack(trackId: String!): TrackObject!
     copyPlaylist(playlistId: String!): PlaylistObject!
     createMyPlaylist(payload: CreatePlaylistInput!): PlaylistObject!
     deleteMyPlaylist(playlistId: String!): PlaylistObject!
@@ -56,12 +54,12 @@ type Query {
     me: UserObject!
     myPlaylist(playlistId: String!): PlaylistObject!
     myPlaylists(search: String): [PlaylistObject!]!
-    myTracks(cursor: String, limit: Int, search: String): TracksWithCursorObject!
+    myTracks(limit: Int, offset: Int, search: String): [TrackObject!]!
     playlistTracks(cursor: String, limit: Int, playlistId: String!): TracksWithCursorObject!
     publicPlaylist(playlistId: String!): PlaylistObject!
     publicPlaylists(search: String): [PlaylistObject!]!
     track(trackId: String!): TrackObject!
-    tracks(cursor: String, search: String): TracksWithCursorObject!
+    tracks(limit: Int, offset: Int, search: String): [TrackObject!]!
 }
 
 type Subscription {
@@ -87,8 +85,7 @@ type TrackObject {
 }
 
 type TrackUrlObject {
-    audio: String
-    file: String!
+    audio: String!
     map: String!
     page: String!
 }

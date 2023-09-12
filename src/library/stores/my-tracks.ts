@@ -19,7 +19,7 @@ export const useMyTracks = createSharedComposable(() => {
   const myTracksService = useMyTracksService()
 
   const { result } = myTracksService.myTracks()
-  whenever(result, ({ myTracks: { data } }) => tracks.value = data)
+  whenever(result, ({ myTracks }) => tracks.value = myTracks)
 
   function has(trackId: string): boolean {
     return tracks.value.some(({ id }) => id === trackId)

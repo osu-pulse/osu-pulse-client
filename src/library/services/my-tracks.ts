@@ -2,33 +2,31 @@ import type { Ref } from 'vue'
 import { createGlobalState } from '@vueuse/core'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
-import type { TracksWithCursor } from '@/shared/dto/tracks-with-cursor'
 import type { Track } from '@/shared/dto/track'
-import { TRACKS_WITH_CURSOR } from '@/shared/dto/tracks-with-cursor'
 import { TRACK } from '@/shared/dto/track'
 
 export const useMyTracksService = createGlobalState(() => ({
   myTracks: (
     search?: Ref<string | undefined>,
-    cursor?: Ref<string | undefined>,
-    limit?: number,
+    limit?: Ref<number | undefined>,
+    offset?: Ref<number | undefined>,
   ) =>
     useQuery<
-      { myTracks: TracksWithCursor },
-      { search?: string; cursor?: string; limit?: number }
+      { myTracks: Track[] },
+      { search?: string; limit?: number; offset?: number }
     >(
       gql`
-        query myTracks($search: String, $cursor: String, $limit: Int) {
-          myTracks(search: $search, cursor: $cursor, limit: $limit) {
-            ...TracksWithCursor
+        query myTracks($search: String, $limit: Int, $offset: Int) {
+          myTracks(search: $search, limit: $limit, offset: $offset) {
+            ...Track
           }
         }
-        ${TRACKS_WITH_CURSOR}
+        ${TRACK}
       `,
       () => ({
         search: search?.value,
-        cursor: cursor?.value,
-        limit,
+        limit: limit?.value,
+        offset: offset?.value,
       }),
     ),
 

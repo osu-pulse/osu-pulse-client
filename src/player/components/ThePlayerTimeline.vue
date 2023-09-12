@@ -1,20 +1,11 @@
 <script lang="ts" setup>
 import { computed, customRef, ref } from 'vue'
+import { audioTime } from '@/shared/utils/audio-tools'
 import SliderRange from '@/player/components/SliderRange.vue'
 import { usePlayer } from '@/player/stores/player'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
-import type { TimeSplit } from '@/shared/types/time-split'
 
 const { track, playing, progress, duration, buffer } = usePlayer()
-
-const progressSplit = computed<TimeSplit>(() => ({
-  h: Math.floor(progress.value / 60).toString(),
-  m: `0${Math.floor(progress.value % 60)}`.slice(-2),
-}))
-const durationSplit = computed<TimeSplit>(() => ({
-  h: Math.floor(duration.value / 60).toString(),
-  m: `0${Math.floor(duration.value % 60)}`.slice(-2),
-}))
 
 const bufferScaled = computed(() => (duration.value > 0 ? buffer.value / duration.value : 0))
 const progressScaled = customRef(() => ({
@@ -58,13 +49,13 @@ function handleChange(value: number) {
     <div class="time-panel">
       <Transition mode="out-in">
         <div :key="track?.id" class="time left">
-          {{ progressSplit.h }}:{{ progressSplit.m }}
+          {{ audioTime(progress) }}
         </div>
       </Transition>
 
       <Transition mode="out-in">
         <div :key="duration === 0" class="time right">
-          {{ durationSplit.h }}:{{ durationSplit.m }}
+          {{ audioTime(duration) }}
         </div>
       </Transition>
     </div>

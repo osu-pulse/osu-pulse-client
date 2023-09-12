@@ -5,7 +5,6 @@ import {
   useBreakpoints, useMediaQuery, useShare,
 } from '@vueuse/core'
 import type { Track } from '@/shared/dto/track'
-import type { TimeSplit } from '@/shared/types/time-split'
 import { usePlayer } from '@/player/stores/player'
 import SecondaryButton from '@/shared/components/SecondaryButton.vue'
 import IconButton from '@/shared/components/IconButton.vue'
@@ -13,6 +12,7 @@ import { useDownload } from '@/shared/hooks/download'
 import { useMyTracks } from '@/library/stores/my-tracks'
 import { useImageLoading } from '@/shared/hooks/image-loading'
 import AudioVisualizer from '@/shared/components/AudioVisualizer.vue'
+import { audioTime } from '@/shared/utils/audio-tools'
 
 const props = defineProps<{
   order: number
@@ -28,11 +28,6 @@ const hovered = ref(false)
 
 const { track, playing } = usePlayer()
 const active = computed(() => props.track.id === track.value?.id)
-
-const duration = computed<TimeSplit>(() => ({
-  h: Math.floor(props.track.duration / 60).toString(),
-  m: `0${Math.floor(props.track.duration % 60)}`.slice(-2),
-}))
 
 const playBtnIcon = computed(() => (active.value && playing.value) ? 'pause-fill' : 'play-fill')
 
@@ -59,7 +54,7 @@ async function handleToggleLibrary() {
     await add(props.track)
 }
 
-const { start, progress } = useDownload(props.track.url.file, `${props.track.artist} - ${props.track.title}`)
+const { start, progress } = useDownload(props.track.url.audio, `${props.track.artist} - ${props.track.title}`)
 
 const { share } = useShare(() => ({
   title: 'Share track',
@@ -92,7 +87,7 @@ const overlayShowed = computed(() => active.value || (!greaterLg.value && hovera
     <div class="info">
       <div class="cover-container">
         <Transition>
-          <img v-if="!coverLoading" alt="cover" class="cover" :class="{ _blurred: overlayShowed }" :src="coverSrc">
+          <img v-show="!coverLoading" alt="cover" class="cover" :class="{ _blurred: overlayShowed }" :src="coverSrc">
         </Transition>
 
         <Transition>
@@ -124,7 +119,7 @@ const overlayShowed = computed(() => active.value || (!greaterLg.value && hovera
       </div>
 
       <div v-else class="time">
-        {{ duration.h }}:{{ duration.m }}
+        {{ audioTime(props.track.duration) }}
       </div>
     </Transition>
   </div>

@@ -40,8 +40,10 @@ export const useAuthentication = createSharedComposable(() => {
   }
 
   function redirect() {
+    const state = crypto.randomUUID()
     const query = new URLSearchParams({
       redirect_url: location.origin,
+      state,
     }).toString()
     window.location.href = `${import.meta.env.VITE_AUTH_URL}/authorize?${query}`
   }

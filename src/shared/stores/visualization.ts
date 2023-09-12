@@ -41,7 +41,7 @@ const useVisualizationState = createGlobalState(() => ({
   analyzer: shallowRef<AnalyserNode>(),
   bins: shallowRef<number[]>([]),
   config: ref<VisualizeConfig>({
-    min: -110,
+    min: -80,
     max: -20,
     length: 256,
   }),

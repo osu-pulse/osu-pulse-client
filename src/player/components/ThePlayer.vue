@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import {
-  SwipeDirection,
   breakpointsTailwind,
-  useBreakpoints,
+  useBreakpoints, useMediaQuery,
   useSwipe,
   useVModel,
   whenever,
 } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import ThePlayerSound from '@/player/components/ThePlayerSound.vue'
 import ThePlayerControl from '@/player/components/ThePlayerControl.vue'
 import ThePlayerTimeline from '@/player/components/ThePlayerTimeline.vue'
@@ -18,7 +17,6 @@ import { usePlayerHotkeys } from '@/player/hooks/player-hotkeys'
 import { usePlayerMedia } from '@/player/hooks/player-media'
 import { useCurrentTrack } from '@/player/stores/current-track'
 import { usePlayerFeedback } from '@/player/hooks/player-feedback'
-import { switchAssign, switchExec } from '@/shared/utils/switch'
 import AudioVisualizer from '@/shared/components/AudioVisualizer.vue'
 import { bound } from '@/shared/utils/bound'
 
@@ -43,71 +41,48 @@ const { hasPrev, hasNext, prev, next } = useCurrentTrack()
 const playerInfoRef = shallowRef<ComponentPublicInstance>()
 const mobilePlayerInfoRef = computed(() => !greaterSm.value && playerInfoRef.value?.$el)
 
-const {
-  lengthX,
-  lengthY,
-  direction,
-  isSwiping,
-} = useSwipe(mobilePlayerInfoRef, { threshold: 10 })
+const { lengthX, lengthY, isSwiping } = useSwipe(mobilePlayerInfoRef, { threshold: 0 })
 
-const changeTrackAvailable = computed(() => switchAssign(direction.value, {
-  [SwipeDirection.LEFT]: hasNext.value,
-  [SwipeDirection.RIGHT]: hasPrev.value,
-}, false))
-const changeMaximizedAvailable = computed(() => switchAssign(direction.value, {
-  [SwipeDirection.UP]: !maximized.value,
-  [SwipeDirection.DOWN]: maximized.value,
-}, false))
-
-const isSwipingX = computed(() =>
-  isSwiping.value
-  && (direction.value === SwipeDirection.RIGHT || direction.value === SwipeDirection.LEFT),
-)
-const isSwipingY = computed(() =>
-  isSwiping.value
-  && (direction.value === SwipeDirection.UP || direction.value === SwipeDirection.DOWN),
-)
+const changeTrackThresholded = computed(() => Math.abs(lengthX.value) > 10)
+const changeMaximizedThresholded = computed(() => Math.abs(lengthY.value) > 10)
 
 const swipedX = ref(false)
 const swipedY = ref(false)
-whenever(isSwipingX, () => swipedX.value = true)
-whenever(isSwipingY, () => swipedY.value = true)
 whenever(() => !isSwiping.value, () => {
   swipedX.value = false
   swipedY.value = false
 })
 
+whenever(changeTrackThresholded, () => !swipedY.value && (swipedX.value = true))
+whenever(changeMaximizedThresholded, () => !swipedX.value && (swipedY.value = true))
+
+const changeTrackAvailable = computed(() => changeTrackThresholded.value && !swipedY.value && (lengthX.value < 0 ? hasNext.value : hasPrev.value))
+const changeMaximizedAvailable = computed(() => changeMaximizedThresholded.value && !swipedX.value && (lengthY.value < 0 ? maximized.value : !maximized.value))
+
 const { swipeStart, swipeEnd } = usePlayerFeedback()
-watch([isSwiping, direction], () => {
-  if (changeMaximizedAvailable.value || changeTrackAvailable.value)
-    isSwiping.value ? swipeStart() : swipeEnd()
-})
+const gestureActive = computed(() => () => changeTrackAvailable.value || changeMaximizedAvailable.value)
+whenever(gestureActive, swipeStart)
+whenever(() => !gestureActive.value, swipeEnd)
 
 whenever(() => !isSwiping.value, () => {
-  if (changeTrackAvailable.value && !swipedY.value) {
-    switchExec(direction.value, {
-      [SwipeDirection.LEFT]: next,
-      [SwipeDirection.RIGHT]: prev,
-    })
-  }
-  if (changeMaximizedAvailable.value && !swipedX.value) {
-    switchExec(direction.value, {
-      [SwipeDirection.UP]: () => maximized.value = true,
-      [SwipeDirection.DOWN]: () => maximized.value = false,
-    })
-  }
+  if (changeTrackAvailable.value)
+    lengthX.value < 0 ? prev() : next()
+  if (changeMaximizedAvailable.value)
+    lengthY.value < 0 ? maximized.value = false : maximized.value = true
 })
 
 const offsetX = computed(() =>
-  (isSwipingX.value && !swipedY.value && changeTrackAvailable.value)
-    ? bound(-lengthX.value, -50, 50)
-    : 0,
+  (changeTrackAvailable.value && isSwiping.value) ? bound(-lengthX.value, -50, 50) : 0,
 )
 const offsetY = computed(() =>
-  (isSwipingY.value && !swipedX.value && changeMaximizedAvailable.value)
-    ? bound(-lengthY.value, -10, 10)
-    : 0,
+  (changeMaximizedAvailable.value && isSwiping.value) ? bound(-lengthY.value, -10, 10) : 0,
 )
+
+const hoverable = useMediaQuery('(hover: hover)')
+function handleClickInfo() {
+  if (!greaterSm.value && hoverable.value)
+    maximized.value = !maximized.value
+}
 </script>
 
 <template>
@@ -122,6 +97,7 @@ const offsetY = computed(() =>
         ref="playerInfoRef"
         class="info"
         :center="(!greaterLg && greaterSm) || (!greaterSm && maximized)"
+        @click="handleClickInfo"
       />
 
       <div class="player" :class="{ _minimized: !greaterSm && !maximized }">

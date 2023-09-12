@@ -1,9 +1,15 @@
 import type { MaybeComputedRef } from '@vueuse/core'
-import { resolveRef, resolveUnref, useEventListener } from '@vueuse/core'
+import {
+  resolveRef,
+  resolveUnref,
+  tryOnUnmounted,
+  useEventListener,
+} from '@vueuse/core'
 import { readonly, ref, watch } from 'vue'
 
 export const useImageLoading = (src: MaybeComputedRef<string | undefined>) => {
   const image = new Image()
+
   const loading = ref(false)
 
   watch(resolveRef(src), (src) => {
@@ -16,6 +22,8 @@ export const useImageLoading = (src: MaybeComputedRef<string | undefined>) => {
     if (target.src === resolveUnref(src))
       loading.value = false
   })
+
+  tryOnUnmounted(() => image.src = '')
 
   return readonly(loading)
 }

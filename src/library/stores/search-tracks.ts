@@ -22,18 +22,20 @@ export const useSearchTracks = createSharedComposable(() => {
     global.value = []
   })
 
+  const limit = ref(20)
+
   const myTracksService = useMyTracksService()
-  const { result: resultMyTracks, loading: loadingMyTracks } = myTracksService.myTracks(search)
+  const { result: resultMyTracks, loading: loadingMyTracks } = myTracksService.myTracks(search, limit)
   whenever(
     () => resultMyTracks.value && search.value !== '',
-    () => library.value = resultMyTracks.value?.myTracks.data ?? [],
+    () => library.value = resultMyTracks.value?.myTracks ?? [],
   )
 
   const tracksService = useTracksService()
-  const { result: resultTracks, loading: loadingTracks } = tracksService.tracks(search)
+  const { result: resultTracks, loading: loadingTracks } = tracksService.tracks(search, limit)
   whenever(
     () => resultTracks.value && search.value !== '',
-    () => global.value = resultTracks.value?.tracks.data ?? [],
+    () => global.value = resultTracks.value?.tracks ?? [],
   )
 
   const loading = computed(() => loadingMyTracks.value || loadingTracks.value)

@@ -18,14 +18,15 @@ const props = withDefaults(defineProps<{
 })
 
 const { bins } = useVisualization()
-const bars = computed(() => {
-  const [from, to] = [0.1, 0.7].map(bound => bound * bins.value.length)
+const indexes = computed(() => {
+  const [from, to] = [0.1, 0.6].map(bound => bound * (bins.value.length - 1))
   const step = (to - from) / (props.length - 1)
   return Array.from(
     { length: props.length },
-    (_, i) => bins.value[Math.floor(from + i * step)],
+    (_, i) => Math.floor(from + i * step),
   )
 })
+const bars = computed(() => indexes.value.map(i => bins.value[i]))
 
 const { playing } = usePlayer()
 </script>
